@@ -33,7 +33,7 @@ endif
 
 SRC_LIB = ../../tinytiffwriter.cpp ../../tinytiffreader.cpp
 #HPP_LIB = yaid.hpp serialization.hpp exception.hpp types.hpp endianness.hpp
-SRC_TEST = ../../tinytiffhighrestimer.cpp ../../libtiff_tools.cpp main.cpp
+SRC_TEST = ../../tinytiffhighrestimer.cpp ../../libtiff_tools/libtiff_tools.cpp main.cpp
 #HPP_TEST = yaid_test.hpp
 
 

@@ -1,0 +1,3 @@
+[submodule "libtiff_tools"]
+	path = libtiff_tools
+	url = https://github.com/jkriege2/libtiff_tools.git

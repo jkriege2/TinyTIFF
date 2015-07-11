@@ -1,12 +1,12 @@
+#include "../../tinytiffwriter.h"
+#include "../../tinytiffhighrestimer.h"
+
 #ifdef TEST_LIBTIFF
 #include <tiffio.h>
-#include "../../libtiff_tools.h"
+#include "../../libtiff_tools/libtiff_tools.h"
 #endif
 #include <iostream>
 
-#include "../../tinytiffwriter.h"
-#include "../../tinytiffhighrestimer.h"
-#include "../../libtiff_tools.h"
 
 using namespace std;
 

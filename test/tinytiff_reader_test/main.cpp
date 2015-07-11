@@ -1,6 +1,6 @@
 #ifdef TEST_LIBTIFF
 #include <tiffio.h>
-#include "../../libtiff_tools.h"
+#include "../../libtiff_tools/libtiff_tools.h"
 #endif
 #include <iostream>
 #include <string>
