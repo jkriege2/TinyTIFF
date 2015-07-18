@@ -23,6 +23,9 @@
 #ifndef TINYTIFFREADER_H
 #define TINYTIFFREADER_H
 
+#ifndef TINYTIFFREADER_LIB_EXPORT
+#    define TINYTIFFREADER_LIB_EXPORT
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -121,7 +124,7 @@ struct TinyTIFFReaderFile; // forward
             permission to read it. Also if no TIFF file was detected (first twi bytes were neither 'II' nor 'MM') \c NULL is returned.
 
   */
-TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename);
+TINYTIFFREADER_LIB_EXPORT TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename);
 
 
 /*! \brief close a given TIFF file
@@ -131,7 +134,7 @@ TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename);
 
     This function also releases memory allocated in TinyTIFFReader_open() in \a tiff.
  */
-void TinyTIFFReader_close(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT void TinyTIFFReader_close(TinyTIFFReaderFile* tiff);
 
 /*! \brief returns a pointer to the last error message
     \ingroup TinyTIFFReader
@@ -140,7 +143,7 @@ void TinyTIFFReader_close(TinyTIFFReaderFile* tiff);
 
     \note the pointer is accessible as long as the TIFF file has not been closed using TinyTIFFReader_close()
  */
-const char* TinyTIFFReader_getLastError(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT const char* TinyTIFFReader_getLastError(TinyTIFFReaderFile* tiff);
 
 /*! \brief returns TRUE (non-zero) when there was an error in the last function call, or FALSE (zero) if there was no error
     \ingroup TinyTIFFReader
@@ -148,7 +151,7 @@ const char* TinyTIFFReader_getLastError(TinyTIFFReaderFile* tiff);
     \param tiff TIFF file 
 
  */
-int TinyTIFFReader_wasError(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT int TinyTIFFReader_wasError(TinyTIFFReaderFile* tiff);
 
 /*! \brief returns TRUE (non-zero) when there was no error in the last function call, or FALSE (zero) if there was an error
     \ingroup TinyTIFFReader
@@ -156,7 +159,7 @@ int TinyTIFFReader_wasError(TinyTIFFReaderFile* tiff);
     \param tiff TIFF file 
 
  */
-int TinyTIFFReader_success(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT int TinyTIFFReader_success(TinyTIFFReaderFile* tiff);
 
 /*! \brief returns TRUE (non-zero) if another frame exists in the TIFF file
     \ingroup TinyTIFFReader
@@ -164,7 +167,7 @@ int TinyTIFFReader_success(TinyTIFFReaderFile* tiff);
     \param tiff TIFF file 
 
  */
-int TinyTIFFReader_hasNext(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT int TinyTIFFReader_hasNext(TinyTIFFReaderFile* tiff);
 
 /*! \brief reads the next frame from a multi-frame TIFF
     \ingroup TinyTIFFReader
@@ -173,7 +176,7 @@ int TinyTIFFReader_hasNext(TinyTIFFReaderFile* tiff);
     \return TRUE (non-zero) if another frame exists in the TIFF file
 
  */
-int TinyTIFFReader_readNext(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT int TinyTIFFReader_readNext(TinyTIFFReaderFile* tiff);
 
 
 /*! \brief return the width of the current frame
@@ -182,7 +185,7 @@ int TinyTIFFReader_readNext(TinyTIFFReaderFile* tiff);
     \param tiff TIFF file 
 
  */
-uint32_t TinyTIFFReader_getWidth(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT uint32_t TinyTIFFReader_getWidth(TinyTIFFReaderFile* tiff);
 
 /*! \brief return the height of the current frame
     \ingroup TinyTIFFReader
@@ -190,7 +193,7 @@ uint32_t TinyTIFFReader_getWidth(TinyTIFFReaderFile* tiff);
     \param tiff TIFF file 
 
  */
-uint32_t TinyTIFFReader_getHeight(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT uint32_t TinyTIFFReader_getHeight(TinyTIFFReaderFile* tiff);
 
 /*! \brief return the image description of the current frame
     \ingroup TinyTIFFReader
@@ -198,7 +201,7 @@ uint32_t TinyTIFFReader_getHeight(TinyTIFFReaderFile* tiff);
     \param tiff TIFF file 
 
  */
-std::string TinyTIFFReader_getImageDescription(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT std::string TinyTIFFReader_getImageDescription(TinyTIFFReaderFile* tiff);
 
 
 #define TINYTIFFREADER_SAMPLEFORMAT_UINT 1
@@ -212,7 +215,7 @@ std::string TinyTIFFReader_getImageDescription(TinyTIFFReaderFile* tiff);
     \param tiff TIFF file 
 
  */
-uint16_t TinyTIFFReader_getSampleFormat(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT uint16_t TinyTIFFReader_getSampleFormat(TinyTIFFReaderFile* tiff);
 
 /*! \brief return the bits per sample of the current frame
     \ingroup TinyTIFFReader
@@ -221,14 +224,14 @@ uint16_t TinyTIFFReader_getSampleFormat(TinyTIFFReaderFile* tiff);
 	\param sample return bits for the given sample number [default: 0]
 
  */
-uint16_t TinyTIFFReader_getBitsPerSample(TinyTIFFReaderFile* tiff, int sample=0);
+TINYTIFFREADER_LIB_EXPORT uint16_t TinyTIFFReader_getBitsPerSample(TinyTIFFReaderFile* tiff, int sample=0);
 /*! \brief return the samples per pixel of the current frame
     \ingroup TinyTIFFReader
 
     \param tiff TIFF file 
 
  */
-uint16_t TinyTIFFReader_getSamplesPerPixel(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT uint16_t TinyTIFFReader_getSamplesPerPixel(TinyTIFFReaderFile* tiff);
 
 /*! \brief read the given sample from the current frame into the given buffer,
            the byteorder is transformed to the byteorder of the system!
@@ -243,7 +246,7 @@ uint16_t TinyTIFFReader_getSamplesPerPixel(TinyTIFFReaderFile* tiff);
           (taking width, height and bitsPerSample into account).
 
  */
-int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_t sample);
+TINYTIFFREADER_LIB_EXPORT int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_t sample);
 
 
 
@@ -253,7 +256,7 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
     \param tiff TIFF file 
 
  */
-uint32_t TinyTIFFReader_countFrames(TinyTIFFReaderFile* tiff);
+TINYTIFFREADER_LIB_EXPORT uint32_t TinyTIFFReader_countFrames(TinyTIFFReaderFile* tiff);
 
 
 
