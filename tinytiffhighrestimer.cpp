@@ -47,7 +47,7 @@ void HighResTimer::start(){
   #else
       gettimeofday(&last,0);
   #endif
-};
+}
 
 double HighResTimer::get_time(){
   #ifdef __LINUX__
@@ -67,7 +67,7 @@ double HighResTimer::get_time(){
 
 
   #endif
-};
+}
 
 
 void HighResTimer::test(double* mean, double* stddev, unsigned long* histogram, double* histogram_x, unsigned long histogram_size){
@@ -113,4 +113,4 @@ void HighResTimer::test(double* mean, double* stddev, unsigned long* histogram, 
   }
   *stddev=sqrt(*stddev);
   free(h);
-};
+}
