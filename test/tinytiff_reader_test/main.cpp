@@ -311,7 +311,7 @@ using namespace std;
 
 
 
-#define TEST_LIBTIFF(filename, image, imagei, imagetype) \
+#define TEST_LIBTIFF_FUNC(filename, image, imagei, imagetype) \
     std::cout<<"\n\nreading '"<<filename<<"' with libtiff and checking read contents ... filesize = "<<bytestostr(get_filesize(filename))<<"\n"; \
     ok=false;\
     timer.start(); \
@@ -422,6 +422,7 @@ int main() {
     TEST_SIMPLE("cell.tif", uint8_t)
     TEST_SIMPLE("circuit.tif", uint8_t)
     TEST_SIMPLE("galaxy.tif", uint8_t)
+    //TEST_SIMPLE("galaxy_nocompression.tif", uint8_t)
     TEST_SIMPLE("mri.tif", uint8_t)
     TEST_SIMPLE("multi-channel-time-series.ome.tif", uint8_t)
 
@@ -434,16 +435,16 @@ int main() {
 #ifdef TEST_LIBTIFF
     if (TEST_FRAMES<60000) {
         TIFF* ltiff=NULL;
-        TEST_LIBTIFF("test8.tif", image8, image8i, uint8_t)
-        TEST_LIBTIFF("test8m.tif", image8, image8i, uint8_t)
-        TEST_LIBTIFF("test16.tif", image16, image16i, uint16_t)
-        TEST_LIBTIFF("test16m.tif", image16, image16i, uint16_t)
-        TEST_LIBTIFF("test16m_imagej.tif", image16, image16i, uint16_t)
+        TEST_LIBTIFF_FUNC("test8.tif", image8, image8i, uint8_t)
+        TEST_LIBTIFF_FUNC("test8m.tif", image8, image8i, uint8_t)
+        TEST_LIBTIFF_FUNC("test16.tif", image16, image16i, uint16_t)
+        TEST_LIBTIFF_FUNC("test16m.tif", image16, image16i, uint16_t)
+        TEST_LIBTIFF_FUNC("test16m_imagej.tif", image16, image16i, uint16_t)
     }
 	{
 		TIFF* ltiff=NULL;
 		char* nval=NULL;
-		TEST_LIBTIFF("multi-channel-time-series.ome.tif", nval, nval, uint16_t)
+		TEST_LIBTIFF_FUNC("multi-channel-time-series.ome.tif", nval, nval, uint16_t)
 		TEST_SIMPLE("multi-channel-time-series.ome.tif", uint8_t)
 	}
 #endif
