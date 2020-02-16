@@ -9,7 +9,7 @@ multi-frame TIFFs.
 This software is licensed under the term of the GNU Lesser General Public License 3.0 
 (LGPL 3.0). 
 
-##TinyTIFFReader
+## TinyTIFFReader
 
 The methods in this file allow to read TIFF files with limited capabilites, but very fast (comapred to libtiff) and also more frames from a multi-frame TIFF than libtiff (which is currently limited to 65535 frames due to internal data sizes!).
    
@@ -77,7 +77,7 @@ This example reads the first frame in a TIFF file:
     TinyTIFFReader_close(tiffr); 
    ```
    
-##TinyTIFFWriter
+## TinyTIFFWriter
 
 The methods in this file allow to write TIFF files with limited capabilites,  but very fast. Usually writing TIFF files with a library like libTIFF is relatively slow, when multiple images are written into a single file. The methods in this files overcome this problem by implementing a tiny writer lib that allows to write a TIFF file where all images have the same properties (size, bit depth, ...). This is a situation thet occurs e.g. in cases where a camera acquires a video that should be saved as TIFF file. The library works like this (write 50 32x32 pixel 8-bit images:
 ```C++
