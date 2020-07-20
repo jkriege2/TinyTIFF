@@ -24,10 +24,6 @@ Some helpful links:
   - <a href="https://github.com/jkriege2/TinyTIFF">Source Code Repository (https://github.com/jkriege2/TinyTIFF)</a>
 .
 
-Library Bindings:
-  - There exists a plugin for the <a href="https://cimg.eu/">CImg image processing library</a>, that uses TinyTIFFWriter: <a href="https://github.com/dtschump/CImg/blob/master/plugins/tinymatwriter.h">https://github.com/dtschump/CImg/blob/master/plugins/tinymatwriter.h</a>.
-.
-
 \section mainpagetinytiff_writer TinyTIFFWriter
 \section mainpagetinytiff_writer_usage TinyTIFFWriter: Usage
 

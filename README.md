@@ -101,8 +101,6 @@ The methods in this file allow to write TIFF files with limited capabilites,  bu
    }
 ```
 
-Note that there exists a plugin for the [CImg image processing library](https://cimg.eu/), that uses TinyTIFFWriter: https://github.com/dtschump/CImg/blob/master/plugins/tinymatwriter.h .
-
 
 The images are written in big- or little-endian according to your system. The TIFF header is set accordingly, so we do not need to shuffle around bytes when writing, but the created TIFF file may differ from hardware system to hardware system, although the same data is written (once in little-endian, once in big-endian). Currently this library saves all images as unsigned int, but with given bit-depth (8, 16, 32 or 64). Also this library explicitly writes a resolution of 1 in both directions.
 
