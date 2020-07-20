@@ -315,7 +315,7 @@ using namespace std;
     ok=false;\
     timer.start(); \
     std::cout<<"    opening file     [duration: "<<floattounitstr(double(timer.get_time())/1.0e6, "s")<<" ]\n"; \
-    ltiff=TIFFOpen(std::string(filename), "r"); \
+    ltiff=TIFFOpen(filename, "r"); \
     if (!ltiff) { \
         std::cout<<"    ERROR reading (not existent, not accessible or no TIFF file)\n"; \
     } else { \
