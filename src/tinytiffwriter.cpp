@@ -677,9 +677,9 @@ TinyTIFFFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSample, 
     }
 }
 #ifdef TINYTIFF_WRITE_COMMENTS
-void TinyTIFFWriter_close(TinyTIFFFile* tiff, char* imageDescription) {
+void TinyTIFFWriter_close(TinyTIFFFile* tiff, const char* imageDescription) {
 #else
-void TinyTIFFWriter_close(TinyTIFFFile* tiff, char* /*imageDescription*/) {
+void TinyTIFFWriter_close(TinyTIFFFile* tiff, const char* /*imageDescription*/) {
 #endif
    if (tiff) {
         TinyTIFFWriter_fseek_set(tiff, tiff->lastIFDOffsetField);

@@ -17,7 +17,7 @@ using namespace std;
 #define SPEEDTEST_OUTPUT 10
 
 template <class T>
-void libtiffTestRead(char* filename, T* written, int width, int height)  {
+void libtiffTestRead(const char* filename, T* written, int width, int height)  {
 #ifdef TINYTIFF_TEST_LIBTIFF
     TIFF* tif = TIFFOpen(filename, "r");
     T* data=(T*)malloc(width*height*sizeof(T));

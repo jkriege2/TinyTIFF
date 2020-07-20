@@ -194,7 +194,7 @@ TINYTIFFWRITER_LIB_EXPORT void TinyTIFFWriter_close(TinyTIFFFile* tiff, double p
 
     This function also releases memory allocated in TinyTIFFWriter_open() in \a tiff.
  */
-TINYTIFFWRITER_LIB_EXPORT void TinyTIFFWriter_close(TinyTIFFFile* tiff, char* imageDescription);
+TINYTIFFWRITER_LIB_EXPORT void TinyTIFFWriter_close(TinyTIFFFile* tiff, const char* imageDescription);
 
 #endif // TINYTIFFWRITER_H
 

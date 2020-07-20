@@ -9,7 +9,6 @@
 #include "tinytiffwriter.h"
 #include "tinytiffreader.h"
 #include "tinytiffhighrestimer.h"
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
