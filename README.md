@@ -1,13 +1,23 @@
 # TinyTIFF
 
-(c) 2014-2015 by Jan W. Krieger                                                 --
+(c) 2014-2020 by Jan W. Krieger                                                 --
 
 This is a lightweight C/C++ library, which is able to read and write basic TIFF
 files. It is significantly faster than libTIFF, especially in writing large
 multi-frame TIFFs.
 
-This software is licensed under the term of the GNU Lesser General Public License 3.0 
-(LGPL 3.0). 
+This software is licensed under the term of the [GNU Lesser General Public License 3.0 
+(LGPL 3.0)](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/LICENSE). 
+
+
+![Language](https://img.shields.io/github/languages/top/jkriege2/TinyTIFF)
+[![Lates Release](https://img.shields.io/github/v/release/jkriege2/TinyTIFF)](https://github.com/jkriege2/TinyTIFF/releases)
+[![Documentation](https://img.shields.io/badge/documentation-online-blue)](http://jkriege2.github.io/TinyTIFF/)
+
+
+[![CI: Windows Build](https://img.shields.io/appveyor/ci/jkriege2/TinyTIFF/master?label=CI%20Windows%20Build)](https://ci.appveyor.com/project/jkriege2/TinyTIFF/branch/master) 
+[![CI: Documentation/Linux/MacOX Build](https://img.shields.io/travis/jkriege2/TinyTIFF/master?label=CI%3A%20Documentation%2FLinux%2FMacOX%20Build)](https://travis-ci.org/jkriege2/TinyTIFF)
+
 
 ## TinyTIFFReader
 
@@ -75,7 +85,7 @@ This example reads the first frame in a TIFF file:
 		free(image); 
 	} 
     TinyTIFFReader_close(tiffr); 
-   ```
+```
    
 ## TinyTIFFWriter
 
