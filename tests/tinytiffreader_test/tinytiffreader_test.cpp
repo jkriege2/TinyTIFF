@@ -65,12 +65,10 @@
   return d;
 };
 
- std::string format(const std::string& templ, ...){
-  va_list ap;
+template <class T>
+ std::string format(const std::string& templ, const T& val){
   char buffer[4096];
-  va_start (ap, templ);
-  vsprintf (buffer, templ.c_str(), ap);
-  va_end (ap);
+  sprintf(buffer, templ.c_str(), val);
   std::string ret(buffer);
   return ret;
 };
