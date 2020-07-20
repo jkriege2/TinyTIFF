@@ -36,7 +36,7 @@
 #include <inttypes.h>
 
 /*! \defgroup tinytiffwriter Tiny TIFF writer library
-    \ingroup tools
+    \ingroup tinytiff_maingroup
 
    The methods in this file allow to write TIFF files with limited capabilites,
    but very fast. Usually writing TIFF files with a library like libTIFF is

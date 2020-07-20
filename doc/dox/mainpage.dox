@@ -150,4 +150,8 @@ This example reads the first frame in a TIFF file:
     TinyTIFFReader_close(tiffr); 
 \endcode
 
+
+
+\defgroup tinytiff_maingroup TinyTIFF - A lightweight C++ library for Writing and Reading TIFF-files
+
 */
