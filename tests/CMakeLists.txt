@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
+add_subdirectory(common_tinytiff_test_lib)
+add_subdirectory(tinytiffreader_test)
+add_subdirectory(tinytiffwriter_test)

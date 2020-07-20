@@ -1,0 +1,68 @@
+version: 0.{build}-{branch}
+
+image:
+    - Visual Studio 2017
+
+environment:
+  global:
+    QTVER: 5.11
+    JOMDIR: C:\Qt\Tools\QtCreator\bin
+    MINGWDIR: C:\Qt\Tools\mingw530_32
+    VSVER: 0
+
+  matrix:
+    - QTABI: mingw53_32
+      ARCH: x86
+      MAKETOOL: mingw32-make
+      CMAKE_GENERATOR: "MinGW Makefiles"
+      MSBUILD_FLAGS: 
+    - QTABI: msvc2017_64
+      ARCH: x64
+      VSVER: 2017
+      CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
+      MSBUILD_FLAGS: /verbosity:minimal /maxcpucount
+    - QTABI: msvc2015
+      ARCH: x86
+      VSVER: 14
+      CMAKE_GENERATOR: "Visual Studio 15 2017"
+      MSBUILD_FLAGS: /verbosity:minimal /maxcpucount
+
+skip_tags: true
+
+build:
+  parallel: true
+  verbosity: detailed
+
+configuration:
+  - release
+#  - debug
+
+
+install:
+  - IF %VSVER% GTR 14 (
+        call "C:\Program Files (x86)\Microsoft Visual Studio\%VSVER%\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH%
+    ) ELSE (
+        IF %VSVER% GTR 0 (
+            call "C:\Program Files (x86)\Microsoft Visual Studio "%VSVER%".0\VC\vcvarsall.bat" %ARCH%
+        ) ELSE (
+            set "PATH=%MINGWDIR%\bin;%PATH%"
+        )
+    )
+  - set PATH=C:\Qt\%QTVER%\%QTABI%\bin;%JOMDIR%;%PATH%
+  - echo "BUILD ID Qt%QTVER%_%QTABI%_%APPVEYOR_BUILD_VERSION%_%CONFIGURATION%"
+  # Rename sh.exe as sh.exe in PATH interferes with MinGW
+  - rename "C:\Program Files\Git\usr\bin\sh.exe" "sh2.exe"
+  - cmd: choco install OpenCV
+  - cmd: set OPENCV_DIR=C:\tools\opencv\build
+  
+
+build_script:
+  - mkdir build
+  - cd build
+  - if "%CONFIGURATION%"=="release" (set CMAKE_CONFIGURATION=Release) else (set CMAKE_CONFIGURATION=Debug)
+  - if "%QTABI%"=="msvc2017_64" (set OPENCV_USAGE=ON) else (set OPENCV_USAGE=OFF)
+  - echo "Call CMake..."
+  - cmake --version 
+  - cmake -G "%CMAKE_GENERATOR%" "-DCMAKE_PREFIX_PATH=%QT5%" -DOpenCV_DIR=%OPENCV_DIR% -DTinyMAT_QT5_SUPPORT=ON -DTinyMAT_OPENCV_SUPPORT=%OPENCV_USAGE% -DTinyMAT_BUILD_SHARED_LIBS=ON -DTinyMAT_BUILD_STATIC_LIBS=ON  .. 
+  - echo "Build..." 
+  - cmake --build . --config "%CMAKE_CONFIGURATION%" -- %MSBUILD_FLAGS% 

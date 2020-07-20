@@ -1,15 +1,14 @@
-#ifdef TEST_LIBTIFF
+#ifdef TINYTIFF_TEST_LIBTIFF
 #include <tiffio.h>
-#include "../../libtiff_tools/libtiff_tools.h"
+#include "libtiff_tools.h"
 #endif
 #include <iostream>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../tinytiffwriter.h"
-#include "../../tinytiffreader.h"
-#include "../../tinytiffhighrestimer.h"
-//#include "../../tools.h"
+#include "tinytiffwriter.h"
+#include "tinytiffreader.h"
+#include "tinytiffhighrestimer.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -78,7 +77,7 @@
   return ret;
 };
 
- long get_filesize(char *FileName) {
+ long get_filesize(const char *FileName) {
     struct stat file;
     if(!stat(FileName,&file)) {
          return file.st_size;
@@ -186,9 +185,9 @@ using namespace std;
 #define SPEEDTEST_OUTPUT 10
 #define TEST_FRAMES 100000
 
-#ifdef TEST_LIBTIFF
+#ifdef TINYTIFF_TEST_LIBTIFF
 #define SAVE_TIFF(filename, data, width,height) { \
-    std::cout<<"SAVE_TIFF("<<filename<<")\n"; \
+    std::cout<<"SAVE_TIFF("<<std::string(filename)<<")\n"; \
     TIFF* t=TIFFOpen(filename, "w"); \
     uint32_t* d=(uint32_t*)calloc(width*height,sizeof(uint32_t));\
     for (int kkt=0; kkt<width*height; kkt++) {\
@@ -203,7 +202,7 @@ using namespace std;
 #endif
 
 #define TEST_SIMPLE(filename, imagetype) \
-    std::cout<<"\n\nreading '"<<filename<<"' and checking read contents ... filesize = "<<bytestostr(get_filesize(filename))<<"\n"; \
+    std::cout<<"\n\nreading '"<<std::string(filename)<<"' and checking read contents ... filesize = "<<bytestostr(get_filesize(filename))<<"\n"; \
     ok=false;\
     tiffr=TinyTIFFReader_open(filename); \
     if (!tiffr) { \
@@ -248,7 +247,7 @@ using namespace std;
 
 
 #define TEST(filename, image, imagei, imagetype) \
-    std::cout<<"\n\nreading '"<<filename<<"' and checking read contents ... filesize = "<<bytestostr(get_filesize(filename))<<"\n"; \
+    std::cout<<"\n\nreading '"<<std::string(filename)<<"' and checking read contents ... filesize = "<<bytestostr(get_filesize(filename))<<"\n"; \
     ok=false;\
     tiffr=TinyTIFFReader_open(filename); \
     if (!tiffr) { \
@@ -311,12 +310,12 @@ using namespace std;
 
 
 
-#define TEST_LIBTIFF_FUNC(filename, image, imagei, imagetype) \
-    std::cout<<"\n\nreading '"<<filename<<"' with libtiff and checking read contents ... filesize = "<<bytestostr(get_filesize(filename))<<"\n"; \
+#define TINYTIFF_TEST_LIBTIFF_FUNC(filename, image, imagei, imagetype) \
+    std::cout<<"\n\nreading '"<<std::string(filename)<<"' with libtiff and checking read contents ... filesize = "<<bytestostr(get_filesize(filename))<<"\n"; \
     ok=false;\
     timer.start(); \
     std::cout<<"    opening file     [duration: "<<floattounitstr(double(timer.get_time())/1.0e6, "s")<<" ]\n"; \
-    ltiff=TIFFOpen(filename, "r"); \
+    ltiff=TIFFOpen(std::string(filename), "r"); \
     if (!ltiff) { \
         std::cout<<"    ERROR reading (not existent, not accessible or no TIFF file)\n"; \
     } else { \
@@ -432,19 +431,19 @@ int main() {
     TEST("test16.tif", image16, image16i, uint16_t)
     TEST("test16m.tif", image16, image16i, uint16_t)
 
-#ifdef TEST_LIBTIFF
+#ifdef TINYTIFF_TEST_LIBTIFF
     if (TEST_FRAMES<60000) {
         TIFF* ltiff=NULL;
-        TEST_LIBTIFF_FUNC("test8.tif", image8, image8i, uint8_t)
-        TEST_LIBTIFF_FUNC("test8m.tif", image8, image8i, uint8_t)
-        TEST_LIBTIFF_FUNC("test16.tif", image16, image16i, uint16_t)
-        TEST_LIBTIFF_FUNC("test16m.tif", image16, image16i, uint16_t)
-        TEST_LIBTIFF_FUNC("test16m_imagej.tif", image16, image16i, uint16_t)
+        TINYTIFF_TEST_LIBTIFF_FUNC("test8.tif", image8, image8i, uint8_t)
+        TINYTIFF_TEST_LIBTIFF_FUNC("test8m.tif", image8, image8i, uint8_t)
+        TINYTIFF_TEST_LIBTIFF_FUNC("test16.tif", image16, image16i, uint16_t)
+        TINYTIFF_TEST_LIBTIFF_FUNC("test16m.tif", image16, image16i, uint16_t)
+        TINYTIFF_TEST_LIBTIFF_FUNC("test16m_imagej.tif", image16, image16i, uint16_t)
     }
 	{
 		TIFF* ltiff=NULL;
 		char* nval=NULL;
-		TEST_LIBTIFF_FUNC("multi-channel-time-series.ome.tif", nval, nval, uint16_t)
+		TINYTIFF_TEST_LIBTIFF_FUNC("multi-channel-time-series.ome.tif", nval, nval, uint16_t)
 		TEST_SIMPLE("multi-channel-time-series.ome.tif", uint8_t)
 	}
 #endif

@@ -1,9 +1,9 @@
-#include "../../tinytiffwriter.h"
-#include "../../tinytiffhighrestimer.h"
+#include "tinytiffwriter.h"
+#include "tinytiffhighrestimer.h"
 
-#ifdef TEST_LIBTIFF
+#ifdef TINYTIFF_TEST_LIBTIFF
 #include <tiffio.h>
-#include "../../libtiff_tools/libtiff_tools.h"
+#include "libtiff_tools.h"
 #endif
 #include <iostream>
 
@@ -18,7 +18,7 @@ using namespace std;
 
 template <class T>
 void libtiffTestRead(char* filename, T* written, int width, int height)  {
-#ifdef TEST_LIBTIFF
+#ifdef TINYTIFF_TEST_LIBTIFF
     TIFF* tif = TIFFOpen(filename, "r");
     T* data=(T*)malloc(width*height*sizeof(T));
     if (tif) {
@@ -384,7 +384,7 @@ int main() {
     fclose(fraw);
 
 
-#ifdef TEST_LIBTIFF
+#ifdef TINYTIFF_TEST_LIBTIFF
     if (SPEEDTEST_SIZE<60000) {
         std::cout<<"LIBTIFF SPEED TEST, 8-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
         TIFF* tifvideo=TIFFOpen("libtifftest8_speedtest.tif", "w");

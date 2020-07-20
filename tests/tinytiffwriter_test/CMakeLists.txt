@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.0)
+
+set(EXAMPLE_NAME tinytiffwriter_test)
+
+add_executable(${EXAMPLE_NAME}
+	tinytiffwriter_test.cpp
+)
+if(TinyTIFF_BUILD_STATIC_LIBS)
+    target_link_libraries(${EXAMPLE_NAME} libTinyTIFF)
+elseif(TinyTIFF_BUILD_SHARED_LIBS)
+    target_link_libraries(${EXAMPLE_NAME} libTinyTIFFShared)
+endif()
+target_link_libraries(${EXAMPLE_NAME} common_tinytiff_test_lib)
+
+# Installation
+install(TARGETS ${EXAMPLE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

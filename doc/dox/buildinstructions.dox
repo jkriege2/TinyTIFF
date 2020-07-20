@@ -1,0 +1,71 @@
+/*!
+
+\page page_buildinstructions Build Instructions
+
+This page explains how to build TinyTIFF.
+
+\tableofcontents
+
+\section page_buildinstructions_CMAKE Build using CMake
+
+\subsection page_buildinstructions_CMAKE_RUN Running a Build with CMake
+
+The preferred way to build TinyTIFF is using <a href="https://cmake.org/">CMake</a>. You can find a detailed explanation of CMake at https://cliutils.gitlab.io/modern-cmake/. The CMake-build is defined in `CMakeLists.txt` files, found in many of the directories of the code repository. Especially in the root directory and the two subdirectories \c ./src/ and \c ./examples/ .
+
+\subsubsection page_buildinstructions_CMAKE_MAKEFILE Building with MinGW/GNU/... Makefiles
+
+You can use (MinGW) Makefiles by calling:
+
+\code{.sh}
+    $ mkdir build
+    $ cd build
+    $ cmake .. -G "MinGW Makefiles" -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON
+    $ cmake --build . --config "Debug"
+    $ cmake --build . --config "Debug" --target install
+\endcode
+
+Note that we set several compiler options on the first run of cmake. The options are describe in detail below in \ref page_buildinstructions_CMAKE_CONFIG .
+
+\subsubsection page_buildinstructions_CMAKE_VSTUDIO Building with Visual Studio
+
+For Visual Studio it could look like this:
+\code{.sh}
+    $ mkdir build
+    $ cd build
+    $ cmake .. -G "Visual Studio 15 2017 Win64" -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON 
+\endcode
+This call results in a Visual Studio solution \c build/TinyTIFF.sln that you can load and compile from the Visual Studio IDE. Alternatively you can also build the solution directly calling:
+\code{.sh}
+    $ cmake --build . --config "Debug"
+\endcode
+Afterwards you can install the library by
+\code{.sh}
+    $ cmake --build . --config "Debug" --target install
+\endcode
+
+\subsection page_buildinstructions_CMAKE_CONFIG Configuring a Build with CMake
+
+The CMake build system offers several configuration variables that you may set/change to modify the outcome of the build:
+  - \c CMAKE_PREFIX_PATH : add the path to your Qt installatrion to this variable, so the \c find_package(Qt5...) commands find the libraries you want to use
+  - \c TinyTIFF_BUILD_SHARED_LIBS : Build as shared library (default: \c ON )
+  - \c TinyTIFF_BUILD_STATIC_LIBS : Build as static library (default: \c OFF )
+  - \c TinyTIFF_BUILD_DECORATE_LIBNAMES_WITH_BUILDTYPE : If set, the build-type is appended to the library name (default: \c ON )
+  - \c TinyTIFF_BUILD_EXAMPLES : Build examples (default: \c ON )
+  - \c CMAKE_INSTALL_PREFIX : Install directory for the library
+.
+
+
+
+
+\subsection page_buildinstructions_CMAKE_USAGE Using a built, generated with CMake
+
+After building and installing TinyTIFF you have all files that you need inside the instal directory:
+  - \c <INSTALLDIR>/include contains all required header files
+  - \c <INSTALLDIR>/bin contains the shared libraries
+  - \c <INSTALLDIR>/lib contains the link libraries
+  - \c <INSTALLDIR>/lib/cmake contains files necessary for CMake's \c find_package() to work
+.
+
+
+
+*/
