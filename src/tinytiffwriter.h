@@ -24,9 +24,7 @@
 #ifndef TINYTIFFWRITER_H
 #define TINYTIFFWRITER_H
 
-#ifndef TINYTIFFWRITER_LIB_EXPORT
-#    define TINYTIFFWRITER_LIB_EXPORT
-#endif
+#include "tinytiff_export.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,7 +131,7 @@ struct TinyTIFFFile; // forward
 /** \brief maximum size of the imageDescription field in the first frame (including trailing \c 0, which has to be present!)
   * \ingroup tinytiffwriter
   */
-TINYTIFFWRITER_LIB_EXPORT int TinyTIFFWriter_getMaxDescriptionTextSize();
+TINYTIFF_EXPORT int TinyTIFFWriter_getMaxDescriptionTextSize();
 
 
 /*! \brief create a new TIFF file
@@ -146,7 +144,7 @@ TINYTIFFWRITER_LIB_EXPORT int TinyTIFFWriter_getMaxDescriptionTextSize();
     \return a new TinyTIFFFile pointer on success, or NULL on errors
 
   */
-TINYTIFFWRITER_LIB_EXPORT TinyTIFFFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSample, uint32_t width, uint32_t height);
+TINYTIFF_EXPORT TinyTIFFFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSample, uint32_t width, uint32_t height);
 
 /*! \brief write a new image to the give TIFF file
     \ingroup tinytiffwriter
@@ -154,9 +152,9 @@ TINYTIFFWRITER_LIB_EXPORT TinyTIFFFile* TinyTIFFWriter_open(const char* filename
     \param tiff TIFF file to write to
     \param data points to the image in row-major ordering with the right bit-depth
   */
-TINYTIFFWRITER_LIB_EXPORT void TinyTIFFWriter_writeImage(TinyTIFFFile* tiff, void* data);
-TINYTIFFWRITER_LIB_EXPORT void TinyTIFFWriter_writeImage(TinyTIFFFile* tiff, float* data);
-TINYTIFFWRITER_LIB_EXPORT void TinyTIFFWriter_writeImage(TinyTIFFFile* tiff, double* data);
+TINYTIFF_EXPORT void TinyTIFFWriter_writeImage(TinyTIFFFile* tiff, void* data);
+TINYTIFF_EXPORT void TinyTIFFWriter_writeImage(TinyTIFFFile* tiff, float* data);
+TINYTIFF_EXPORT void TinyTIFFWriter_writeImage(TinyTIFFFile* tiff, double* data);
 
 /*! \brief close a given TIFF file
     \ingroup tinytiffwriter
@@ -180,7 +178,7 @@ TINYTIFFWRITER_LIB_EXPORT void TinyTIFFWriter_writeImage(TinyTIFFFile* tiff, dou
 
     This function also releases memory allocated in TinyTIFFWriter_open() in \a tiff.
  */
-TINYTIFFWRITER_LIB_EXPORT void TinyTIFFWriter_close(TinyTIFFFile* tiff, double pixel_width=0, double pixel_height=0, double frametime=0, double deltaz=0);
+TINYTIFF_EXPORT void TinyTIFFWriter_close(TinyTIFFFile* tiff, double pixel_width=0, double pixel_height=0, double frametime=0, double deltaz=0);
 
 
 /*! \brief close a given TIFF file and write the given string into the IMageDescription tag of the first frame in the file.
@@ -192,7 +190,7 @@ TINYTIFFWRITER_LIB_EXPORT void TinyTIFFWriter_close(TinyTIFFFile* tiff, double p
 
     This function also releases memory allocated in TinyTIFFWriter_open() in \a tiff.
  */
-TINYTIFFWRITER_LIB_EXPORT void TinyTIFFWriter_close(TinyTIFFFile* tiff, const char* imageDescription);
+TINYTIFF_EXPORT void TinyTIFFWriter_close(TinyTIFFFile* tiff, const char* imageDescription);
 
 #endif // TINYTIFFWRITER_H
 

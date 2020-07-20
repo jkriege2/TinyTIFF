@@ -11,7 +11,6 @@
 #include "tinytiffhighrestimer.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

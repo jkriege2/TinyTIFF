@@ -15,9 +15,7 @@ set(HEADERS
 
 
 include(CMakePackageConfigHelpers)
-
-#include(CheckSymbolExists)
-#check_symbol_exists(fopen_s "stdio.h" HAVE_FOPEN_S)
+include(GenerateExportHeader)
 
 
 if(TinyTIFF_BUILD_SHARED_LIBS)
@@ -30,9 +28,14 @@ if(TinyTIFF_BUILD_SHARED_LIBS)
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>  
     )
     set_target_properties(${libsh_name} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS "ON")
-    #if (HAVE_FOPEN_S)
-    #    target_compile_definitions(${libsh_name} PRIVATE HAVE_FOPEN_S)
-    #endif()
+
+    generate_export_header(${libsh_name} BASE_NAME tinytiff)
+    target_include_directories(${libsh_name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    target_include_directories(${libsh_name} INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
+    target_compile_definitions(${libsh_name} PRIVATE ${libsh_name}_EXPORTS)
 endif()
 
 if(TinyTIFF_BUILD_STATIC_LIBS)
@@ -43,10 +46,21 @@ if(TinyTIFF_BUILD_STATIC_LIBS)
     target_include_directories(${lib_name} INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>  
-        )
-    #if (HAVE_FOPEN_S)
-    #    target_compile_definitions(${lib_name} PRIVATE HAVE_FOPEN_S)
-    #endif()
+    )
+
+    if(NOT TinyTIFF_BUILD_SHARED_LIBS)
+      generate_export_header(${lib_name} BASE_NAME tinytiff)
+    endif()
+    target_include_directories(${lib_name} INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
+    target_include_directories(${lib_name} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    target_include_directories(${lib_name} INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
+    target_compile_definitions(${lib_name} PUBLIC TINYTIFF_STATIC_DEFINE)
 
 endif()
 
@@ -70,6 +84,7 @@ if(TinyTIFF_BUILD_SHARED_LIBS)
 	)
 	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${libsh_name}Version.cmake" 
 			DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${libsh_name}  )
+
 endif(TinyTIFF_BUILD_SHARED_LIBS)
 
 if(TinyTIFF_BUILD_STATIC_LIBS)
@@ -88,12 +103,11 @@ if(TinyTIFF_BUILD_STATIC_LIBS)
 	)
 	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${lib_name}Version.cmake" 
 			DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${lib_name}  )
+
 endif(TinyTIFF_BUILD_STATIC_LIBS)
 
-install(FILES ${HEADERS}
-                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-		COMPONENT Headers)
-
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT Headers)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinytiff_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} )
 configure_file(${CMAKE_SOURCE_DIR}/readme.txt.in ${CMAKE_CURRENT_BINARY_DIR}/readme.txt @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/readme.txt" DESTINATION "${TinyTIFF_DOC_INSTALL_DIR}/${lib_name}/" )
 install(FILES "${CMAKE_SOURCE_DIR}/LICENSE" DESTINATION "${TinyTIFF_DOC_INSTALL_DIR}/${lib_name}/" )
