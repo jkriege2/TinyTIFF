@@ -5,22 +5,35 @@ set(libsh_name "libTinyTIFFShared")
 
 # Set up source files
 set(SOURCES
-    tinytiffreader.cpp
-    tinytiffwriter.cpp
+    tinytiffreader.c
+    tinytiffwriter.c
 )
-set(HEADERS
+set_property(SOURCE ${SOURCES} PROPERTY LANGUAGE "C")
+set(HEADERS_C
     tinytiffreader.h
     tinytiffwriter.h
+)
+set(HEADERS_CXX
+    tinytiffreader.hxx
+)
+set(HEADERS
+    ${HEADERS_C}
+    ${HEADERS_CXX}
 )
 
 
 include(CMakePackageConfigHelpers)
 include(GenerateExportHeader)
+include(CheckSymbolExists)
+check_symbol_exists(strcpy_s "string.h" HAVE_STRCPY_S)
+check_symbol_exists(fopen_s "stdio.h" HAVE_FOPEN_S)
+check_symbol_exists(fread_s "stdio.h" HAVE_FREAD_S)
+check_symbol_exists(sprintf_s "stdio.h" HAVE_SPRINTF_S)
+check_symbol_exists(strcat_s "string.h" HAVE_STRCAT_S)
 
 
 if(TinyTIFF_BUILD_SHARED_LIBS)
     add_library(${libsh_name} SHARED  ${SOURCES} ${HEADERS})
-    target_compile_features(${libsh_name} PUBLIC cxx_std_11)
     set_property(TARGET ${libsh_name} PROPERTY VERSION "${PROJECT_VERSION}")
     set_property(TARGET ${libsh_name} PROPERTY OUTPUT_NAME  "${libsh_name}${TinyTIFF_LIBNAME_ADDITION}")
     target_include_directories(${libsh_name} INTERFACE
@@ -36,11 +49,25 @@ if(TinyTIFF_BUILD_SHARED_LIBS)
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
     target_compile_definitions(${libsh_name} PRIVATE ${libsh_name}_EXPORTS)
+    if (HAVE_STRCPY_S)
+        target_compile_definitions(${libsh_name} PRIVATE HAVE_STRCPY_S)
+    endif()
+    if (HAVE_FOPEN_S)
+        target_compile_definitions(${libsh_name} PRIVATE HAVE_FOPEN_S)
+    endif()
+    if (HAVE_SPRINTF_S)
+        target_compile_definitions(${libsh_name} PRIVATE HAVE_SPRINTF_S)
+    endif()
+    if (HAVE_STRCAT_S)
+        target_compile_definitions(${libsh_name} PRIVATE HAVE_STRCAT_S)
+    endif()
+    if (HAVE_FREAD_S)
+        target_compile_definitions(${libsh_name} PRIVATE HAVE_FREAD_S)
+    endif()
 endif()
 
 if(TinyTIFF_BUILD_STATIC_LIBS)
     add_library(${lib_name} STATIC ${SOURCES} ${HEADERS})
-    target_compile_features(${lib_name} PUBLIC cxx_std_11)
     set_property(TARGET ${lib_name} PROPERTY VERSION "${PROJECT_VERSION}")
     set_property(TARGET ${lib_name} PROPERTY OUTPUT_NAME  "${lib_name}${TinyTIFF_LIBNAME_ADDITION}")
     target_include_directories(${lib_name} INTERFACE
@@ -61,8 +88,23 @@ if(TinyTIFF_BUILD_STATIC_LIBS)
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
     target_compile_definitions(${lib_name} PUBLIC TINYTIFF_STATIC_DEFINE)
-
+    if (HAVE_STRCPY_S)
+        target_compile_definitions(${lib_name} PRIVATE HAVE_STRCPY_S)
+    endif()
+    if (HAVE_FOPEN_S)
+        target_compile_definitions(${lib_name} PRIVATE HAVE_FOPEN_S)
+    endif()
+    if (HAVE_SPRINTF_S)
+        target_compile_definitions(${lib_name} PRIVATE HAVE_SPRINTF_S)
+    endif()
+    if (HAVE_STRCAT_S)
+        target_compile_definitions(${lib_name} PRIVATE HAVE_STRCAT_S)
+    endif()
+    if (HAVE_FREAD_S)
+        target_compile_definitions(${lib_name} PRIVATE HAVE_FREAD_S)
+    endif()
 endif()
+
 
 
 

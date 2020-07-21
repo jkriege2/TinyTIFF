@@ -82,20 +82,20 @@ int main() {
     std::cout<<"WRITING 8-Bit UINT TIFF\n";
     TinyTIFFFile* tiff = TinyTIFFWriter_open("test8.tif", 8, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, image8);
-    TinyTIFFWriter_close(tiff, "THIS IS MY OWN TIFF COMMET");
+    TinyTIFFWriter_close_withdescription(tiff, "");
     tiff = TinyTIFFWriter_open("test8m.tif", 8, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, image8);
     TinyTIFFWriter_writeImage(tiff, image8i);
     TinyTIFFWriter_writeImage(tiff, image8);
     TinyTIFFWriter_writeImage(tiff, image8i);
-    TinyTIFFWriter_close(tiff, "THIS IS MY OWN TIFF COMMET");
+    TinyTIFFWriter_close(tiff);
     libtiffTestRead<uint8_t>("test8.tif", image8, WIDTH, HEIGHT);
 
 
     std::cout<<"WRITING 16-Bit UINT TIFF\n";
     tiff = TinyTIFFWriter_open("test16.tif", 16, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, image16);
-    TinyTIFFWriter_close(tiff, 100, 200, 300, 1e-4);
+    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
     tiff = TinyTIFFWriter_open("test16m.tif", 16, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, image16);
     TinyTIFFWriter_writeImage(tiff, image16i);
@@ -103,13 +103,13 @@ int main() {
     TinyTIFFWriter_writeImage(tiff, image16i);
     TinyTIFFWriter_writeImage(tiff, image16);
     TinyTIFFWriter_writeImage(tiff, image16i);
-    TinyTIFFWriter_close(tiff, 100, 200, 300, 1e-4);
+    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
     libtiffTestRead<uint16_t>("test16.tif", image16, WIDTH, HEIGHT);
 
     std::cout<<"WRITING 32-Bit FLOAT TIFF\n";
     tiff = TinyTIFFWriter_open("testf.tif", 32, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, imagef);
-    TinyTIFFWriter_close(tiff, 100, 200, 300, 1e-4);
+    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
     tiff = TinyTIFFWriter_open("testfm.tif", 32, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, imagef);
     TinyTIFFWriter_writeImage(tiff, imagefi);
@@ -117,7 +117,7 @@ int main() {
     TinyTIFFWriter_writeImage(tiff, imagefi);
     TinyTIFFWriter_writeImage(tiff, imagef);
     TinyTIFFWriter_writeImage(tiff, imagefi);
-    TinyTIFFWriter_close(tiff, 100, 200, 300, 1e-4);
+    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
     libtiffTestRead<float>("testf.tif", imagef, WIDTH, HEIGHT);
 
     std::cout<<"TIFF SPEED TEST, 8-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
@@ -188,7 +188,7 @@ int main() {
     fprintf(fstat, "plot [*:*] [%lf:%lf] 'test8_speedtest.dat' with yerrorbars\n", min, max);
     fprintf(fstat, "pause -1\n");
     fclose(fstat);
-    TinyTIFFWriter_close(tiff, 100, 200, 300, 1e-4);
+    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
 
 
 
@@ -318,7 +318,7 @@ int main() {
     fprintf(fstat, "plot [*:*] [%lf:%lf] 'test16_speedtest.dat' with yerrorbars\n", min, max);
     fprintf(fstat, "pause -1\n");
     fclose(fstat);
-    TinyTIFFWriter_close(tiff, 100, 200, 300, 1e-4);
+    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
 
 
 

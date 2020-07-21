@@ -250,7 +250,12 @@ using namespace std;
         std::cout<<"    ERROR reading (not existent, not accessible or no TIFF file)\n"; \
     } else { \
         if (TinyTIFFReader_wasError(tiffr)) std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; \
-        std::cout<<"    ImageDescription:\n"<< TinyTIFFReader_getImageDescription(tiffr) <<"\n"; \
+        const char* desc=TinyTIFFReader_getImageDescription(tiffr); \
+        if (desc!=NULL && strlen(desc)>0) { \
+            std::cout<<"    ImageDescription:\n"<< desc <<"\n"; \
+        } else {\
+            std::cout<<"    ImageDescription: EMPTY\n"; \
+        }\
         timer.start(); \
         uint32_t frames=TinyTIFFReader_countFrames(tiffr); \
         double duration=timer.get_time(); \
@@ -267,7 +272,7 @@ using namespace std;
             ok=(width==WIDTH)&&(height==HEIGHT); \
             if (!ok) std::cout<<"    ERROR IN FRAME "<<frame<<": size does not match, read "<<width<<"x"<<height<<"    expected "<<WIDTH<<"x"<<HEIGHT<<"\n";; \
             if (ok) { \
-                imagetype* tmp=(imagetype*)calloc(width*height, TinyTIFFReader_getBitsPerSample(tiffr)/8);  \
+                imagetype* tmp=(imagetype*)calloc(width*height, TinyTIFFReader_getBitsPerSample(tiffr, 0)/8);  \
                 timer1.start(); \
                 TinyTIFFReader_getSampleData(tiffr, tmp, 0); \
                 duration_getdata+=timer1.get_time(); \
