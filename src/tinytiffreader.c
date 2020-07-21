@@ -646,13 +646,11 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     //printf("      - s=%u: stripoffset=0x%X stripbytecounts=%u\n", s, tiff->currentFrame.stripoffsets[s], tiff->currentFrame.stripbytecounts[s]);
                     const size_t tmpsize=tiff->currentFrame.stripbytecounts[s];
                     uint8_t* tmp=(uint8_t*)calloc(tmpsize, sizeof(uint8_t));
-                    //fseek(tiff->file, tiff->currentFrame.stripoffsets[s], SEEK_SET);
                     TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
-                    //fread(tmp, tiff->currentFrame.stripbytecounts[s], 1, tiff->file);
-                    TinyTIFFReader_fread(tmp, tmpsize, tiff->currentFrame.stripbytecounts[s], 1, tiff);
+                    TinyTIFFReader_fread(tmp, tmpsize, tmpsize, 1, tiff);
                     uint32_t offset=s*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
                     //printf("          bufferoffset=%u\n", offset);
-                    memcpy(&(((uint8_t*)buffer)[offset]), tmp, tiff->currentFrame.stripbytecounts[s]);
+                    memcpy(&(((uint8_t*)buffer)[offset]), tmp, tmpsize);
                     free(tmp);
                 }
             } else if (tiff->currentFrame.bitspersample[sample]==16) {
@@ -660,12 +658,9 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     //printf("      - s=%u: stripoffset=0x%X stripbytecounts=%u\n", s, tiff->currentFrame.stripoffsets[s], tiff->currentFrame.stripbytecounts[s]);
                     const size_t tmpsize=tiff->currentFrame.stripbytecounts[s];
                     uint16_t* tmp=(uint16_t*)calloc(tmpsize, sizeof(uint8_t));
-                    //fseek(tiff->file, tiff->currentFrame.stripoffsets[s], SEEK_SET);
                     TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
-                    //fread(tmp, tiff->currentFrame.stripbytecounts[s], 1, tiff->file);
                     TinyTIFFReader_fread(tmp, tmpsize, tiff->currentFrame.stripbytecounts[s], 1, tiff);
                     uint32_t offset=s*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
-                    //memcpy(&(((uint8_t*)buffer)[offset*2]), tmp, tiff->currentFrame.stripbytecounts[s]);
                     uint32_t pixels=tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
                     uint32_t imagesize=tiff->currentFrame.width*tiff->currentFrame.height;
                     if (offset+pixels>imagesize) pixels=imagesize-offset;

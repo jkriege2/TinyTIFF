@@ -16,7 +16,7 @@
 
 
 */
-//#define TINYTIFF_WRITE_COMMENTS
+#define TINYTIFF_WRITE_COMMENTS
 
 #include <math.h>
 #include <float.h>
@@ -270,12 +270,12 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFFile* tiff, size_t offset) {
     \ingroup tinytiffwriter
     \internal
  */
-#define TIFF_HEADER_SIZE 510
+#define TIFF_HEADER_SIZE 700
 /*! \brief maximum number of field entries in a TIFF header
     \ingroup tinytiffwriter
     \internal
  */
-#define TIFF_HEADER_MAX_ENTRIES 16
+#define TIFF_HEADER_MAX_ENTRIES 20
 
 
 
@@ -411,12 +411,12 @@ static void TinyTIFFWriter_startIFD(TinyTIFFFile* tiff, int hsize) {
     //tiff->lastIFDEndAdress=startPos+2+TIFF_HEADER_SIZE;
     tiff->lastIFDDATAAdress=2+TIFF_HEADER_MAX_ENTRIES*12;
     tiff->lastIFDCount=0;
-    if (tiff->lastHeader && hsize!=tiff->lastHeaderSize) {
+    if (tiff->lastHeader!=NULL && hsize!=tiff->lastHeaderSize) {
         free(tiff->lastHeader);
         tiff->lastHeader=NULL;
         tiff->lastHeaderSize=0;
     }
-    if (!tiff->lastHeader) {
+    if (tiff->lastHeader==NULL) {
         tiff->lastHeader=(uint8_t*)calloc(hsize+2, 1);
         tiff->lastHeaderSize=hsize;
     } else {
@@ -855,7 +855,7 @@ void TinyTIFFWriter_writeImage(TinyTIFFFile* tiff, const void* data) {
     TinyTIFFWriter_writeIFDEntryRATIONAL(tiff, TIFF_FIELD_YRESOLUTION, 1,1);
     TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_PLANARCONFIG, 1);
     TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_RESOLUTIONUNIT, 1);
-    TinyTIFFWriter_endIFD(tiff, TIFF_HEADER_SIZE);
+    TinyTIFFWriter_endIFD(tiff, hsize);
     TinyTIFFWriter_fwrite(data, tiff->width*tiff->height*(tiff->bitspersample/8), 1, tiff);
     tiff->frames=tiff->frames+1;
 }
@@ -890,7 +890,7 @@ void TinyTIFFWriter_writeImage_float(TinyTIFFFile* tiff, const float* data) {
      TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_PLANARCONFIG, 1);
      TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_RESOLUTIONUNIT, 1);
      TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_SAMPLEFORMAT, 3);
-     TinyTIFFWriter_endIFD(tiff, TIFF_HEADER_SIZE);
+     TinyTIFFWriter_endIFD(tiff, hsize);
      TinyTIFFWriter_fwrite(data, tiff->width*tiff->height*(tiff->bitspersample/8), 1, tiff);
      tiff->frames=tiff->frames+1;
 }
@@ -929,7 +929,7 @@ void TinyTIFFWriter_writeImage_double(TinyTIFFFile* tiff, const double *data) {
      TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_PLANARCONFIG, 1);
      TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_RESOLUTIONUNIT, 1);
      TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_SAMPLEFORMAT, 3);
-     TinyTIFFWriter_endIFD(tiff, TIFF_HEADER_SIZE);
+     TinyTIFFWriter_endIFD(tiff, hsize);
      TinyTIFFWriter_fwrite(data, tiff->width*tiff->height*(tiff->bitspersample/8), 1, tiff);
      tiff->frames=tiff->frames+1;
 }

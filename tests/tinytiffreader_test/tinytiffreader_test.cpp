@@ -6,6 +6,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#include <iomanip>
 #include "tinytiffwriter.h"
 #include "tinytiffreader.h"
 #include "tinytiffhighrestimer.h"
@@ -181,6 +182,13 @@ using namespace std;
 #define SPEEDTEST_OUTPUT 10
 #define TEST_FRAMES 100000
 
+struct TestResults {
+    inline TestResults(): name(""), success(false), duration_ms(0) {};
+    std::string name;
+    bool success;
+    double duration_ms;
+};
+
 #ifdef TINYTIFF_TEST_LIBTIFF
 #define SAVE_TIFF(filename, data, width,height) { \
     std::cout<<"SAVE_TIFF("<<std::string(filename)<<")\n"; \
@@ -197,9 +205,11 @@ using namespace std;
 #define SAVE_TIFF(filename, data, width,height)
 #endif
 
-#define TEST_SIMPLE(filename, imagetype) \
+#define TEST_SIMPLE(filename, imagetype, test_results) \
+    test_results.emplace_back(); \
+    test_results.back().name=std::string("TEST_SIMPLE(")+std::string(filename)+std::string(")"); \
     std::cout<<"\n\nreading '"<<std::string(filename)<<"' and checking read contents ... filesize = "<<bytestostr(get_filesize(filename))<<"\n"; \
-    ok=false;\
+    test_results.back().success=ok=false;\
     tiffr=TinyTIFFReader_open(filename); \
     if (!tiffr) { \
         std::cout<<"    ERROR reading (not existent, not accessible or no TIFF file)\n"; \
@@ -212,18 +222,18 @@ using namespace std;
         std::cout<<"    frames: "<<frames<<"     [duration: "<<duration<<" us  =  "<<floattounitstr(duration/1.0e6, "s")<<" ]\n"; \
         if (TinyTIFFReader_wasError(tiffr)) std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; \
         timer.start(); \
-        ok=true; \
+        test_results.back().success=ok=true; \
         uint32_t frame=0; \
         do { \
             uint32_t width=TinyTIFFReader_getWidth(tiffr); \
             uint32_t height=TinyTIFFReader_getHeight(tiffr); \
             if (width>0 && height>0) std::cout<<"    size of frame "<<frame<<": "<<width<<"x"<<height<<"\n"; \
-            else { std::cout<<"    ERROR IN FRAME "<<frame<<": size too small "<<width<<"x"<<height<<"\n"; ok=false; } \
+            else { std::cout<<"    ERROR IN FRAME "<<frame<<": size too small "<<width<<"x"<<height<<"\n"; test_results.back().success=ok=false; } \
             if (ok) { \
                 frame++; \
                 imagetype* tmp=(imagetype*)calloc(width*height, sizeof(imagetype));  \
                 TinyTIFFReader_getSampleData(tiffr, tmp, 0); \
-                if (TinyTIFFReader_wasError(tiffr)) { ok=false; std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; } \
+                if (TinyTIFFReader_wasError(tiffr)) { test_results.back().success=ok=false; std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; } \
                 if (ok) { \
                     char fn[1024];\
                     sprintf(fn, "%s.%u.tif", filename, frame); \
@@ -233,6 +243,7 @@ using namespace std;
             } \
         } while (ok && TinyTIFFReader_readNext(tiffr));\
         duration=timer.get_time(); \
+        test_results.back().duration_ms=duration/1.0e3; \
         std::cout<<"    read and checked all frames: "<<((ok)?std::string("SUCCESS"):std::string("ERROR"))<<"     [duration: "<<duration<<" us  =  "<<floattounitstr(duration/1.0e6, "s")<<" ]\n"; \
         std::cout<<"    read "<<frame<<" frames\n"; \
     } \
@@ -242,9 +253,11 @@ using namespace std;
 
 
 
-#define TEST(filename, image, imagei, imagetype) \
+#define TEST(filename, image, imagei, imagetype, test_results) \
     std::cout<<"\n\nreading '"<<std::string(filename)<<"' and checking read contents ... filesize = "<<bytestostr(get_filesize(filename))<<"\n"; \
-    ok=false;\
+    test_results.emplace_back(); \
+    test_results.back().name=std::string("TEST(")+std::string(filename)+std::string(")"); \
+    test_results.back().success=ok=false;\
     tiffr=TinyTIFFReader_open(filename); \
     if (!tiffr) { \
         std::cout<<"    ERROR reading (not existent, not accessible or no TIFF file)\n"; \
@@ -262,14 +275,14 @@ using namespace std;
         std::cout<<"    frames: "<<frames<<"     [duration: "<<duration<<" us  =  "<<floattounitstr(duration/1.0e6, "s")<<" ]\n"; \
         if (TinyTIFFReader_wasError(tiffr)) std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; \
         timer.start(); \
-        ok=true; \
+        test_results.back().success=ok=true; \
         uint32_t frame=0; \
         double duration_getdata=0, duration_nextframe=0; \
         bool next; \
         do { \
             uint32_t width=TinyTIFFReader_getWidth(tiffr); \
             uint32_t height=TinyTIFFReader_getHeight(tiffr); \
-            ok=(width==WIDTH)&&(height==HEIGHT); \
+            test_results.back().success=ok=(width==WIDTH)&&(height==HEIGHT); \
             if (!ok) std::cout<<"    ERROR IN FRAME "<<frame<<": size does not match, read "<<width<<"x"<<height<<"    expected "<<WIDTH<<"x"<<HEIGHT<<"\n";; \
             if (ok) { \
                 imagetype* tmp=(imagetype*)calloc(width*height, TinyTIFFReader_getBitsPerSample(tiffr, 0)/8);  \
@@ -280,12 +293,12 @@ using namespace std;
                 uint32_t poserror=0xFFFFFFFF; \
                 if (frame%2==0) {\
                     for (uint32_t i=0; i<width*height; i++) {\
-                        ok=ok&&(tmp[i]==image[i]); \
+                        test_results.back().success=ok=ok&&(tmp[i]==image[i]); \
                         if (!ok) { poserror=i; break; } \
                     }\
                 } else {\
                     for (uint32_t i=0; i<width*height; i++) {\
-                        ok=ok&&(tmp[i]==imagei[i]); \
+                        test_results.back().success=ok=ok&&(tmp[i]==imagei[i]); \
                         if (!ok) { poserror=i; break; } \
                     }\
                 }\
@@ -300,6 +313,7 @@ using namespace std;
             duration_nextframe+=timer1.get_time(); \
         } while (ok && next);\
         duration=timer.get_time(); \
+        test_results.back().duration_ms=duration/1.0e3; \
         std::cout<<"    read and checked all frames: "<<((ok)?std::string("SUCCESS"):std::string("ERROR"))<<"     [duration: "<<duration<<" us  =  "<<floattounitstr(duration/1.0e6, "s")<<" ]\n"; \
         std::cout<<"    getSampleData() consumed "<<floattounitstr(duration_getdata/1.0e6, "s")<<"\n"; \
         std::cout<<"    readNext() consumed "<<floattounitstr(duration_nextframe/1.0e6, "s")<<"\n"; \
@@ -311,9 +325,11 @@ using namespace std;
 
 
 
-#define TINYTIFF_TEST_LIBTIFF_FUNC(filename, image, imagei, imagetype) \
+#define TINYTIFF_TEST_LIBTIFF_FUNC(filename, image, imagei, imagetype, test_results) \
     std::cout<<"\n\nreading '"<<std::string(filename)<<"' with libtiff and checking read contents ... filesize = "<<bytestostr(get_filesize(filename))<<"\n"; \
-    ok=false;\
+    test_results.emplace_back(); \
+    test_results.back().name=std::string("LIBTIFF_TEST(")+std::string(filename)+std::string(")"); \
+    test_results.back().success=ok=false;\
     timer.start(); \
     std::cout<<"    opening file     [duration: "<<floattounitstr(double(timer.get_time())/1.0e6, "s")<<" ]\n"; \
     ltiff=TIFFOpen(filename, "r"); \
@@ -325,7 +341,7 @@ using namespace std;
         double duration=timer.get_time(); \
         std::cout<<"    frames: "<<frames<<"     [duration: "<<duration<<" us  =  "<<floattounitstr(duration/1.0e6, "s")<<" ]\n"; \
         timer.start(); \
-        ok=true; \
+        test_results.back().success=ok=true; \
         uint32_t frame=0; \
         do { \
             uint32_t width; \
@@ -337,7 +353,7 @@ using namespace std;
 			char*val; \
 			TIFFGetField(ltiff,TIFFTAG_IMAGEDESCRIPTION,&val); \
 			std::cout<<"    ImageDescription:\n"<<val<<"\n"; \
-            ok=(width==WIDTH)&&(height==HEIGHT); \
+            test_results.back().success=ok=(width==WIDTH)&&(height==HEIGHT); \
             if (!ok) std::cout<<"    ERROR IN FRAME "<<frame<<": size does not match, read "<<width<<"x"<<height<<"    expected "<<WIDTH<<"x"<<HEIGHT<<"\n";; \
             if (ok && image && imagei) { \
                 imagetype* tmp=(imagetype*)calloc(width*height, sizeof(imagetype));   \
@@ -345,12 +361,12 @@ using namespace std;
                 uint32_t poserror=0xFFFFFFFF; \
                 if (frame%2==0) {\
                     for (uint32_t i=0; i<width*height; i++) {\
-                        ok=ok&&(tmp[i]==image[i]); \
+                        test_results.back().success=ok=ok&&(tmp[i]==image[i]); \
                         if (!ok) { poserror=i; break; } \
                     }\
                 } else {\
                     for (uint32_t i=0; i<width*height; i++) {\
-                        ok=ok&&(tmp[i]==imagei[i]); \
+                        test_results.back().success=ok=ok&&(tmp[i]==imagei[i]); \
                         if (!ok) { poserror=i; break; } \
                     }\
                 }\
@@ -362,6 +378,7 @@ using namespace std;
             } \
         } while (ok && TIFFReadDirectory(ltiff));\
         duration=timer.get_time(); \
+        test_results.back().duration_ms=duration/1.0e3; \
         std::cout<<"    read and checked all frames: "<<((ok)?std::string("SUCCESS"):std::string("ERROR"))<<"     [duration: "<<duration<<" us  =  "<<floattounitstr(duration/1.0e6, "s")<<" ]\n"; \
         std::cout<<"    read "<<frame<<" frames\n"; \
     } \
@@ -419,33 +436,34 @@ int main() {
     bool ok=false;
     TinyTIFFReaderFile* tiffr=NULL;
 
-    TEST_SIMPLE("cell.tif", uint8_t)
-    TEST_SIMPLE("circuit.tif", uint8_t)
-    TEST_SIMPLE("galaxy.tif", uint8_t)
-    //TEST_SIMPLE("galaxy_nocompression.tif", uint8_t)
-    TEST_SIMPLE("mri.tif", uint8_t)
-    TEST_SIMPLE("multi-channel-time-series.ome.tif", uint8_t)
+    std::vector<TestResults> test_results;
+
+    TEST_SIMPLE("cell.tif", uint8_t, test_results)
+    TEST_SIMPLE("circuit.tif", uint8_t, test_results)
+    TEST_SIMPLE("galaxy.tif", uint8_t, test_results)
+    TEST_SIMPLE("mri.tif", uint8_t, test_results)
+    TEST_SIMPLE("multi-channel-time-series.ome.tif", uint8_t, test_results)
 
 
-    TEST("test8.tif", image8, image8i, uint8_t)
-    TEST("test8m.tif", image8, image8i, uint8_t)
-    TEST("test16.tif", image16, image16i, uint16_t)
-    TEST("test16m.tif", image16, image16i, uint16_t)
+    TEST("test8.tif", image8, image8i, uint8_t, test_results)
+    TEST("test8m.tif", image8, image8i, uint8_t, test_results)
+    TEST("test16.tif", image16, image16i, uint16_t, test_results)
+    TEST("test16m.tif", image16, image16i, uint16_t, test_results)
 
 #ifdef TINYTIFF_TEST_LIBTIFF
     if (TEST_FRAMES<60000) {
         TIFF* ltiff=NULL;
-        TINYTIFF_TEST_LIBTIFF_FUNC("test8.tif", image8, image8i, uint8_t)
-        TINYTIFF_TEST_LIBTIFF_FUNC("test8m.tif", image8, image8i, uint8_t)
-        TINYTIFF_TEST_LIBTIFF_FUNC("test16.tif", image16, image16i, uint16_t)
-        TINYTIFF_TEST_LIBTIFF_FUNC("test16m.tif", image16, image16i, uint16_t)
-        TINYTIFF_TEST_LIBTIFF_FUNC("test16m_imagej.tif", image16, image16i, uint16_t)
+        TINYTIFF_TEST_LIBTIFF_FUNC("test8.tif", image8, image8i, uint8_t, test_results)
+        TINYTIFF_TEST_LIBTIFF_FUNC("test8m.tif", image8, image8i, uint8_t, test_results)
+        TINYTIFF_TEST_LIBTIFF_FUNC("test16.tif", image16, image16i, uint16_t, test_results)
+        TINYTIFF_TEST_LIBTIFF_FUNC("test16m.tif", image16, image16i, uint16_t, test_results)
+        TINYTIFF_TEST_LIBTIFF_FUNC("test16m_imagej.tif", image16, image16i, uint16_t, test_results)
     }
 	{
 		TIFF* ltiff=NULL;
 		char* nval=NULL;
-		TINYTIFF_TEST_LIBTIFF_FUNC("multi-channel-time-series.ome.tif", nval, nval, uint16_t)
-		TEST_SIMPLE("multi-channel-time-series.ome.tif", uint8_t)
+		TINYTIFF_TEST_LIBTIFF_FUNC("multi-channel-time-series.ome.tif", nval, nval, uint16_t, test_results)
+		TEST_SIMPLE("multi-channel-time-series.ome.tif", uint8_t, test_results)
 	}
 #endif
 
@@ -453,5 +471,10 @@ int main() {
     free(image16);
     free(image8i);
     free(image16i);
+
+    std::cout<<"\n\n\nTEST SUMMARY:\n";
+    for (auto& r: test_results) {
+        std::cout<<std::setw(60)<<r.name<<" | "<<std::boolalpha<<std::setw(8)<<r.success<<" | "<<r.duration_ms<<"ms"<<std::endl;
+    }
     return 0;
 }
