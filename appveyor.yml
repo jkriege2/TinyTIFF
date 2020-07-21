@@ -63,6 +63,23 @@ build_script:
   - if "%QTABI%"=="msvc2017_64" (set OPENCV_USAGE=ON) else (set OPENCV_USAGE=OFF)
   - echo "Call CMake..."
   - cmake --version 
-  - cmake -G "%CMAKE_GENERATOR%" "-DCMAKE_PREFIX_PATH=%QT5%" -DOpenCV_DIR=%OPENCV_DIR% -DTinyMAT_QT5_SUPPORT=ON -DTinyMAT_OPENCV_SUPPORT=%OPENCV_USAGE% -DTinyMAT_BUILD_SHARED_LIBS=ON -DTinyMAT_BUILD_STATIC_LIBS=ON  .. 
+  - cmake -G "%CMAKE_GENERATOR%" "-DCMAKE_PREFIX_PATH=%QT5%" -DOpenCV_DIR=%OPENCV_DIR% -DTinyTIFF_QT5_SUPPORT=ON -DTinyTIFF_OPENCV_SUPPORT=%OPENCV_USAGE% -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}/install"  .. 
   - echo "Build..." 
   - cmake --build . --config "%CMAKE_CONFIGURATION%" -- %MSBUILD_FLAGS% 
+  - echo "Install..." 
+  - cmake --install . --config "%CMAKE_CONFIGURATION%" -- %MSBUILD_FLAGS% 
+
+test_script:    
+  - echo "Test..." 
+  - dir
+  - ctest  --config "%CMAKE_CONFIGURATION%" --timeout 600 --output-on-failure -- %MSBUILD_FLAGS% > test_output.txt
+
+artifacts:
+  - path: 'build/CMakeFiles/*.log'
+    name: logs
+  - path: 'build/install/**'
+    name: binary
+  - path: 'build/Testing/**/*.xml'
+    name: test_results
+  - path: 'build/test_output.txt'
+    name: test_results_simple

@@ -12,5 +12,7 @@ elseif(TinyTIFF_BUILD_SHARED_LIBS)
 endif()
 target_link_libraries(${EXAMPLE_NAME} common_tinytiff_test_lib)
 
+add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME} WORKING_DIRECTORY ${CMAKE_INSTALL_BINDIR})
+
 # Installation
 install(TARGETS ${EXAMPLE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
