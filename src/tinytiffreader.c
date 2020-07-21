@@ -50,17 +50,17 @@
 
 #ifdef __WINDOWS__
 #  ifndef __USE_LIBC_FOR_TIFFReader__
-#    define __USE_WINAPI_FIR_TIFF__
+#    define TINYTIFF_USE_WINAPI_FOR_FILEIO
 #  endif
 #endif // __WINDOWS__
 
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
 #  include <windows.h>
 #  warning COMPILING TinyTIFFReader with WinAPI
 #  define TinyTIFFReader_POSTYPE DWORD
 #else
 #  define TinyTIFFReader_POSTYPE fpos_t
-#endif // __USE_WINAPI_FIR_TIFF__
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 
 #define TIFF_LAST_ERROR_SIZE 1024
 
@@ -170,11 +170,11 @@ static void TinyTIFFReader_freeEmptyFrame(TinyTIFFReaderFrame f) {
 
 
 struct TinyTIFFReaderFile {
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
     HANDLE hFile;
 #else
     FILE* file;
-#endif // __USE_WINAPI_FIR_TIFF__
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 
     char lastError[TIFF_LAST_ERROR_SIZE];
     int wasError;
@@ -192,7 +192,7 @@ struct TinyTIFFReaderFile {
 
 
 void TinyTIFFReader_fopen(TinyTIFFReaderFile* tiff, const char* filename) {
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
     tiff->hFile = CreateFile(filename,               // name of the write
                        GENERIC_READ,          // open for writing
                        FILE_SHARE_READ,
@@ -206,22 +206,22 @@ void TinyTIFFReader_fopen(TinyTIFFReaderFile* tiff, const char* filename) {
 #  else
     tiff->file=fopen(filename, "rb");
 #  endif
-#endif // __USE_WINAPI_FIR_TIFF__
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
 int TinyTIFFReader_fclose(TinyTIFFReaderFile* tiff) {
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
     CloseHandle(tiff->hFile);
     return 0;
 #else
     int r=fclose(tiff->file);
     tiff->file=NULL;
     return r;
-#endif // __USE_WINAPI_FIR_TIFF__
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
 int TinyTIFFReader_fOK(const TinyTIFFReaderFile* tiff)  {
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
    if (tiff->hFile == INVALID_HANDLE_VALUE) return FALSE;
    else return TRUE;
 #else
@@ -229,11 +229,11 @@ int TinyTIFFReader_fOK(const TinyTIFFReaderFile* tiff)  {
         return TRUE;
     }
     return FALSE;
-#endif // __USE_WINAPI_FIR_TIFF__
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
 int TinyTIFFReader_fseek_set(TinyTIFFReaderFile* tiff, size_t offset) {
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
    DWORD res = SetFilePointer (tiff->hFile,
                                 offset,
                                 NULL,
@@ -242,12 +242,12 @@ int TinyTIFFReader_fseek_set(TinyTIFFReaderFile* tiff, size_t offset) {
 
    return res;
 #else
-    return fseek(tiff->file, offset, SEEK_SET);
-#endif // __USE_WINAPI_FIR_TIFF__
+    return fseek(tiff->file, (long)offset, SEEK_SET);
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
 int TinyTIFFReader_fseek_cur(TinyTIFFReaderFile* tiff, size_t offset) {
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
    DWORD res = SetFilePointer (tiff->hFile,
                                 offset,
                                 NULL,
@@ -256,12 +256,12 @@ int TinyTIFFReader_fseek_cur(TinyTIFFReaderFile* tiff, size_t offset) {
 
    return res;
 #else
-    return fseek(tiff->file, offset, SEEK_CUR);
-#endif // __USE_WINAPI_FIR_TIFF__
+    return fseek(tiff->file, (long)offset, SEEK_CUR);
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
 size_t TinyTIFFReader_fread(void * ptr, size_t ptrsize, size_t size, size_t count, TinyTIFFReaderFile* tiff) {
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
     DWORD  dwBytesRead = 0;
     if(!ReadFile(tiff->hFile, ptr, size*count, &dwBytesRead, NULL)) {
         return 0;
@@ -273,12 +273,12 @@ size_t TinyTIFFReader_fread(void * ptr, size_t ptrsize, size_t size, size_t coun
 #  else
     return fread(ptr, size, count, tiff->file);
 #  endif
-#endif // __USE_WINAPI_FIR_TIFF__
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
 
 static long int TinyTIFFReader_ftell ( TinyTIFFReaderFile * tiff ) {
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
 DWORD dwPtr = SetFilePointer( tiff->hFile,
                                 0,
                                 NULL,
@@ -290,7 +290,7 @@ DWORD dwPtr = SetFilePointer( tiff->hFile,
 }
 
 int TinyTIFFReader_fgetpos(TinyTIFFReaderFile* tiff, TinyTIFFReader_POSTYPE* pos) {
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
     *pos= SetFilePointer( tiff->hFile,
                                 0,
                                 NULL,
@@ -298,11 +298,11 @@ int TinyTIFFReader_fgetpos(TinyTIFFReaderFile* tiff, TinyTIFFReader_POSTYPE* pos
     return 0;
 #else
     return fgetpos(tiff->file, pos);
-#endif // __USE_WINAPI_FIR_TIFF__
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
 int TinyTIFFReader_fsetpos(TinyTIFFReaderFile* tiff, const TinyTIFFReader_POSTYPE* pos) {
-#ifdef __USE_WINAPI_FIR_TIFF__
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
     SetFilePointer( tiff->hFile,
                                 *pos,
                                 NULL,
@@ -310,7 +310,7 @@ int TinyTIFFReader_fsetpos(TinyTIFFReaderFile* tiff, const TinyTIFFReader_POSTYP
     return 0;
 #else
     return fsetpos(tiff->file, pos);
-#endif // __USE_WINAPI_FIR_TIFF__
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
 
@@ -554,7 +554,7 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                 case TIFF_FIELD_ROWSPERSTRIP: tiff->currentFrame.rowsperstrip=ifd.value; break;
                 case TIFF_FIELD_SAMPLEFORMAT: tiff->currentFrame.sampleformat=ifd.value; break;
                 case TIFF_FIELD_IMAGEDESCRIPTION: {
-                        printf("TIFF_FIELD_IMAGEDESCRIPTION: (tag: %u, type: %u, count: %u)\n", ifd.tag, ifd.type, ifd.count);
+                        //printf("TIFF_FIELD_IMAGEDESCRIPTION: (tag: %u, type: %u, count: %u)\n", ifd.tag, ifd.type, ifd.count);
 				        if (ifd.count>0) {
 				            if (tiff->currentFrame.description) free(tiff->currentFrame.description);
 							tiff->currentFrame.description=(char*)calloc(ifd.count+1, sizeof(char));
@@ -586,7 +586,11 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
         //printf("      - nextifd_offset=%lu\n", tiff->nextifd_offset);
     } else {
         tiff->wasError=TRUE;
+#ifdef HAVE_STRCPY_S
+        strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "no more images in TIF file\0");
+#else
         strcpy(tiff->lastError, "no more images in TIF file\0");
+#endif
     }
 }
 
@@ -594,22 +598,38 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
     if (tiff) {
         if (tiff->currentFrame.compression!=TIFF_COMPRESSION_NONE) {
             tiff->wasError=TRUE;
+#ifdef HAVE_STRCPY_S
+            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "the compression of the file is not supported by this library\0");
+#else
             strcpy(tiff->lastError, "the compression of the file is not supported by this library\0");
+#endif
             return FALSE;
         }
         if (tiff->currentFrame.samplesperpixel>1 && tiff->currentFrame.planarconfiguration!=TIFF_PLANARCONFIG_PLANAR) {
             tiff->wasError=TRUE;
+#ifdef HAVE_STRCPY_S
+            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "only planar TIFF files are supported by this library\0");
+#else
             strcpy(tiff->lastError, "only planar TIFF files are supported by this library\0");
+#endif
             return FALSE;
         }
         if (tiff->currentFrame.width==0 || tiff->currentFrame.height==0 ) {
             tiff->wasError=TRUE;
+#ifdef HAVE_STRCPY_S
+            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "the current frame does not contain images\0");
+#else
             strcpy(tiff->lastError, "the current frame does not contain images\0");
+#endif
             return FALSE;
         }
         if (tiff->currentFrame.bitspersample[sample]!=8 && tiff->currentFrame.bitspersample[sample]!=16 && tiff->currentFrame.bitspersample[sample]!=32) {
             tiff->wasError=TRUE;
+#ifdef HAVE_STRCPY_S
+            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "this library only support 8,16 and 32 bits per sample\0");
+#else
             strcpy(tiff->lastError, "this library only support 8,16 and 32 bits per sample\0");
+#endif
             return FALSE;
         }
         TinyTIFFReader_POSTYPE pos;
@@ -681,7 +701,11 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
 
         } else {
             tiff->wasError=TRUE;
+#ifdef HAVE_STRCPY_S
+            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "TIFF format not recognized\0");
+#else
             strcpy(tiff->lastError, "TIFF format not recognized\0");
+#endif
         }
 
         //fsetpos(tiff->file, &pos);
@@ -689,7 +713,11 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
         return !tiff->wasError;
     }
     tiff->wasError=TRUE;
+#ifdef HAVE_STRCPY_S
+    strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "TIFF file not opened\0");
+#else
     strcpy(tiff->lastError, "TIFF file not opened\0");
+#endif
     return FALSE;
 }
 
