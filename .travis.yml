@@ -74,7 +74,9 @@ script:
   - mkdir build
   - cd build
   - cmake -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DTinyMAT_QT5_SUPPORT=ON -DTinyMAT_BUILD_SHARED_LIBS=ON -DTinyMAT_BUILD_STATIC_LIBS=ON -DTinyMAT_OPENCV_SUPPORT=ON ..
-  - cmake --build . --target install
+  - cmake --build . 
+  - cmake --install . 
+  - ctest . --timeout 600 --output-on-failure > test_output.txt
 
 notifications:
   email: false
