@@ -52,8 +52,8 @@ install:
   - echo "BUILD ID Qt%QTVER%_%QTABI%_%APPVEYOR_BUILD_VERSION%_%CONFIGURATION%"
   # Rename sh.exe as sh.exe in PATH interferes with MinGW
   - rename "C:\Program Files\Git\usr\bin\sh.exe" "sh2.exe"
-  - cmd: choco install OpenCV
-  - cmd: set OPENCV_DIR=C:\tools\opencv\build
+  #- cmd: choco install OpenCV
+  #- cmd: set OPENCV_DIR=C:\tools\opencv\build
   
 
 build_script:
@@ -63,11 +63,11 @@ build_script:
   - if "%QTABI%"=="msvc2017_64" (set OPENCV_USAGE=ON) else (set OPENCV_USAGE=OFF)
   - echo "Call CMake..."
   - cmake --version 
-  - cmake -G "%CMAKE_GENERATOR%" "-DCMAKE_PREFIX_PATH=%QT5%" -DOpenCV_DIR=%OPENCV_DIR% -DTinyTIFF_QT5_SUPPORT=ON -DTinyTIFF_OPENCV_SUPPORT=%OPENCV_USAGE% -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR}/install"  .. 
+  - cmake -G "%CMAKE_GENERATOR%" -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON "-DCMAKE_INSTALL_PREFIX=./install"  .. 
   - echo "Build..." 
   - cmake --build . --config "%CMAKE_CONFIGURATION%" -- %MSBUILD_FLAGS% 
   - echo "Install..." 
-  - cmake --install . --config "%CMAKE_CONFIGURATION%" -- %MSBUILD_FLAGS% 
+  - cmake --install . 
 
 test_script:    
   - echo "Test..." 

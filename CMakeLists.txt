@@ -25,7 +25,7 @@ if(NOT DEFINED TinyTIFF_BUILD_TESTS)
     option(TinyTIFF_BUILD_TESTS "Build the tests and examples" ON)
 endif()
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-    option(CMAKE_INSTALL_PREFIX "Install directory" ${CMAKE_CURRENT_SOURCE_DIR}/install)
+    option(CMAKE_INSTALL_PREFIX "Install directory" ${CMAKE_CURRENT_SOURCE_DIR}/output)
 endif()
 
 
@@ -63,6 +63,17 @@ endif()
 ######################################################################################################
 # check for dependency libs
 
+
+######################################################################################################
+# Project Summary
+message("Building TinyTIFF With these features:")
+message("  TinyTIFF_BUILD_SHARED_LIBS                      = ${TinyTIFF_BUILD_SHARED_LIBS}")
+message("  TinyTIFF_BUILD_STATIC_LIBS                      = ${TinyTIFF_BUILD_STATIC_LIBS}")
+message("  TinyTIFF_USE_WINAPI_FOR_FILEIO                  = ${TinyTIFF_USE_WINAPI_FOR_FILEIO}")
+message("  TinyTIFF_BUILD_DECORATE_LIBNAMES_WITH_BUILDTYPE = ${TinyTIFF_BUILD_DECORATE_LIBNAMES_WITH_BUILDTYPE}")
+message("  TinyTIFF_LIBNAME_ADDITION                       = ${TinyTIFF_LIBNAME_ADDITION}")
+message("  TinyTIFF_BUILD_TESTS                            = ${TinyTIFF_BUILD_TESTS}")
+message("  CMAKE_INSTALL_PREFIX                            = ${CMAKE_INSTALL_PREFIX}")
 
 ######################################################################################################
 # now add subdirectories with the library code ...
