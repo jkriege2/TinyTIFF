@@ -27,7 +27,13 @@ extern "C" {
 #include <string>
 
 
+/*! \defgroup tinytiffreader_CXX TinyTIFFReader: Optional C++-Interface (include-only!)
+   \ingroup tinytiffreader
 
+   All functions in this group are extensions to the basic TinyTIFFReader libarary. They
+   are all header-only (or templates), so no link library other than libTinyTIFF is required.
+
+*/
 
 
 /*! \brief template function that internally calls TinyTIFFReader_getSampleData() and copies the data into the specified output buffer

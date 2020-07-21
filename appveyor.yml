@@ -72,14 +72,11 @@ build_script:
 test_script:    
   - echo "Test..." 
   - dir
-  - ctest  --config "%CMAKE_CONFIGURATION%" --timeout 600 --output-on-failure -- %MSBUILD_FLAGS% > test_output.txt
+  - cd install
+  - dir
+  - cd bin
+  - dir
+  - tinytiffwriter_test
+  - tinytiffreader_test
 
-artifacts:
-  - path: 'build/CMakeFiles/*.log'
-    name: logs
-  - path: 'build/install/**'
-    name: binary
-  - path: 'build/Testing/**/*.xml'
-    name: test_results
-  - path: 'build/test_output.txt'
-    name: test_results_simple
+

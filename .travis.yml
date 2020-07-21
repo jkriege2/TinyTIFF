@@ -76,7 +76,16 @@ script:
   - cmake -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DTinyMAT_QT5_SUPPORT=ON -DTinyMAT_BUILD_SHARED_LIBS=ON -DTinyMAT_BUILD_STATIC_LIBS=ON -DTinyMAT_OPENCV_SUPPORT=ON ..
   - cmake --build . 
   - cmake --install . 
-  - ctest . --timeout 600 --output-on-failure > test_output.txt
+  - echo "TESTING ..."
+  - cd $CONDA_PREFIX/bin
+  - echo $LD_LIBRARY_PATH
+  - LD_LIBRARY_PATH=$CONDA_PREFIX/lib\:$LD_LIBRARY_PATH ; export LD_LIBRARY_PATH
+  - echo $LD_LIBRARY_PATH
+  - echo $DYLD_LIBRARY_PATH 
+  - DYLD_LIBRARY_PATH =$CONDA_PREFIX/lib\:$DYLD_LIBRARY_PATH  ; export DYLD_LIBRARY_PATH 
+  - echo $DYLD_LIBRARY_PATH 
+  - ./tinytiffwriter_test
+  - ./tinytiffreader_test
 
 notifications:
   email: false

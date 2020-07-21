@@ -108,12 +108,7 @@
    \ingroup tinytiffreader
 
 */
-/*! \defgroup tinytiffreader_CXX TinyTIFFReader: Optional C++-Interface (include-only!)
-   \ingroup tinytiff_maingroup
 
-   All functions in this group are extensions to the basic TinyTIFFReader libarary. They
-
-*/
 /** \brief struct used to describe a TIFF file
   * \ingroup tinytiffreader
   */

@@ -357,7 +357,7 @@ bool TIFFTWriteUint16from32(TIFF* tif, uint32_t* image, uint16 width, uint16 hei
         if (scaled) {
             for (unsigned int rr = 0; rr<nrow; ++rr) {
                 for (unsigned int cc = 0; cc<frame_width; ++cc) { // go through all pixels in the current row
-                    register uint32_t d=image[cc+(row + rr)*frame_width];
+                    uint32_t d=image[cc+(row + rr)*frame_width];
                     d=(uint32_t)round((double)d*factor);
                     if (d>65535) d=65535;
                     buf[bi++] = d;
@@ -366,7 +366,7 @@ bool TIFFTWriteUint16from32(TIFF* tif, uint32_t* image, uint16 width, uint16 hei
         } else {
             for (unsigned int rr = 0; rr<nrow; ++rr) {
                 for (unsigned int cc = 0; cc<frame_width; ++cc) { // go through all pixels in the current row
-                    register uint32_t d=image[cc+(row + rr)*frame_width];
+                    uint32_t d=image[cc+(row + rr)*frame_width];
                     if (d>0xFFFF) d=0xFFFF;
                     buf[bi++] = d;
                 }
@@ -437,10 +437,10 @@ bool TIFFTReadUInt16(TIFF* tif, uint16** image, uint16* width, uint16* height, c
     uint32 ny=0;
     uint16* tiffbuf = NULL;
     uint16* imagebuf=NULL;
-    register uint32 row = 0;
+    uint32 row = 0;
     uint32 rowsperstrip = 0;
-    register unsigned int rr=0;
-    register unsigned int cc=0;
+    unsigned int rr=0;
+    unsigned int cc=0;
     bool ok=true;
 
     TIFFGetField(tif,TIFFTAG_IMAGEWIDTH,&nx);

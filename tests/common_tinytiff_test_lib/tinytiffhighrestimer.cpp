@@ -63,7 +63,7 @@ double HighResTimer::get_time(){
     long long t1, t2;
     t1 = last.tv_sec * 1000000 + last.tv_usec;
     t2 = tv.tv_sec * 1000000 + tv.tv_usec;
-    return abs(t2 - t1);
+    return std::abs(t2 - t1);
 
 
   #endif
