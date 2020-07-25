@@ -62,6 +62,8 @@ int main() {
     uint16_t* image16i=(uint16_t*)calloc(WIDTH*HEIGHT, sizeof(uint16_t));
     float* imagef=(float*)calloc(WIDTH*HEIGHT, sizeof(float));
     float* imagefi=(float*)calloc(WIDTH*HEIGHT, sizeof(float));
+    uint8_t* imagergb=(uint8_t*)calloc(WIDTH*HEIGHT*3, sizeof(uint8_t));
+    uint8_t* imagergbi=(uint8_t*)calloc(WIDTH*HEIGHT*3, sizeof(uint8_t));
 
     int i=0;
     for (int x=0; x<WIDTH; x++) {
@@ -75,15 +77,25 @@ int main() {
             image16i[i]=0xFFFF-image16[i];
             imagef[i]=float(image8[i])/255.0-0.5;
             imagefi[i]=1.0-float(image8[i])/255.0-0.5;
+            imagergb[i*3+0]=x*255/WIDTH;
+            imagergb[i*3+1]=0;
+            imagergb[i*3+2]=y*255/WIDTH;
+            if (x==y) imagergb[i*3+1]=254;
+            else if ((x%PATTERNSIZE==0) && (y%PATTERNSIZE==0)) imagergb[i*3+1]=200;
+            else if (x%PATTERNSIZE==0) imagergb[i*3+1]=75;
+            else if (y%PATTERNSIZE==0) imagergb[i*3+1]=150;
+            imagergbi[i*3+0]=255-imagergb[i*3+0];
+            imagergbi[i*3+1]=255-imagergb[i*3+1];
+            imagergbi[i*3+2]=255-imagergb[i*3+2];
             i++;
         }
     }
 
     std::cout<<"WRITING 8-Bit UINT TIFF\n";
-    TinyTIFFFile* tiff = TinyTIFFWriter_open("test8.tif", 8, WIDTH,HEIGHT);
+    TinyTIFFWriterFile* tiff = TinyTIFFWriter_open("test8.tif", 8, 1, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, image8);
     TinyTIFFWriter_close_withdescription(tiff, "");
-    tiff = TinyTIFFWriter_open("test8m.tif", 8, WIDTH,HEIGHT);
+    tiff = TinyTIFFWriter_open("test8m.tif", 8, 1, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, image8);
     TinyTIFFWriter_writeImage(tiff, image8i);
     TinyTIFFWriter_writeImage(tiff, image8);
@@ -93,10 +105,10 @@ int main() {
 
 
     std::cout<<"WRITING 16-Bit UINT TIFF\n";
-    tiff = TinyTIFFWriter_open("test16.tif", 16, WIDTH,HEIGHT);
+    tiff = TinyTIFFWriter_open("test16.tif", 16, 1, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, image16);
     TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
-    tiff = TinyTIFFWriter_open("test16m.tif", 16, WIDTH,HEIGHT);
+    tiff = TinyTIFFWriter_open("test16m.tif", 16, 1, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, image16);
     TinyTIFFWriter_writeImage(tiff, image16i);
     TinyTIFFWriter_writeImage(tiff, image16);
@@ -107,10 +119,10 @@ int main() {
     libtiffTestRead<uint16_t>("test16.tif", image16, WIDTH, HEIGHT);
 
     std::cout<<"WRITING 32-Bit FLOAT TIFF\n";
-    tiff = TinyTIFFWriter_open("testf.tif", 32, WIDTH,HEIGHT);
+    tiff = TinyTIFFWriter_open("testf.tif", 32, 1, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, imagef);
     TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
-    tiff = TinyTIFFWriter_open("testfm.tif", 32, WIDTH,HEIGHT);
+    tiff = TinyTIFFWriter_open("testfm.tif", 32, 1, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, imagef);
     TinyTIFFWriter_writeImage(tiff, imagefi);
     TinyTIFFWriter_writeImage(tiff, imagef);
@@ -120,11 +132,26 @@ int main() {
     TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
     libtiffTestRead<float>("testf.tif", imagef, WIDTH, HEIGHT);
 
+
+    std::cout<<"WRITING 3-CHANNEL 8-Bit UINT RGB TIFF\n";
+    tiff = TinyTIFFWriter_open("test_rgb.tif", 8, 3, WIDTH,HEIGHT);
+    TinyTIFFWriter_writeImage(tiff, imagergb);
+    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
+    tiff = TinyTIFFWriter_open("test_rgbm.tif", 8, 3, WIDTH,HEIGHT);
+    TinyTIFFWriter_writeImage(tiff, imagergb);
+    TinyTIFFWriter_writeImage(tiff, imagergbi);
+    TinyTIFFWriter_writeImage(tiff, imagergb);
+    TinyTIFFWriter_writeImage(tiff, imagergbi);
+    TinyTIFFWriter_writeImage(tiff, imagergb);
+    TinyTIFFWriter_writeImage(tiff, imagergbi);
+    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
+    //libtiffTestReadRGB<float>("test_rgb.tif", imagergb, WIDTH, HEIGHT);
+
     std::cout<<"TIFF SPEED TEST, 8-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
     HighResTimer timer;
 
     FILE* fstat;
-    tiff = TinyTIFFWriter_open("test8_speedtest.tif", 8, WIDTH,HEIGHT);
+    tiff = TinyTIFFWriter_open("test8_speedtest.tif", 8, 1, WIDTH,HEIGHT);
     fstat=fopen("test8_speedtest.dat", "w");
     double sum[SPEEDTEST_SIZE/SPEEDTEST_OUTPUT+5];
     double sum2[SPEEDTEST_SIZE/SPEEDTEST_OUTPUT+5];
@@ -178,7 +205,7 @@ int main() {
     std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
     fclose(fstat);
     fstat=fopen("test8_speedtest.plt", "w");
-    fprintf(fstat, "set title 'TinyTIFFWrite Speed Test, %d 8-bit %dx%d images, each point: average ofer %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
+    fprintf(fstat, "set title 'TinyTIFFWrite Speed Test, %d 8-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
             SPEEDTEST_OUTPUT);
     fprintf(fstat, "set xlabel 'image number'\n");
     fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
@@ -240,7 +267,7 @@ int main() {
     std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
     fclose(fstat);
     fstat=fopen("rawtest8_speedtest.plt", "w");
-    fprintf(fstat, "set title 'Raw Speed Test, %d 8-bit %dx%d images, each point: average ofer %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
+    fprintf(fstat, "set title 'Raw Speed Test, %d 8-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
             SPEEDTEST_OUTPUT);
     fprintf(fstat, "set xlabel 'image number'\n");
     fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
@@ -256,7 +283,7 @@ int main() {
 
     std::cout<<"TIFF SPEED TEST, 16-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
 
-    tiff = TinyTIFFWriter_open("test16_speedtest.tif", 16, WIDTH,HEIGHT);
+    tiff = TinyTIFFWriter_open("test16_speedtest.tif", 16, 1, WIDTH,HEIGHT);
     fstat=fopen("test16_speedtest.dat", "w");
     sum[0]=0;
     sum2[0]=0;
@@ -308,8 +335,7 @@ int main() {
     std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
     fclose(fstat);
     fstat=fopen("test16_speedtest.plt", "w");
-    fprintf(fstat, "set title 'TinyTIFFWrite Speed Test, %d 16-bit %dx%d images, each point: average ofer %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
-            SPEEDTEST_OUTPUT);
+    fprintf(fstat, "set title 'TinyTIFFWrite Speed Test, %d 16-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT, SPEEDTEST_OUTPUT);
     fprintf(fstat, "set xlabel 'image number'\n");
     fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
     fprintf(fstat, "set logscale y\n");
@@ -371,7 +397,7 @@ int main() {
     std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
     fclose(fstat);
     fstat=fopen("rawtest16_speedtest.plt", "w");
-    fprintf(fstat, "set title 'Raw Speed Test, %d 16-bit %dx%d images, each point: average ofer %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
+    fprintf(fstat, "set title 'Raw Speed Test, %d 16-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
             SPEEDTEST_OUTPUT);
     fprintf(fstat, "set xlabel 'image number'\n");
     fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
@@ -435,7 +461,7 @@ int main() {
         std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
         fclose(fstat);
         fstat=fopen("libtifftest8_speedtest.plt", "w");
-        fprintf(fstat, "set title 'Raw Speed Test, %d 8-bit %dx%d images, each point: average ofer %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
+        fprintf(fstat, "set title 'Raw Speed Test, %d 8-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
                 SPEEDTEST_OUTPUT);
         fprintf(fstat, "set xlabel 'image number'\n");
         fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
@@ -499,7 +525,7 @@ int main() {
         std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
         fclose(fstat);
         fstat=fopen("libtifftest16_speedtest.plt", "w");
-        fprintf(fstat, "set title 'Raw Speed Test, %d 16-bit %dx%d images, each point: average ofer %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
+        fprintf(fstat, "set title 'Raw Speed Test, %d 16-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
                 SPEEDTEST_OUTPUT);
         fprintf(fstat, "set xlabel 'image number'\n");
         fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");

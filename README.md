@@ -91,7 +91,7 @@ This example reads the first frame in a TIFF file:
 
 The methods in this file allow to write TIFF files with limited capabilites,  but very fast. Usually writing TIFF files with a library like libTIFF is relatively slow, when multiple images are written into a single file. The methods in this files overcome this problem by implementing a tiny writer lib that allows to write a TIFF file where all images have the same properties (size, bit depth, ...). This is a situation thet occurs e.g. in cases where a camera acquires a video that should be saved as TIFF file. The library works like this (write 50 32x32 pixel 8-bit images:
 ```C++
-   TinyTIFFFile* tif=TinyTIFFWriter_open("myfil.tif", 8, 32, 32);
+   TinyTIFFWriterFile* tif=TinyTIFFWriter_open("myfil.tif", 8, 1, 32, 32);
    if (tif) {
        for (uint16_t frame=0; frame<50; frame++) {
            uint8_t* data=readImage();

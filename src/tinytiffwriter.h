@@ -44,7 +44,7 @@
 
    The library works like this (write 50 32x32 pixel 8-bit images:
 \code
-   TinyTIFFFile* tif=TinyTIFFWriter_open("myfil.tif", 8, 32, 32);
+   TinyTIFFWriterFile* tif=TinyTIFFWriter_open("myfil.tif", 8, 1, 32, 32);
    if (tif) {
        for (uint16_t frame=0; frame<50; frame++) {
            uint8_t* data=readImage();
@@ -71,7 +71,7 @@
    As the image size is known, the size of
    every image in the file can be predetermined (we assume a maximum number of TIFF
    directory entries). The size will be: \verbatim
-      MAX_HEADER_ENTRIES*12 + SOME_FREE_SPACE + WIDTH*HEIGHT*(BITS_PER_SAMPLES/8)
+      MAX_HEADER_ENTRIES*12 + SOME_FREE_SPACE + WIDTH*HEIGHT*SAMPLES*(BITS_PER_SAMPLES/8)
       ---------------------------------------   ---------------------------------
           directory/image description data                 image data
 \endverbatim
@@ -125,8 +125,20 @@ LIBTIFF SPEED TEST, 16-Bit 1000 images 32x32 pixels
 /** \brief struct used to describe a TIFF file
   * \ingroup tinytiffwriter
   */
-typedef struct TinyTIFFFile TinyTIFFFile; // forward
+typedef struct TinyTIFFWriterFile TinyTIFFWriterFile; // forward
 
+#ifndef TINYTIFFWRITER_TRUE
+/** \brief a logic value of TRUE, e.g. used by TINYTIFFWRITER_wasError()
+  * \ingroup tinytiffwriter
+  */
+#  define TINYTIFFWRITER_TRUE 1
+#endif
+#ifndef TINYTIFFWRITER_FALSE
+/** \brief a logic value of FALSE, e.g. used by TINYTIFFWRITER_wasError()
+  * \ingroup tinytiffwriter
+  */
+#  define TINYTIFFWRITER_FALSE 0
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -136,40 +148,57 @@ extern "C" {
       */
     TINYTIFF_EXPORT int TinyTIFFWriter_getMaxDescriptionTextSize();
 
+    /*! \brief returns a pointer to the last error message
+        \ingroup tinytiffwriter
+
+        \param tiff TIFF file
+
+        \note the pointer is accessible as long as the TIFF file has not been closed using TINYTIFFWRITER_close()
+    */
+    TINYTIFF_EXPORT const char* TinyTIFFWriter_getLastError(TinyTIFFWriterFile* tiff);
+
+    /*! \brief returns TRUE (non-zero) when there was an error in the last function call, or FALSE (zero) if there was no error
+        \ingroup tinytiffwriter
+
+        \param tiff TIFF file
+
+    */
+    TINYTIFF_EXPORT int TinyTIFFWriter_wasError(TinyTIFFWriterFile* tiff);
+
+    /*! \brief returns TINYTIFFWRITER_TRUE (non-zero) when there was no error in the last function call, or TINYTIFFWRITER_FALSE if there was an error
+        \ingroup tinytiffwriter
+
+        \param tiff TIFF file
+
+        */
+    TINYTIFF_EXPORT int TinyTIFFWriter_success(TinyTIFFWriterFile* tiff);
 
     /*! \brief create a new TIFF file
         \ingroup tinytiffwriter
 
         \param filename name of the new TIFF file
+        \param number of samples per pixel (e.g. 3 for RGB images)
         \param bitsPerSample bits used to save each sample of the images
         \param width width of the images in pixels
         \param height height of the images in pixels
-        \return a new TinyTIFFFile pointer on success, or NULL on errors
+        \return a new TinyTIFFWriterFile pointer on success, or NULL on errors
 
       */
-    TINYTIFF_EXPORT TinyTIFFFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSample, uint32_t width, uint32_t height);
+    TINYTIFF_EXPORT TinyTIFFWriterFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSample, uint16_t samples, uint32_t width, uint32_t height);
 
     /*! \brief write a new image to the give TIFF file
         \ingroup tinytiffwriter
 
         \param tiff TIFF file to write to
-        \param data points to the image in row-major ordering with the right bit-depth
-      */
-    TINYTIFF_EXPORT void TinyTIFFWriter_writeImage(TinyTIFFFile* tiff, const void* data);
-    /*! \brief write a new image to the give TIFF file
-        \ingroup tinytiffwriter
+        \param data points to the image in row-major ordering with the right bit-depth,
+                    multi-sample data has to be provided in the "chunky" format, e.g. if
+                    you have 3 samples ("R", "G" and "B"), the the data in this field has to
+                    be \c R1G1B1|R2G2B2|R3G3B3|R4G4B4|...
+        \return TINYTIFFWRITER_TRUE on success and TINYTIFFWRITER_FALSE on failure.
+                An error description can be obtained by calling TinyTIFFWriter_getLastError().
+    */
+    TINYTIFF_EXPORT int TinyTIFFWriter_writeImage(TinyTIFFWriterFile* tiff, const void* data);
 
-        \param tiff TIFF file to write to
-        \param data points to the image in row-major ordering with the right bit-depth
-                                                                                              */
-    TINYTIFF_EXPORT void TinyTIFFWriter_writeImage_float(TinyTIFFFile* tiff, const float* data);
-    /*! \brief write a new image to the give TIFF file
-        \ingroup tinytiffwriter
-
-        \param tiff TIFF file to write to
-        \param data points to the image in row-major ordering with the right bit-depth
-                                                                                              */
-    TINYTIFF_EXPORT void TinyTIFFWriter_writeImage_double(TinyTIFFFile* tiff, const double* data);
 
     /*! \brief close a given TIFF file
         \ingroup tinytiffwriter
@@ -193,7 +222,7 @@ extern "C" {
 
     This function also releases memory allocated in TinyTIFFWriter_open() in \a tiff.
     */
-    TINYTIFF_EXPORT void TinyTIFFWriter_close_withmetadatadescription(TinyTIFFFile* tiff, double pixel_width, double pixel_height, double frametime, double deltaz);
+    TINYTIFF_EXPORT void TinyTIFFWriter_close_withmetadatadescription(TinyTIFFWriterFile* tiff, double pixel_width, double pixel_height, double frametime, double deltaz);
 
     /*! \brief close a given TIFF file
         \ingroup tinytiffwriter
@@ -203,7 +232,7 @@ extern "C" {
 
         This function also releases memory allocated in TinyTIFFWriter_open() in \a tiff.
     */
-    TINYTIFF_EXPORT void TinyTIFFWriter_close(TinyTIFFFile* tiff);
+    TINYTIFF_EXPORT void TinyTIFFWriter_close(TinyTIFFWriterFile* tiff);
 
 
     /*! \brief close a given TIFF file and write the given string into the IMageDescription tag of the first frame in the file.
@@ -215,7 +244,7 @@ extern "C" {
 
         This function also releases memory allocated in TinyTIFFWriter_open() in \a tiff.
      */
-    TINYTIFF_EXPORT void TinyTIFFWriter_close_withdescription(TinyTIFFFile* tiff, const char* imageDescription);
+    TINYTIFF_EXPORT void TinyTIFFWriter_close_withdescription(TinyTIFFWriterFile* tiff, const char* imageDescription);
 #ifdef __cplusplus
 }
 #endif

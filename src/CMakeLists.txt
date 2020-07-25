@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(lib_name "libTinyTIFF")
-set(libsh_name "libTinyTIFFShared")
+set(lib_name "TinyTIFF")
+set(libsh_name "TinyTIFFShared")
 
 # Set up source files
 set(SOURCES
@@ -72,7 +72,7 @@ endif()
 if(TinyTIFF_BUILD_STATIC_LIBS)
     add_library(${lib_name} STATIC ${SOURCES} ${HEADERS})
     set_property(TARGET ${lib_name} PROPERTY VERSION "${PROJECT_VERSION}")
-    set_property(TARGET ${lib_name} PROPERTY OUTPUT_NAME  "${lib_name}${TinyTIFF_LIBNAME_ADDITION}")
+    set_property(TARGET ${lib_name} PROPERTY OUTPUT_NAME "${lib_name}${TinyTIFF_LIBNAME_ADDITION}")
     target_include_directories(${lib_name} INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>  

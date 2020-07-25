@@ -28,6 +28,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+
 /*! \defgroup tinytiffreader Tiny TIFF reader library
    \ingroup tinytiff_maingroup
 
@@ -109,6 +110,19 @@
 
 */
 
+#ifndef TINYTIFFREADER_TRUE
+/** \brief a logic value of TRUE, e.g. used by TinyTIFFReader_wasError()
+  * \ingroup tinytiffreader
+  */
+#  define TINYTIFFREADER_TRUE 1
+#endif
+#ifndef TINYTIFFREADER_FALSE
+/** \brief a logic value of FALSE, e.g. used by TinyTIFFReader_wasError()
+  * \ingroup tinytiffreader
+  */
+#  define TINYTIFFREADER_FALSE 0
+#endif
+
 /** \brief struct used to describe a TIFF file
   * \ingroup tinytiffreader
   */
@@ -147,7 +161,7 @@ extern "C" {
      */
     TINYTIFF_EXPORT const char* TinyTIFFReader_getLastError(TinyTIFFReaderFile* tiff);
 
-    /*! \brief returns TRUE (non-zero) when there was an error in the last function call, or FALSE (zero) if there was no error
+    /*! \brief returns TINYTIFFREADER_TRUE (non-zero) when there was an error in the last function call, or TINYTIFFREADER_FALSE if there was no error
         \ingroup tinytiffreader_C
 
         \param tiff TIFF file
@@ -155,7 +169,7 @@ extern "C" {
      */
     TINYTIFF_EXPORT int TinyTIFFReader_wasError(TinyTIFFReaderFile* tiff);
 
-    /*! \brief returns TRUE (non-zero) when there was no error in the last function call, or FALSE (zero) if there was an error
+    /*! \brief returns TINYTIFFREADER_TRUE (non-zero) when there was no error in the last function call, or TINYTIFFREADER_FALSE if there was an error
         \ingroup tinytiffreader_C
 
         \param tiff TIFF file
@@ -163,7 +177,7 @@ extern "C" {
      */
     TINYTIFF_EXPORT int TinyTIFFReader_success(TinyTIFFReaderFile* tiff);
 
-    /*! \brief returns TRUE (non-zero) if another frame exists in the TIFF file
+    /*! \brief returns TINYTIFFREADER_TRUE (non-zero) if another frame exists in the TIFF file
         \ingroup tinytiffreader_C
 
         \param tiff TIFF file
@@ -175,7 +189,7 @@ extern "C" {
         \ingroup tinytiffreader_C
 
         \param tiff TIFF file
-        \return TRUE (non-zero) if another frame exists in the TIFF file
+        \return TINYTIFFREADER_TRUE (non-zero) if another frame exists in the TIFF file
 
      */
     TINYTIFF_EXPORT int TinyTIFFReader_readNext(TinyTIFFReaderFile* tiff);
@@ -243,7 +257,7 @@ extern "C" {
         \param tiff TIFF file
         \param buffer the buffer this function writes into
         \param sample the sample to read [default: 0]
-        \return \c TRUE (non-zero) on success
+        \return \c TINYTIFFREADER_TRUE (non-zero) on success
 
         \note The user is responsible for providing the correct buffer size
               (taking width, height and bitsPerSample into account).

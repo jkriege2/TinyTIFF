@@ -412,20 +412,20 @@ int main() {
         }
     }
 
-    TinyTIFFFile* tiff = TinyTIFFWriter_open("test8.tif", 8, WIDTH,HEIGHT);
+    TinyTIFFWriterFile* tiff = TinyTIFFWriter_open("test8.tif", 8, 1, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, image8);
     TinyTIFFWriter_close(tiff);
-    tiff = TinyTIFFWriter_open("test8m.tif", 8, WIDTH,HEIGHT);
+    tiff = TinyTIFFWriter_open("test8m.tif", 8, 1, WIDTH,HEIGHT);
     for (int i=0; i<TEST_FRAMES/2; i++) {
         TinyTIFFWriter_writeImage(tiff, image8);
         TinyTIFFWriter_writeImage(tiff, image8i);
     }
     TinyTIFFWriter_close(tiff);
 
-    tiff = TinyTIFFWriter_open("test16.tif", 16, WIDTH,HEIGHT);
+    tiff = TinyTIFFWriter_open("test16.tif", 16, 1, WIDTH,HEIGHT);
     TinyTIFFWriter_writeImage(tiff, image16);
     TinyTIFFWriter_close(tiff);
-    tiff = TinyTIFFWriter_open("test16m.tif", 16, WIDTH,HEIGHT);
+    tiff = TinyTIFFWriter_open("test16m.tif", 16, 1, WIDTH,HEIGHT);
     for (int i=0; i<TEST_FRAMES/2; i++) {
         TinyTIFFWriter_writeImage(tiff, image16);
         TinyTIFFWriter_writeImage(tiff, image16i);
