@@ -26,7 +26,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-
+/** \defgroup tinytiffreader_internal TinyTIFFReader: Internal functions
+ *  \ingroup tinytiffreader */
 
 #ifndef __WINDOWS__
 # if defined(WIN32) || defined(WIN64) || defined(_MSC_VER) || defined(_WIN32)

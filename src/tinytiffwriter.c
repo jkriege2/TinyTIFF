@@ -59,8 +59,11 @@ int TinyTIFFWriter_getMaxDescriptionTextSize() {
     return TINYTIFFWRITER_DESCRIPTION_SIZE;
 }
 
+/** \defgroup tinytiffwriter_internal TinyTIFFWriter: Internal functions
+ *  \ingroup tinytiffwriter */
+
 /*! \brief determines the byte order of the system
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
 
     \return TIFF_ORDER_BIGENDIAN or TIFF_ORDER_LITTLEENDIAN, or TIFF_ORDER_UNKNOWN if the byte order cannot be determined
@@ -83,7 +86,7 @@ int TIFF_get_byteorder()
 
 
 /*! \brief this struct represents a TIFF file
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 struct TinyTIFFWriterFile {
@@ -126,7 +129,7 @@ struct TinyTIFFWriterFile {
 };
 
 /*! \brief wrapper around fopen
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 static void TinyTIFFWriter_fopen(TinyTIFFWriterFile* tiff, const char* filename) {
@@ -148,7 +151,7 @@ static void TinyTIFFWriter_fopen(TinyTIFFWriterFile* tiff, const char* filename)
 }
 
 /*! \brief checks whether a file was opened successfully
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 static int TinyTIFFWriter_fOK(TinyTIFFWriterFile* tiff) {
@@ -162,7 +165,7 @@ static int TinyTIFFWriter_fOK(TinyTIFFWriterFile* tiff) {
 }
 
 /*! \brief wrapper around fclose
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 static int TinyTIFFWriter_fclose(TinyTIFFWriterFile* tiff) {
@@ -177,7 +180,7 @@ static int TinyTIFFWriter_fclose(TinyTIFFWriterFile* tiff) {
 }
 
 /*! \brief wrapper around fwrite
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 static size_t TinyTIFFWriter_fwrite(const void * ptr, size_t size, size_t count, TinyTIFFWriterFile* tiff) {
@@ -196,7 +199,7 @@ static size_t TinyTIFFWriter_fwrite(const void * ptr, size_t size, size_t count,
 }
 
 /*! \brief wrapper around ftell
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 static long int TinyTIFFWriter_ftell ( TinyTIFFWriterFile * tiff ) {
@@ -213,7 +216,7 @@ DWORD dwPtr = SetFilePointer( tiff->hFile,
 
 
 /*! \brief wrapper around fseek
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 static int TinyTIFFWriter_fseek_set(TinyTIFFWriterFile* tiff, size_t offset) {
@@ -231,7 +234,7 @@ static int TinyTIFFWriter_fseek_set(TinyTIFFWriterFile* tiff, size_t offset) {
 }
 
 /*! \brief wrapper around fseek(..., FILE_CURRENT)
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
@@ -278,12 +281,12 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 
 
 /*! \brief fixed size of the TIFF frame header in bytes
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define TIFF_HEADER_SIZE 700
 /*! \brief maximum number of field entries in a TIFF header
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define TIFF_HEADER_MAX_ENTRIES 20
@@ -293,7 +296,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 
 
 /*! \brief write a 4-byte word \a data directly into a file \a fileno
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITE32DIRECT(filen, data)  { \
@@ -301,7 +304,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 }
 
 /*! \brief write a data word \a data , which is first cast into a 4-byte word directly into a file \a fileno
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITE32DIRECT_CAST(filen, data)  { \
@@ -315,7 +318,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 
 
 /*! \brief write a 2-byte word \a data directly into a file \a fileno
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITE16DIRECT(filen, data)    { \
@@ -323,7 +326,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 }
 
 /*! \brief write a data word \a data , which is first cast into a 2-byte word directly into a file \a fileno
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITE16DIRECT_CAST(filen, data)    { \
@@ -335,7 +338,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 
 
 /*! \brief write a data word \a data , which is first cast into a 1-byte word directly into a file \a fileno
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITE8DIRECT(filen, data) {\
@@ -357,7 +360,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 
 
 /*! \brief writes a 32-bit word at the current position into the current file header and advances the position by 4 bytes
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITEH32DIRECT_LE(filen, data)  { \
@@ -365,7 +368,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
     filen->pos+=4;\
 }
 /*! \brief writes a value, which is cast to a 32-bit word at the current position into the current file header and advances the position by 4 bytes
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITEH32_LE(filen, data)  { \
@@ -375,7 +378,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 
 // write 2-bytes in big endian
 /*! \brief writes a 16-bit word at the current position into the current file header and advances the position by 4 bytes
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITEH16DIRECT_LE(filen, data)    { \
@@ -384,7 +387,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 }
 
 /*! \brief writes a value, which is cast to a 16-bit word at the current position into the current file header and advances the position by 4 bytes
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITEH16_LE(filen, data)    { \
@@ -395,12 +398,12 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 
 // write byte
 /*! \brief writes an 8-bit word at the current position into the current file header and advances the position by 4 bytes
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITEH8(filen, data) { filen->lastHeader[filen->pos]=data; filen->pos+=1; }
 /*! \brief writes an 8-bit word at the current position into the current file header and advances the position by 4 bytes
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 #define WRITEH8DIRECT(filen, data) { filen->lastHeader[filen->pos]=data; filen->pos+=1; }
@@ -413,7 +416,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 #define WRITEH32DIRECT(filen, data)  WRITEH32DIRECT_LE(filen, data)
 
 /*! \brief starts a new IFD (TIFF frame header)
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
  */
 static void TinyTIFFWriter_startIFD(TinyTIFFWriterFile* tiff, int hsize) {
@@ -437,7 +440,7 @@ static void TinyTIFFWriter_startIFD(TinyTIFFWriterFile* tiff, int hsize) {
 }
 
 /*! \brief ends the current IFD (TIFF frame header) and writes the header (as a single block of size TIFF_HEADER_SIZE) into the file
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
 
     This function also sets the pointer to the next IFD, based on the known header size and frame data size.
@@ -461,7 +464,7 @@ static void TinyTIFFWriter_endIFD(TinyTIFFWriterFile* tiff, int hsize) {
 }
 
 /*! \brief write an arbitrary IFD entry
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
 
     \note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
@@ -478,7 +481,7 @@ static void TinyTIFFWriter_writeIFDEntry(TinyTIFFWriterFile* tiff, uint16_t tag,
 }
 
 /*! \brief write an 8-bit word IFD entry
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
 
     \note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
@@ -497,7 +500,7 @@ static void TinyTIFFWriter_writeIFDEntry(TinyTIFFWriterFile* tiff, uint16_t tag,
 }
 
 /*! \brief write an 16-bit word IFD entry
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
 
     \note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
@@ -515,7 +518,7 @@ static void TinyTIFFWriter_writeIFDEntry(TinyTIFFWriterFile* tiff, uint16_t tag,
 }
 
 /*! \brief write an 32-bit word IFD entry
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
 
     \note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
@@ -532,7 +535,7 @@ static void TinyTIFFWriter_writeIFDEntry(TinyTIFFWriterFile* tiff, uint16_t tag,
 }
 
 /*! \brief write an array of 32-bit words as IFD entry
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
 
     \note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
@@ -560,7 +563,7 @@ static void TinyTIFFWriter_writeIFDEntry(TinyTIFFWriterFile* tiff, uint16_t tag,
 }
 
 /*! \brief write an array of 16-bit words as IFD entry
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
 
     \note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
@@ -590,7 +593,7 @@ static void TinyTIFFWriter_writeIFDEntrySHORTARRAY(TinyTIFFWriterFile* tiff, uin
 }
 
 /*! \brief write an array of characters (ASCII TEXT) as IFD entry
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
 
     \note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
@@ -629,7 +632,7 @@ static void TinyTIFFWriter_writeIFDEntryASCIIARRAY(TinyTIFFWriterFile* tiff, uin
 }
 
 /*! \brief write a rational number as IFD entry
-    \ingroup tinytiffwriter
+    \ingroup tinytiffwriter_internal
     \internal
 
     \note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
@@ -857,16 +860,6 @@ int TinyTIFFWriter_writeImage(TinyTIFFWriterFile* tiff, const void* data) {
     TinyTIFFWriter_writeIFDEntryLONG(tiff, TIFF_FIELD_IMAGEWIDTH, tiff->width);
     TinyTIFFWriter_writeIFDEntryLONG(tiff, TIFF_FIELD_IMAGELENGTH, tiff->height);
     TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_BITSPERSAMPLE, tiff->bitspersample);
-/*    if (tiff->samples==1) {
-        TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_BITSPERSAMPLE, tiff->bitspersample);
-    } else {
-        uint16_t* bps=(uint16_t*)malloc(tiff->samples*sizeof(uint16_t));
-        for (uint16_t i=0; i<tiff->samples; i++) {
-            bps[i]=tiff->bitspersample;
-        }
-        TinyTIFFWriter_writeIFDEntrySHORTARRAY(tiff, TIFF_FIELD_BITSPERSAMPLE, bps, tiff->samples);
-        free(bps);
-    }*/
     TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_COMPRESSION, 1);
     if (tiff->samples==1) {
         TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_PHOTOMETRICINTERPRETATION, TIFF_PHOTOMETRIC_BLACKISZERO);
