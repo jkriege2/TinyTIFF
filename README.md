@@ -45,7 +45,7 @@ This example reads all frames from a TIFF file:
         do { 
             uint32_t width=TinyTIFFReader_getWidth(tiffr); 
             uint32_t height=TinyTIFFReader_getHeight(tiffr); 
-			bool ok=true;
+            bool ok=true;
             if (width>0 && height>0) std::cout<<"    size of frame "<<frame<<": "<<width<<"x"<<height<<"\n"; 
             else { std::cout<<"    ERROR IN FRAME "<<frame<<": size too small "<<width<<"x"<<height<<"\n"; ok=false; } 
             if (ok) { 
@@ -55,7 +55,7 @@ This example reads all frames from a TIFF file:
                 if (TinyTIFFReader_wasError(tiffr)) { ok=false; std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; } 
 				
                 ///////////////////////////////////////////////////////////////////
-				// HERE WE CAN DO SOMETHING WITH THE IMAGE IN image (ROW-MAJOR!)
+                // HERE WE CAN DO SOMETHING WITH THE IMAGE IN image (ROW-MAJOR!)
                 ///////////////////////////////////////////////////////////////////
 				
                 free(image); 
@@ -73,17 +73,17 @@ This example reads the first frame in a TIFF file:
    if (!tiffr) { 
         std::cout<<"    ERROR reading (not existent, not accessible or no TIFF file)\n"; 
    } else { 
-		uint32_t width=TinyTIFFReader_getWidth(tiffr); 
+        uint32_t width=TinyTIFFReader_getWidth(tiffr); 
         uint32_t height=TinyTIFFReader_getHeight(tiffr); 
-		uint16_t* image=(uint16_t*)calloc(width*height, sizeof(uint16_t));  
+        uint16_t* image=(uint16_t*)calloc(width*height, sizeof(uint16_t));  
         TinyTIFFReader_getSampleData(tiffr, image, 0); 
 				
-                ///////////////////////////////////////////////////////////////////
-				// HERE WE CAN DO SOMETHING WITH THE IMAGE IN image (ROW-MAJOR!)
-                ///////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////
+        // HERE WE CAN DO SOMETHING WITH THE IMAGE IN image (ROW-MAJOR!)
+        ///////////////////////////////////////////////////////////////////
 				
-		free(image); 
-	} 
+        free(image); 
+    } 
     TinyTIFFReader_close(tiffr); 
 ```
    
