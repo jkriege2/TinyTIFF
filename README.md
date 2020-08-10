@@ -139,6 +139,6 @@ So this library is about a factor of 2.2 slower than direct binary output (raw) 
 # Documentation
 
 * library docukentation: https://travis-ci.org/jkriege2/TinyTIFF
-** API documentation: http://jkriege2.github.io/TinyTIFF/modules.html
-** build instructions: http://jkriege2.github.io/TinyTIFF/page_buildinstructions.html
-** usage instructions: http://jkriege2.github.io/TinyTIFF/page_useinstructions.html
+* API documentation: http://jkriege2.github.io/TinyTIFF/modules.html
+* build instructions: http://jkriege2.github.io/TinyTIFF/page_buildinstructions.html
+* usage instructions: http://jkriege2.github.io/TinyTIFF/page_useinstructions.html
