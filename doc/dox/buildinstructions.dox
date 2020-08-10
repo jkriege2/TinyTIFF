@@ -57,15 +57,5 @@ The CMake build system offers several configuration variables that you may set/c
 
 
 
-\subsection page_buildinstructions_CMAKE_USAGE Using a built, generated with CMake
-
-After building and installing TinyTIFF you have all files that you need inside the instal directory:
-  - \c <INSTALLDIR>/include contains all required header files
-  - \c <INSTALLDIR>/bin contains the shared libraries
-  - \c <INSTALLDIR>/lib contains the link libraries
-  - \c <INSTALLDIR>/lib/cmake contains files necessary for CMake's \c find_package() to work
-.
-
-
 
 */

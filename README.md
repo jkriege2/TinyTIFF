@@ -19,7 +19,7 @@ This software is licensed under the term of the [GNU Lesser General Public Licen
 [![CI: Documentation/Linux/MacOX Build](https://img.shields.io/travis/jkriege2/TinyTIFF/master?label=CI%3A%20Documentation%2FLinux%2FMacOX%20Build)](https://travis-ci.org/jkriege2/TinyTIFF)
 
 
-## TinyTIFFReader
+# TinyTIFFReader
 
 The methods in this file allow to read TIFF files with limited capabilites, but very fast (comapred to libtiff) and also more frames from a multi-frame TIFF than libtiff (which is currently limited to 65535 frames due to internal data sizes!).
    
@@ -87,7 +87,7 @@ This example reads the first frame in a TIFF file:
     TinyTIFFReader_close(tiffr); 
 ```
    
-## TinyTIFFWriter
+# TinyTIFFWriter
 
 The methods in this file allow to write TIFF files with limited capabilites,  but very fast. Usually writing TIFF files with a library like libTIFF is relatively slow, when multiple images are written into a single file. The methods in this files overcome this problem by implementing a tiny writer lib that allows to write a TIFF file where all images have the same properties (size, bit depth, ...). This is a situation thet occurs e.g. in cases where a camera acquires a video that should be saved as TIFF file. The library works like this (write 50 32x32 pixel 8-bit images:
 ```C++
@@ -135,3 +135,10 @@ LIBTIFF SPEED TEST, 16-Bit 1000 images 32x32 pixels
 ```
 So this library is about a factor of 2.2 slower than direct binary output (raw) and about a factor of 500 faster than libTIFF. Note however the wide range of per-image write speeds which stems from the time the operating systems takes for file access. But the average rates are very good, so if your image creation is synchronous, you will need to use a FIFO to save images intermediately to account for the write speed jitter.
    
+
+# Documentation
+
+* library docukentation: https://travis-ci.org/jkriege2/TinyTIFF
+** API documentation: http://jkriege2.github.io/TinyTIFF/modules.html
+** build instructions: http://jkriege2.github.io/TinyTIFF/page_buildinstructions.html
+** usage instructions: http://jkriege2.github.io/TinyTIFF/page_useinstructions.html
