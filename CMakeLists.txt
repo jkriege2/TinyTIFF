@@ -8,6 +8,10 @@ project(libTinyTIFF VERSION 3.0.0.0)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 ######################################################################################################
+# ensure a build-type is set (Release is default)
+include(tinytiff_build_type)
+
+######################################################################################################
 # compile options:
 if(NOT DEFINED TinyTIFF_BUILD_SHARED_LIBS)
     option(TinyTIFF_BUILD_SHARED_LIBS "Build as shared library" ON)
