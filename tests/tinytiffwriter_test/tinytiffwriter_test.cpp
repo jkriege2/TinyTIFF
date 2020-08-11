@@ -6,6 +6,8 @@
 #include "libtiff_tools.h"
 #endif
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 
 using namespace std;
@@ -14,7 +16,55 @@ using namespace std;
 #define HEIGHT 32
 #define PATTERNSIZE 12
 #define SPEEDTEST_SIZE 100000
-#define SPEEDTEST_OUTPUT 10
+#define SPEEDTEST_REMOVESLOWEST_PERCENT 0.1
+
+struct Statistics {
+    double mean;
+    double std;
+    double min;
+    double max;
+    size_t removed_records;
+};
+
+Statistics evaluateRuntimes(std::vector<double> runtimes, double remove_slowest_percent=SPEEDTEST_REMOVESLOWEST_PERCENT) {
+    std::sort(runtimes.begin(), runtimes.end());
+    size_t removed_records=0;
+    if (remove_slowest_percent>0 && remove_slowest_percent/100.0*runtimes.size()>0) {
+        removed_records=static_cast<size_t>(remove_slowest_percent/100.0*runtimes.size());
+        runtimes.erase(runtimes.end()-removed_records, runtimes.end());
+    }
+    double sum=0, sum2=0, mmin=0, mmax=0;
+
+    for (size_t i=0; i<runtimes.size(); i++) {
+
+        sum+=runtimes[i];
+        sum2+=(runtimes[i]*runtimes[i]);
+        if (i==0) mmin=mmax=runtimes[i];
+        else {
+            if (runtimes[i]>mmax) mmax=runtimes[i];
+            if (runtimes[i]<mmin) mmin=runtimes[i];
+        }
+    }
+    Statistics stat;
+    const double NN=static_cast<double>(runtimes.size());
+    stat.mean=sum/NN;
+    stat.std=sqrt((sum2-sum*sum/NN)/(NN-1.0));
+    stat.min=mmin;
+    stat.max=mmax;
+    stat.removed_records=removed_records;
+    return stat;
+}
+
+void reportRuntimes(const std::vector<double>& runtimes, double remove_slowest_percent=SPEEDTEST_REMOVESLOWEST_PERCENT) {
+    Statistics stat=evaluateRuntimes(runtimes, 0);
+    std::cout<<"  ALL:     average time to write one image: "<<stat.mean<<" usecs    std: "<<stat.std<<" usecs     range: ["<<stat.min<<".."<<stat.max<<"] usecs\n";
+    std::cout<<"  ALL:     average image rate: "<<1.0/(stat.mean)*1000.0<<" kHz\n";
+    stat=evaluateRuntimes(runtimes, remove_slowest_percent);
+    std::cout<<"  CLEANED: removed slowest "<<stat.removed_records<<" records\n";
+    std::cout<<"  CLEANED: average time to write one image: "<<stat.mean<<" usecs    std: "<<stat.std<<" usecs     range: ["<<stat.min<<".."<<stat.max<<"] usecs\n";
+    std::cout<<"  CLEANED: average image rate: "<<1.0/(stat.mean)*1000.0<<" kHz\n";
+}
+
 
 template <class T>
 void libtiffTestRead(const char* filename, T* written, int width, int height)  {
@@ -150,71 +200,15 @@ int main() {
     std::cout<<"TIFF SPEED TEST, 8-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
     HighResTimer timer;
 
-    FILE* fstat;
     tiff = TinyTIFFWriter_open("test8_speedtest.tif", 8, 1, WIDTH,HEIGHT);
-    fstat=fopen("test8_speedtest.dat", "w");
-    double sum[SPEEDTEST_SIZE/SPEEDTEST_OUTPUT+5];
-    double sum2[SPEEDTEST_SIZE/SPEEDTEST_OUTPUT+5];
-    double msum=0;
-    double mmin=0;
-    double mmax=0;
-    int sumi=0;
-    sum[0]=0;
-    sum2[0]=0;
+    std::vector<double> runtimes;
     for (int i=0; i<SPEEDTEST_SIZE; i++) {
         timer.start();
         TinyTIFFWriter_writeImage(tiff, image8i);
-        double duration=timer.get_time();
-        sum[sumi]+=duration;
-        sum2[sumi]+=duration*duration;
-        msum+=duration;
-        if (i%SPEEDTEST_OUTPUT==0) {
-            /*double NN=(double)SPEEDTEST_OUTPUT;
-            double mean=sum[sumi]/NN;
-            double std=sqrt((sum2[sumi]-sum[sumi]*sum[sumi]/NN)/(NN-1.0));
-            std::cout<<"  "<<(double)i/(double)SPEEDTEST_SIZE*100.0<<"%     average="<<mean<<" usecs   std="<<std<<" usecs\n";
-            fprintf(fstat, "%d, %lf, %lf\n", i, mean, std);
-            */
-            sumi++;
-            sum[sumi]=0;
-            sum2[sumi]=0;
-        }
-        if (i==0) mmin=mmax=duration;
-        else {
-            if (duration>mmax) mmax=duration;
-            if (duration<mmin) mmin=duration;
-        }
+        const double duration=timer.get_time();
+        runtimes.push_back(duration);
     }
-    double min=0;
-    double max=0;
-    double mmean=0;
-    for (int i=0; i<SPEEDTEST_SIZE/SPEEDTEST_OUTPUT; i++) {
-        double NN=(double)SPEEDTEST_OUTPUT;
-        double mean=sum[i]/NN;
-        mmean+=mean;
-        double std=sqrt((sum2[i]-sum[i]*sum[i]/NN)/(NN-1.0));
-        if (i==0) min=max=mean;
-        else {
-            if (mean>max) max=mean;
-            if (mean<min) min=mean;
-        }
-        //std::cout<<"  "<<(double)i/(double)((double)SPEEDTEST_SIZE/(double)SPEEDTEST_OUTPUT)*100.0<<"%     average="<<mean<<" usecs   std="<<std<<" usecs\n";
-        fprintf(fstat, "%d, %lf, %lf\n", i*SPEEDTEST_OUTPUT, mean, std);
-    }
-    std::cout<<"  average time to write one image: "<<msum/(double)(SPEEDTEST_SIZE)<<" usecs    range: ["<<mmin<<".."<<mmax<<"] usecs\n";
-    std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
-    fclose(fstat);
-    fstat=fopen("test8_speedtest.plt", "w");
-    fprintf(fstat, "set title 'TinyTIFFWrite Speed Test, %d 8-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
-            SPEEDTEST_OUTPUT);
-    fprintf(fstat, "set xlabel 'image number'\n");
-    fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
-    fprintf(fstat, "set logscale y\n");
-    fprintf(fstat, "plot [*:*] [%lf:%lf] 'test8_speedtest.dat' with points\n", min, max);
-    fprintf(fstat, "pause -1\n");
-    fprintf(fstat, "plot [*:*] [%lf:%lf] 'test8_speedtest.dat' with yerrorbars\n", min, max);
-    fprintf(fstat, "pause -1\n");
-    fclose(fstat);
+    reportRuntimes(runtimes);
     TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
 
 
@@ -222,128 +216,30 @@ int main() {
 
     std::cout<<"RAW SPEED TEST, 8-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
     FILE* fraw=fopen("test8_speedtest.raw", "w");
-    fstat=fopen("rawtest8_speedtest.dat", "w");
-    msum=0;
-    mmin=0;
-    mmax=0;
-    sumi=0;
-    sum[0]=0;
-    sum2[0]=0;
+    runtimes.clear();
     for (int i=0; i<SPEEDTEST_SIZE; i++) {
         timer.start();
         fwrite(image8i, WIDTH*HEIGHT, 1, fraw);
-        double duration=timer.get_time();
-        sum[sumi]+=duration;
-        sum2[sumi]+=duration*duration;
-        msum+=duration;
-        if (i%SPEEDTEST_OUTPUT==0) {
-            sumi++;
-            sum[sumi]=0;
-            sum2[sumi]=0;
-        }
-        if (i==0) mmin=mmax=duration;
-        else {
-            if (duration>mmax) mmax=duration;
-            if (duration<mmin) mmin=duration;
-        }
+        const double duration=timer.get_time();
+        runtimes.push_back(duration);
     }
-    min=0;
-    max=0;
-    mmean=0;
-    for (int i=0; i<SPEEDTEST_SIZE/SPEEDTEST_OUTPUT; i++) {
-        double NN=(double)SPEEDTEST_OUTPUT;
-        double mean=sum[i]/NN;
-        mmean+=mean;
-        double std=sqrt((sum2[i]-sum[i]*sum[i]/NN)/(NN-1.0));
-        if (i==0) min=max=mean;
-        else {
-            if (mean>max) max=mean;
-            if (mean<min) min=mean;
-        }
-        //std::cout<<"  "<<(double)i/(double)((double)SPEEDTEST_SIZE/(double)SPEEDTEST_OUTPUT)*100.0<<"%     average="<<mean<<" usecs   std="<<std<<" usecs\n";
-        fprintf(fstat, "%d, %lf, %lf\n", i*SPEEDTEST_OUTPUT, mean, std);
-    }
-    std::cout<<"  average time to write one image: "<<msum/(double)(SPEEDTEST_SIZE)<<" usecs    range: ["<<mmin<<".."<<mmax<<"] usecs\n";
-    std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
-    fclose(fstat);
-    fstat=fopen("rawtest8_speedtest.plt", "w");
-    fprintf(fstat, "set title 'Raw Speed Test, %d 8-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
-            SPEEDTEST_OUTPUT);
-    fprintf(fstat, "set xlabel 'image number'\n");
-    fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
-    fprintf(fstat, "set logscale y\n");
-    fprintf(fstat, "plot [*:*] [%lf:%lf] 'rawtest8_speedtest.dat' with points\n", min, max);
-    fprintf(fstat, "pause -1\n");
-    fprintf(fstat, "plot [*:*] [%lf:%lf] 'rawtest8_speedtest.dat' with yerrorbars\n", min, max);
-    fprintf(fstat, "pause -1\n");
-    fclose(fstat);
-    fclose(fraw);
+    reportRuntimes(runtimes);
 
 
 
     std::cout<<"TIFF SPEED TEST, 16-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
 
     tiff = TinyTIFFWriter_open("test16_speedtest.tif", 16, 1, WIDTH,HEIGHT);
-    fstat=fopen("test16_speedtest.dat", "w");
-    sum[0]=0;
-    sum2[0]=0;
-    msum=0;
-    mmin=0;
-    mmax=0;
-    sumi=0;
+    runtimes.clear();
+
     for (int i=0; i<SPEEDTEST_SIZE; i++) {
         timer.start();
         TinyTIFFWriter_writeImage(tiff, image16);
-        double duration=timer.get_time();
-        sum[sumi]+=duration;
-        sum2[sumi]+=duration*duration;
-        msum+=duration;
-        if (i%SPEEDTEST_OUTPUT==0) {
-            /*double NN=(double)SPEEDTEST_OUTPUT;
-            double mean=sum[sumi]/NN;
-            double std=sqrt((sum2[sumi]-sum[sumi]*sum[sumi]/NN)/(NN-1.0));
-            std::cout<<"  "<<(double)i/(double)SPEEDTEST_SIZE*100.0<<"%     average="<<mean<<" usecs   std="<<std<<" usecs\n";
-            fprintf(fstat, "%d, %lf, %lf\n", i, mean, std);
-            */
-            sumi++;
-            sum[sumi]=0;
-            sum2[sumi]=0;
-        }
-        if (i==0) mmin=mmax=duration;
-        else {
-            if (duration>mmax) mmax=duration;
-            if (duration<mmin) mmin=duration;
-        }
+        const double duration=timer.get_time();
+        runtimes.push_back(duration);
     }
-    min=0;
-    max=0;
-    mmean=0;
-    for (int i=0; i<SPEEDTEST_SIZE/SPEEDTEST_OUTPUT; i++) {
-        double NN=(double)SPEEDTEST_OUTPUT;
-        double mean=sum[i]/NN;
-        mmean+=mean;
-        double std=sqrt((sum2[i]-sum[i]*sum[i]/NN)/(NN-1.0));
-        if (i==0) min=max=mean;
-        else {
-            if (mean>max) max=mean;
-            if (mean<min) min=mean;
-        }
-        //std::cout<<"  "<<(double)i/(double)((double)SPEEDTEST_SIZE/(double)SPEEDTEST_OUTPUT)*100.0<<"%     average="<<mean<<" usecs   std="<<std<<" usecs\n";
-        fprintf(fstat, "%d, %lf, %lf\n", i*SPEEDTEST_OUTPUT, mean, std);
-    }
-    std::cout<<"  average time to write one image: "<<msum/(double)(SPEEDTEST_SIZE)<<" usecs    range: ["<<mmin<<".."<<mmax<<"] usecs\n";
-    std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
-    fclose(fstat);
-    fstat=fopen("test16_speedtest.plt", "w");
-    fprintf(fstat, "set title 'TinyTIFFWrite Speed Test, %d 16-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT, SPEEDTEST_OUTPUT);
-    fprintf(fstat, "set xlabel 'image number'\n");
-    fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
-    fprintf(fstat, "set logscale y\n");
-    fprintf(fstat, "plot [*:*] [%lf:%lf] 'test16_speedtest.dat' with points\n", min, max);
-    fprintf(fstat, "pause -1\n");
-    fprintf(fstat, "plot [*:*] [%lf:%lf] 'test16_speedtest.dat' with yerrorbars\n", min, max);
-    fprintf(fstat, "pause -1\n");
-    fclose(fstat);
+    reportRuntimes(runtimes);
+
     TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
 
 
@@ -352,125 +248,35 @@ int main() {
 
     std::cout<<"RAW SPEED TEST, 16-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
     fraw=fopen("test16_speedtest.raw", "w");
-    fstat=fopen("rawtest16_speedtest.dat", "w");
-    msum=0;
-    mmin=0;
-    mmax=0;
-    sumi=0;
-    sum[0]=0;
-    sum2[0]=0;
+    runtimes.clear();
+
     for (int i=0; i<SPEEDTEST_SIZE; i++) {
         timer.start();
         fwrite(image16i, WIDTH*HEIGHT*2, 1, fraw);
-        double duration=timer.get_time();
-        sum[sumi]+=duration;
-        sum2[sumi]+=duration*duration;
-        msum+=duration;
-        if (i%SPEEDTEST_OUTPUT==0) {
-            sumi++;
-            sum[sumi]=0;
-            sum2[sumi]=0;
-        }
-        if (i==0) mmin=mmax=duration;
-        else {
-            if (duration>mmax) mmax=duration;
-            if (duration<mmin) mmin=duration;
-        }
+        const double duration=timer.get_time();
+        runtimes.push_back(duration);
     }
-    min=0;
-    max=0;
-    mmean=0;
-    for (int i=0; i<SPEEDTEST_SIZE/SPEEDTEST_OUTPUT; i++) {
-        double NN=(double)SPEEDTEST_OUTPUT;
-        double mean=sum[i]/NN;
-        mmean+=mean;
-        double std=sqrt((sum2[i]-sum[i]*sum[i]/NN)/(NN-1.0));
-        if (i==0) min=max=mean;
-        else {
-            if (mean>max) max=mean;
-            if (mean<min) min=mean;
-        }
-        //std::cout<<"  "<<(double)i/(double)((double)SPEEDTEST_SIZE/(double)SPEEDTEST_OUTPUT)*100.0<<"%     average="<<mean<<" usecs   std="<<std<<" usecs\n";
-        fprintf(fstat, "%d, %lf, %lf\n", i*SPEEDTEST_OUTPUT, mean, std);
-    }
-    std::cout<<"  average time to write one image: "<<msum/(double)(SPEEDTEST_SIZE)<<" usecs    range: ["<<mmin<<".."<<mmax<<"] usecs\n";
-    std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
-    fclose(fstat);
-    fstat=fopen("rawtest16_speedtest.plt", "w");
-    fprintf(fstat, "set title 'Raw Speed Test, %d 16-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
-            SPEEDTEST_OUTPUT);
-    fprintf(fstat, "set xlabel 'image number'\n");
-    fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
-    fprintf(fstat, "set logscale y\n");
-    fprintf(fstat, "plot [*:*] [%lf:%lf] 'rawtest16_speedtest.dat' with points\n", min, max);
-    fprintf(fstat, "pause -1\n");
-    fprintf(fstat, "plot [*:*] [%lf:%lf] 'rawtest16_speedtest.dat' with yerrorbars\n", min, max);
-    fprintf(fstat, "pause -1\n");
-    fclose(fstat);
-    fclose(fraw);
+    reportRuntimes(runtimes);
+
 
 
 #ifdef TINYTIFF_TEST_LIBTIFF
     if (SPEEDTEST_SIZE<60000) {
         std::cout<<"LIBTIFF SPEED TEST, 8-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
         TIFF* tifvideo=TIFFOpen("libtifftest8_speedtest.tif", "w");
-        fstat=fopen("libtifftest8_speedtest.dat", "w");
-        msum=0;
-        mmin=0;
-        mmax=0;
-        sumi=0;
-        sum[0]=0;
-        sum2[0]=0;
+        runtimes.clear();
+
         for (int i=0; i<SPEEDTEST_SIZE; i++) {
             timer.start();
-        TIFFTWriteUint8(tifvideo, image8i, WIDTH, HEIGHT);
-        TIFFWriteDirectory(tifvideo);
-            double duration=timer.get_time();
-            sum[sumi]+=duration;
-            sum2[sumi]+=duration*duration;
-            msum+=duration;
-            if (i%SPEEDTEST_OUTPUT==0) {
-                sumi++;
-                sum[sumi]=0;
-                sum2[sumi]=0;
-            }
-            if (i==0) mmin=mmax=duration;
-            else {
-                if (duration>mmax) mmax=duration;
-                if (duration<mmin) mmin=duration;
-            }
+            TIFFTWriteUint8(tifvideo, image8i, WIDTH, HEIGHT);
+            TIFFWriteDirectory(tifvideo);
+            const double duration=timer.get_time();
+            runtimes.push_back(duration);
+
         }
         TIFFClose(tifvideo);
-        min=0;
-        max=0;
-        mmean=0;
-        for (int i=0; i<SPEEDTEST_SIZE/SPEEDTEST_OUTPUT; i++) {
-            double NN=(double)SPEEDTEST_OUTPUT;
-            double mean=sum[i]/NN;
-            mmean+=mean;
-            double std=sqrt((sum2[i]-sum[i]*sum[i]/NN)/(NN-1.0));
-            if (i==0) min=max=mean;
-            else {
-                if (mean>max) max=mean;
-                if (mean<min) min=mean;
-            }
-            //std::cout<<"  "<<(double)i/(double)((double)SPEEDTEST_SIZE/(double)SPEEDTEST_OUTPUT)*100.0<<"%     average="<<mean<<" usecs   std="<<std<<" usecs\n";
-            fprintf(fstat, "%d, %lf, %lf\n", i*SPEEDTEST_OUTPUT, mean, std);
-        }
-        std::cout<<"  average time to write one image: "<<msum/(double)(SPEEDTEST_SIZE)<<" usecs    range: ["<<mmin<<".."<<mmax<<"] usecs\n";
-        std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
-        fclose(fstat);
-        fstat=fopen("libtifftest8_speedtest.plt", "w");
-        fprintf(fstat, "set title 'Raw Speed Test, %d 8-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
-                SPEEDTEST_OUTPUT);
-        fprintf(fstat, "set xlabel 'image number'\n");
-        fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
-        fprintf(fstat, "set logscale y\n");
-        fprintf(fstat, "plot [*:*] [%lf:%lf] 'libtifftest8_speedtest.dat' with points\n", min, max);
-        fprintf(fstat, "pause -1\n");
-        fprintf(fstat, "plot [*:*] [%lf:%lf] 'libtifftest8_speedtest.dat' with yerrorbars\n", min, max);
-        fprintf(fstat, "pause -1\n");
-        fclose(fstat);
+        reportRuntimes(runtimes);
+
 
 
 
@@ -478,63 +284,19 @@ int main() {
 
         std::cout<<"LIBTIFF SPEED TEST, 16-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
         tifvideo=TIFFOpen("libtifftest16_speedtest.tif", "w");
-        fstat=fopen("libtifftest16_speedtest.dat", "w");
-        msum=0;
-        mmin=0;
-        mmax=0;
-        sumi=0;
-        sum[0]=0;
-        sum2[0]=0;
+        runtimes.clear();
+
         for (int i=0; i<SPEEDTEST_SIZE; i++) {
             timer.start();
-        TIFFTWriteUint16(tifvideo, image16i, WIDTH, HEIGHT);
-        TIFFWriteDirectory(tifvideo);
-            double duration=timer.get_time();
-            sum[sumi]+=duration;
-            sum2[sumi]+=duration*duration;
-            msum+=duration;
-            if (i%SPEEDTEST_OUTPUT==0) {
-                sumi++;
-                sum[sumi]=0;
-                sum2[sumi]=0;
-            }
-            if (i==0) mmin=mmax=duration;
-            else {
-                if (duration>mmax) mmax=duration;
-                if (duration<mmin) mmin=duration;
-            }
+            TIFFTWriteUint16(tifvideo, image16i, WIDTH, HEIGHT);
+            TIFFWriteDirectory(tifvideo);
+            const double duration=timer.get_time();
+            runtimes.push_back(duration);
+
         }
         TIFFClose(tifvideo);
-        min=0;
-        max=0;
-        mmean=0;
-        for (int i=0; i<SPEEDTEST_SIZE/SPEEDTEST_OUTPUT; i++) {
-            double NN=(double)SPEEDTEST_OUTPUT;
-            double mean=sum[i]/NN;
-            mmean+=mean;
-            double std=sqrt((sum2[i]-sum[i]*sum[i]/NN)/(NN-1.0));
-            if (i==0) min=max=mean;
-            else {
-                if (mean>max) max=mean;
-                if (mean<min) min=mean;
-            }
-            //std::cout<<"  "<<(double)i/(double)((double)SPEEDTEST_SIZE/(double)SPEEDTEST_OUTPUT)*100.0<<"%     average="<<mean<<" usecs   std="<<std<<" usecs\n";
-            fprintf(fstat, "%d, %lf, %lf\n", i*SPEEDTEST_OUTPUT, mean, std);
-        }
-        std::cout<<"  average time to write one image: "<<msum/(double)(SPEEDTEST_SIZE)<<" usecs    range: ["<<mmin<<".."<<mmax<<"] usecs\n";
-        std::cout<<"  average image rate: "<<1/(msum/(double)(SPEEDTEST_SIZE))*1000.0<<" kHz\n";
-        fclose(fstat);
-        fstat=fopen("libtifftest16_speedtest.plt", "w");
-        fprintf(fstat, "set title 'Raw Speed Test, %d 16-bit %dx%d images, each point: average over %d images'\n", SPEEDTEST_SIZE, WIDTH, HEIGHT,
-                SPEEDTEST_OUTPUT);
-        fprintf(fstat, "set xlabel 'image number'\n");
-        fprintf(fstat, "set ylabel 'time to write one image [microseconds]'\n");
-        fprintf(fstat, "set logscale y\n");
-        fprintf(fstat, "plot [*:*] [%lf:%lf] 'libtifftest16_speedtest.dat' with points\n", min, max);
-        fprintf(fstat, "pause -1\n");
-        fprintf(fstat, "plot [*:*] [%lf:%lf] 'libtifftest16_speedtest.dat' with yerrorbars\n", min, max);
-        fprintf(fstat, "pause -1\n");
-        fclose(fstat);
+        reportRuntimes(runtimes);
+
     }
 #endif
 
