@@ -18,6 +18,7 @@ This software is licensed under the term of the [GNU Lesser General Public Licen
 [![CI: Windows Build](https://img.shields.io/appveyor/ci/jkriege2/TinyTIFF/master?label=CI%20Windows%20Build)](https://ci.appveyor.com/project/jkriege2/TinyTIFF/branch/master) 
 [![CI: Documentation/Linux/MacOX Build](https://img.shields.io/travis/jkriege2/TinyTIFF/master?label=CI%3A%20Documentation%2FLinux%2FMacOX%20Build)](https://travis-ci.org/jkriege2/TinyTIFF)
 
+[![Code Quality](https://www.code-inspector.com/project/12238/score/svg) ![Code Grade](https://www.code-inspector.com/project/12238/status/svg)](https://www.code-inspector.com/project/12238/status/svg)
 
 # TinyTIFFReader
 
