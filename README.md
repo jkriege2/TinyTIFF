@@ -1,6 +1,6 @@
 # TinyTIFF
 
-(c) 2014-2020 by Jan W. Krieger                                                 --
+(c) 2014-2020 by Jan W. Krieger
 
 This is a lightweight C/C++ library, which is able to read and write basic TIFF
 files. It is significantly faster than libTIFF, especially in writing large
@@ -18,7 +18,7 @@ This software is licensed under the term of the [GNU Lesser General Public Licen
 [![CI: Windows Build](https://img.shields.io/appveyor/ci/jkriege2/TinyTIFF/master?label=CI%20Windows%20Build)](https://ci.appveyor.com/project/jkriege2/TinyTIFF/branch/master) 
 [![CI: Documentation/Linux/MacOX Build](https://img.shields.io/travis/jkriege2/TinyTIFF/master?label=CI%3A%20Documentation%2FLinux%2FMacOX%20Build)](https://travis-ci.org/jkriege2/TinyTIFF)
 
-[![Code Quality](https://www.code-inspector.com/project/12238/score/svg) ![Code Grade](https://www.code-inspector.com/project/12238/status/svg)](https://www.code-inspector.com/project/12238/status/svg)
+[![Code Quality](https://www.code-inspector.com/project/12238/score/svg) ![Code Grade](https://www.code-inspector.com/project/12238/status/svg)](https://frontend.code-inspector.com/public/project/12238/TinyTIFF/dashboard)
 
 # TinyTIFFReader
 
