@@ -6,7 +6,7 @@ compiler:
 os:
   - linux
   - osx
-dist: bionic
+dist: focal
 osx_image: xcode8.3
 
 matrix:
@@ -29,6 +29,9 @@ matrix:
             - doxygen-latex
             - doxygen-gui
             - graphviz
+            - clang-9
+            - libclang-9-dev
+            - libclang-cpp9
       install:
         - pwd
         - doxygen --version
@@ -40,7 +43,7 @@ matrix:
         ############################################################################
         # Install a recent Doxygen
         ############################################################################
-        - DOXYGEN_URL="http://doxygen.nl/files/doxygen-1.8.18.linux.bin.tar.gz"
+        - DOXYGEN_URL="http://doxygen.nl/files/doxygen-1.8.20.linux.bin.tar.gz"
         - mkdir doxygen
         - travis_retry wget -O - ${DOXYGEN_URL} | tar --strip-components=1 -xz -C doxygen
         - export PATH=${DEPS_DIR}/doxygen/bin:${PATH}
