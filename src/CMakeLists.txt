@@ -10,15 +10,24 @@ set(SOURCES
 )
 set_property(SOURCE ${SOURCES} PROPERTY LANGUAGE "C")
 set(HEADERS_C
+    tinytiff_defs.h
     tinytiffreader.h
     tinytiffwriter.h
 )
 set(HEADERS_CXX
     tinytiffreader.hxx
+	tinytiff_tools.hxx
 )
-set(HEADERS
+set(HEADERS_INTERNAL
+    tiff_definitions_internal.h
+)
+set(HEADERS_INSTALL
     ${HEADERS_C}
     ${HEADERS_CXX}
+)
+set(HEADERS
+    ${HEADERS_INSTALL}
+    ${HEADERS_INTERNAL}
 )
 
 
@@ -160,7 +169,7 @@ if(TinyTIFF_BUILD_STATIC_LIBS)
 
 endif(TinyTIFF_BUILD_STATIC_LIBS)
 
-install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT Headers)
+install(FILES ${HEADERS_INSTALL} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT Headers)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tinytiff_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} )
 configure_file(${CMAKE_SOURCE_DIR}/readme.txt.in ${CMAKE_CURRENT_BINARY_DIR}/readme.txt @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/readme.txt" DESTINATION "${TinyTIFF_DOC_INSTALL_DIR}/${lib_name}/" )

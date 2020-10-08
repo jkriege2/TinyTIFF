@@ -16,8 +16,8 @@
 
 
 */
- #include "tinytiffreader.h"
-
+#include "tinytiffreader.h"
+#include "tiff_definitions_internal.h"
 //#define DEBUG_IFDTIMING
 #ifdef DEBUG_IFDTIMING
 #include "highrestimer.h"
@@ -57,63 +57,13 @@
 #  define TinyTIFFReader_POSTYPE fpos_t
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 
+
+
+/** \brief maximum length of error messages in bytes \internal */
 #define TIFF_LAST_ERROR_SIZE 1024
 
 
-#define TIFF_ORDER_UNKNOWN 0
-#define TIFF_ORDER_BIGENDIAN 1
-#define TIFF_ORDER_LITTLEENDIAN 2
 
-
-#define TIFF_FIELD_IMAGEWIDTH 256
-#define TIFF_FIELD_IMAGELENGTH 257
-#define TIFF_FIELD_BITSPERSAMPLE 258
-#define TIFF_FIELD_COMPRESSION 259
-#define TIFF_FIELD_PHOTOMETRICINTERPRETATION 262
-#define TIFF_FIELD_FILLORDER 266
-#define TIFF_FIELD_IMAGEDESCRIPTION 270
-#define TIFF_FIELD_STRIPOFFSETS 273
-#define TIFF_FIELD_ORIENTATION 274
-#define TIFF_FIELD_SAMPLESPERPIXEL 277
-#define TIFF_FIELD_ROWSPERSTRIP 278
-#define TIFF_FIELD_STRIPBYTECOUNTS 279
-#define TIFF_FIELD_XRESOLUTION 282
-#define TIFF_FIELD_YRESOLUTION 283
-#define TIFF_FIELD_PLANARCONFIG 284
-#define TIFF_FIELD_RESOLUTIONUNIT 296
-#define TIFF_FIELD_SAMPLEFORMAT 339
-
-#define TIFF_TYPE_BYTE 1
-#define TIFF_TYPE_ASCII 2
-#define TIFF_TYPE_SHORT 3
-#define TIFF_TYPE_LONG 4
-#define TIFF_TYPE_RATIONAL 5
-
-#define TIFF_COMPRESSION_NONE 1
-#define TIFF_COMPRESSION_CCITT 2
-#define TIFF_COMPRESSION_PACKBITS 32773
-
-#define TIFF_PLANARCONFIG_CHUNKY 1
-#define TIFF_PLANARCONFIG_PLANAR 2
-
-#define TIFF_PHOTOMETRICINTERPRETATION_WHITEISZERO 0
-#define TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO 1
-#define TIFF_PHOTOMETRICINTERPRETATION_RGB 2
-#define TIFF_PHOTOMETRICINTERPRETATION_PALETTECOLOR 3
-#define TIFF_PHOTOMETRICINTERPRETATION_TRANSPARENCYMASK 4
-#define TIFF_PHOTOMETRICINTERPRETATION_CMYK 5
-#define TIFF_PHOTOMETRICINTERPRETATION_YCBCR 6
-#define TIFF_PHOTOMETRICINTERPRETATION_CIELAB 8
-
-#define TIFF_ORIENTATION_STANDARD 1
-
-#define TIFF_FILLORDER_DEFAULT 1
-#define TIFF_FILLORDER_REVERSE 2
-
-
-
-#define TIFF_HEADER_SIZE 510
-#define TIFF_HEADER_MAX_ENTRIES 16
 
 
 int TIFFReader_get_byteorder() {
@@ -141,7 +91,7 @@ typedef struct TinyTIFFReaderFrame {
     uint32_t* stripbytecounts;
     uint32_t stripcount;
     uint16_t samplesperpixel;
-    uint16_t* bitspersample;
+    uint32_t bitspersample;
     uint16_t planarconfiguration;
     uint16_t sampleformat;
     uint32_t imagelength;
@@ -164,7 +114,7 @@ static TinyTIFFReaderFrame TinyTIFFReader_getEmptyFrame() {
     d.samplesperpixel=1;
     d.bitspersample=0;
     d.planarconfiguration=TIFF_PLANARCONFIG_PLANAR;
-    d.sampleformat=TINYTIFFREADER_SAMPLEFORMAT_UINT;
+    d.sampleformat=TINYTIFF_SAMPLEFORMAT_UINT;
     d.imagelength=0;
 	d.description=0;
     d.orientation=TIFF_ORIENTATION_STANDARD;
@@ -178,8 +128,6 @@ static void TinyTIFFReader_freeEmptyFrame(TinyTIFFReaderFrame f) {
     f.stripoffsets=NULL;
     if (f.stripbytecounts) free(f.stripbytecounts);
     f.stripbytecounts=NULL;
-    if (f.bitspersample) free(f.bitspersample);
-    f.bitspersample=NULL;
 	if (f.description) free(f.description);
 	f.description=NULL;
 }
@@ -238,13 +186,13 @@ int TinyTIFFReader_fclose(TinyTIFFReaderFile* tiff) {
 
 int TinyTIFFReader_fOK(const TinyTIFFReaderFile* tiff)  {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
-   if (tiff->hFile == INVALID_HANDLE_VALUE) return TINYTIFFREADER_FALSE;
-   else return TINYTIFFREADER_TRUE;
+   if (tiff->hFile == INVALID_HANDLE_VALUE) return TINYTIFF_FALSE;
+   else return TINYTIFF_TRUE;
 #else
     if (tiff->file) {
-        return TINYTIFFREADER_TRUE;
+        return TINYTIFF_TRUE;
     }
-    return TINYTIFFREADER_FALSE;
+    return TINYTIFF_FALSE;
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
@@ -339,12 +287,12 @@ const char* TinyTIFFReader_getLastError(TinyTIFFReaderFile* tiff) {
 
 int TinyTIFFReader_wasError(TinyTIFFReaderFile* tiff) {
     if (tiff) return tiff->wasError;
-    return TINYTIFFREADER_TRUE;
+    return TINYTIFF_TRUE;
 }
 
 int TinyTIFFReader_success(TinyTIFFReaderFile* tiff) {
     if (tiff) return !tiff->wasError;
-    return TINYTIFFREADER_FALSE;
+    return TINYTIFF_FALSE;
 }
 
 
@@ -422,7 +370,7 @@ static TinyTIFFReader_IFD TinyTIFFReader_readIFD(TinyTIFFReaderFile* tiff) {
     TinyTIFFReader_POSTYPE pos;
     //fgetpos(tiff->file, &pos);
     TinyTIFFReader_fgetpos(tiff, &pos);
-    int changedpos=TINYTIFFREADER_FALSE;
+    int changedpos=TINYTIFF_FALSE;
     //printf("    - pos=0x%X   tag=%d type=%d count=%u \n",pos, d.tag, d.type, d.count);
     switch(d.type) {
         case TIFF_TYPE_BYTE:
@@ -436,7 +384,7 @@ static TinyTIFFReader_IFD TinyTIFFReader_readIFD(TinyTIFFReaderFile* tiff) {
                   if (i<d.count) d.pvalue[i]=v;
                 }
               } else {
-                changedpos=TINYTIFFREADER_TRUE;
+                changedpos=TINYTIFF_TRUE;
                 uint32_t offset=TinyTIFFReader_readuint32(tiff);
 
                 if (offset+d.count*1<=tiff->filesize) {
@@ -461,7 +409,7 @@ static TinyTIFFReader_IFD TinyTIFFReader_readIFD(TinyTIFFReaderFile* tiff) {
                     if (i<d.count) d.pvalue[i]=v;
                 }
             } else {
-                changedpos=TINYTIFFREADER_TRUE;
+                changedpos=TINYTIFF_TRUE;
                 uint32_t offset=TinyTIFFReader_readuint32(tiff);
                 if (offset+d.count*2<=tiff->filesize) {
                     //fseek(tiff->file, offset, SEEK_SET);
@@ -481,7 +429,7 @@ static TinyTIFFReader_IFD TinyTIFFReader_readIFD(TinyTIFFReaderFile* tiff) {
             if (d.count<=1) {
                 d.pvalue[0]=TinyTIFFReader_readuint32(tiff);
             } else {
-                changedpos=TINYTIFFREADER_TRUE;
+                changedpos=TINYTIFF_TRUE;
                 uint32_t offset=TinyTIFFReader_readuint32(tiff);
                 if (offset+d.count*4<=tiff->filesize) {
                     //fseek(tiff->file, offset, SEEK_SET);
@@ -500,7 +448,7 @@ static TinyTIFFReader_IFD TinyTIFFReader_readIFD(TinyTIFFReaderFile* tiff) {
             d.pvalue=(uint32_t*)calloc(d.count, sizeof(uint32_t));
             d.pvalue2=(uint32_t*)calloc(d.count, sizeof(uint32_t));
 
-            changedpos=TINYTIFFREADER_TRUE;
+            changedpos=TINYTIFF_TRUE;
             uint32_t offset=TinyTIFFReader_readuint32(tiff);
             if (offset+d.count*4<=tiff->filesize) {
                 //fseek(tiff->file, offset, SEEK_SET);
@@ -562,8 +510,26 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                 case TIFF_FIELD_IMAGEWIDTH: tiff->currentFrame.width=ifd.value;  break;
                 case TIFF_FIELD_IMAGELENGTH: tiff->currentFrame.imagelength=ifd.value;  break;
                 case TIFF_FIELD_BITSPERSAMPLE: {
-                        tiff->currentFrame.bitspersample=(uint16_t*)malloc(ifd.count*sizeof(uint16_t));
-                        memcpy(tiff->currentFrame.bitspersample, ifd.pvalue, ifd.count*sizeof(uint16_t));
+                        tiff->currentFrame.bitspersample=ifd.value;
+                        if (ifd.count>0) {
+                            tiff->currentFrame.bitspersample=ifd.pvalue[0];
+                            int ok=TINYTIFF_TRUE;
+                            uint32_t i;
+                            for (i=1; i<ifd.count; i++) {
+                                if (ifd.pvalue[i]!=ifd.pvalue[0]) {
+                                    ok=TINYTIFF_FALSE;
+                                }
+                            }
+                            if (ok==TINYTIFF_FALSE) {
+                                tiff->wasError=TINYTIFF_TRUE;
+#ifdef HAVE_STRCPY_S
+                                strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "this library does not support different sample sizes in a single frame\0");
+#else
+                                strcpy(tiff->lastError, "this library does not support different sample sizes in a single frame\0");
+#endif
+                            }
+                        }
+
                      } break;
                 case TIFF_FIELD_COMPRESSION: tiff->currentFrame.compression=ifd.value; break;
                 case TIFF_FIELD_STRIPOFFSETS: {
@@ -613,7 +579,7 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
         tiff->nextifd_offset=TinyTIFFReader_readuint32(tiff);
         //printf("      - nextifd_offset=%lu\n", tiff->nextifd_offset);
     } else {
-        tiff->wasError=TINYTIFFREADER_TRUE;
+        tiff->wasError=TINYTIFF_TRUE;
 #ifdef HAVE_STRCPY_S
         strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "no more images in TIF file\0");
 #else
@@ -625,63 +591,72 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
 int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_t sample) {
     if (tiff) {
         if (tiff->currentFrame.compression!=TIFF_COMPRESSION_NONE) {
-            tiff->wasError=TINYTIFFREADER_TRUE;
+            tiff->wasError=TINYTIFF_TRUE;
 #ifdef HAVE_STRCPY_S
             strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "the compression of the file is not supported by this library\0");
 #else
             strcpy(tiff->lastError, "the compression of the file is not supported by this library\0");
 #endif
-            return TINYTIFFREADER_FALSE;
+            return TINYTIFF_FALSE;
         }
         if (tiff->currentFrame.samplesperpixel>1 && tiff->currentFrame.planarconfiguration!=TIFF_PLANARCONFIG_PLANAR) {
-            tiff->wasError=TINYTIFFREADER_TRUE;
+            tiff->wasError=TINYTIFF_TRUE;
 #ifdef HAVE_STRCPY_S
             strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "only planar TIFF files are supported by this library\0");
 #else
             strcpy(tiff->lastError, "only planar TIFF files are supported by this library\0");
 #endif
-            return TINYTIFFREADER_FALSE;
+            return TINYTIFF_FALSE;
+        }
+        if (tiff->currentFrame.samplesperpixel>1 && tiff->currentFrame.stripcount%tiff->currentFrame.samplesperpixel>0) {
+            tiff->wasError=TINYTIFF_TRUE;
+#ifdef HAVE_STRCPY_S
+            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "in planar multi-sample data, stripcount has to be dividable by samplesperpixel\0");
+#else
+            strcpy(tiff->lastError, "in planar multi-sample data, stripcount has to be dividable by samplesperpixel\0");
+#endif
+            return TINYTIFF_FALSE;
         }
         if (tiff->currentFrame.orientation!=TIFF_ORIENTATION_STANDARD) {
-            tiff->wasError=TINYTIFFREADER_TRUE;
+            tiff->wasError=TINYTIFF_TRUE;
 #ifdef HAVE_STRCPY_S
             strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "only standard TIFF orientations are supported by this library\0");
 #else
             strcpy(tiff->lastError, "only standard TIFF orientations are supported by this library\0");
 #endif
-            return TINYTIFFREADER_FALSE;
+            return TINYTIFF_FALSE;
         }
-        if (tiff->currentFrame.photometric_interpretation==TIFF_PHOTOMETRICINTERPRETATION_PALETTECOLOR) {
-            tiff->wasError=TINYTIFFREADER_TRUE;
+        if (tiff->currentFrame.photometric_interpretation==TIFF_PHOTOMETRICINTERPRETATION_PALETTE) {
+            tiff->wasError=TINYTIFF_TRUE;
 #ifdef HAVE_STRCPY_S
             strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "palette-colored TIFF images are supported by this library\0");
 #else
             strcpy(tiff->lastError, "palette-colored TIFF images are supported by this library\0");
 #endif
-            return TINYTIFFREADER_FALSE;
+            return TINYTIFF_FALSE;
         }
         if (tiff->currentFrame.width==0 || tiff->currentFrame.height==0 ) {
-            tiff->wasError=TINYTIFFREADER_TRUE;
+            tiff->wasError=TINYTIFF_TRUE;
 #ifdef HAVE_STRCPY_S
             strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "the current frame does not contain images\0");
 #else
             strcpy(tiff->lastError, "the current frame does not contain images\0");
 #endif
-            return TINYTIFFREADER_FALSE;
+            return TINYTIFF_FALSE;
         }
-        if (tiff->currentFrame.bitspersample[sample]!=8 && tiff->currentFrame.bitspersample[sample]!=16 && tiff->currentFrame.bitspersample[sample]!=32) {
-            tiff->wasError=TINYTIFFREADER_TRUE;
+        if (tiff->currentFrame.bitspersample!=8 && tiff->currentFrame.bitspersample!=16 && tiff->currentFrame.bitspersample!=32) {
+            tiff->wasError=TINYTIFF_TRUE;
 #ifdef HAVE_STRCPY_S
             strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "this library only support 8,16 and 32 bits per sample\0");
 #else
             strcpy(tiff->lastError, "this library only support 8,16 and 32 bits per sample\0");
 #endif
-            return TINYTIFFREADER_FALSE;
+            return TINYTIFF_FALSE;
         }
         TinyTIFFReader_POSTYPE pos;
         //fgetpos(tiff->file, &pos);
         TinyTIFFReader_fgetpos(tiff, &pos);
-        tiff->wasError=TINYTIFFREADER_FALSE;
+        tiff->wasError=TINYTIFF_FALSE;
 
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
         printf("    - stripcount=%u\n", tiff->currentFrame.stripcount);
@@ -689,10 +664,12 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
         if (tiff->currentFrame.stripcount>0 && tiff->currentFrame.stripbytecounts && tiff->currentFrame.stripoffsets) {
             uint32_t s;
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
-            printf("    - bitspersample[sample]=%u\n", tiff->currentFrame.bitspersample[sample]);
+            printf("    - bitspersample=%u\n", tiff->currentFrame.bitspersample);
 #endif
-            if (tiff->currentFrame.bitspersample[sample]==8) {
-                for (s=0; s<tiff->currentFrame.stripcount; s++) {
+
+            const uint32_t stripspersample=tiff->currentFrame.stripcount/tiff->currentFrame.samplesperpixel;
+            if (tiff->currentFrame.bitspersample==8) {
+                for (s=sample*stripspersample; s<(sample+1)*stripspersample; s++) {
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                     printf("      - s=%u: stripoffset=0x%X stripbytecounts=%u\n", s, tiff->currentFrame.stripoffsets[s], tiff->currentFrame.stripbytecounts[s]);
 #endif
@@ -700,15 +677,15 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     uint8_t* tmp=(uint8_t*)calloc(tmpsize, sizeof(uint8_t));
                     TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
                     TinyTIFFReader_fread(tmp, tmpsize, tmpsize, 1, tiff);
-                    uint32_t offset=s*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
+                    uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                     printf("          bufferoffset=%u\n", offset);
 #endif
-                    memcpy(&(((uint8_t*)buffer)[offset]), tmp, tmpsize);
+                    memcpy(&(((uint8_t*)buffer)[offset]), tmp, tmpsize*sizeof(uint8_t));
                     free(tmp);
                 }
-            } else if (tiff->currentFrame.bitspersample[sample]==16) {
-                for (s=0; s<tiff->currentFrame.stripcount; s++) {
+            } else if (tiff->currentFrame.bitspersample==16) {
+                for (s=sample*stripspersample; s<(sample+1)*stripspersample; s++) {
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                     printf("      - s=%u: stripoffset=0x%X stripbytecounts=%u\n", s, tiff->currentFrame.stripoffsets[s], tiff->currentFrame.stripbytecounts[s]);
 #endif
@@ -716,7 +693,7 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     uint16_t* tmp=(uint16_t*)calloc(tmpsize, sizeof(uint8_t));
                     TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
                     TinyTIFFReader_fread(tmp, tmpsize, tiff->currentFrame.stripbytecounts[s], 1, tiff);
-                    uint32_t offset=s*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
+                    uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
                     uint32_t pixels=tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
                     uint32_t imagesize=tiff->currentFrame.width*tiff->currentFrame.height;
                     if (offset+pixels>imagesize) pixels=imagesize-offset;
@@ -730,8 +707,8 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     }
                     free(tmp);
                 }
-            } else if (tiff->currentFrame.bitspersample[sample]==32) {
-                for (s=0; s<tiff->currentFrame.stripcount; s++) {
+            } else if (tiff->currentFrame.bitspersample==32) {
+                for (s=sample*stripspersample; s<(sample+1)*stripspersample; s++) {
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                     printf("      - s=%u: stripoffset=0x%X stripbytecounts=%u\n", s, tiff->currentFrame.stripoffsets[s], tiff->currentFrame.stripbytecounts[s]);
 #endif
@@ -739,7 +716,7 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     //fseek(tiff->file, tiff->currentFrame.stripoffsets[s], SEEK_SET);
                     TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
                     //fread(tmp, tiff->currentFrame.stripbytecounts[s], 1, tiff->file);
-                    uint32_t offset=s*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
+                    uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
                     //memcpy(&(((uint8_t*)buffer)[offset*2]), tmp, tiff->currentFrame.stripbytecounts[s]);
                     uint32_t pixels=tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
                     uint32_t imagesize=tiff->currentFrame.width*tiff->currentFrame.height;
@@ -751,7 +728,7 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     free(tmp);
                 }
             } else {
-                tiff->wasError=TINYTIFFREADER_TRUE;
+                tiff->wasError=TINYTIFF_TRUE;
 #ifdef HAVE_STRCPY_S
                 strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "TINYTIFFReader does not support the bitsPerSample, given in teh file (only 8,16,32bit are supported)\0");
 #else
@@ -760,7 +737,7 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
             }
 
         } else {
-            tiff->wasError=TINYTIFFREADER_TRUE;
+            tiff->wasError=TINYTIFF_TRUE;
 #ifdef HAVE_STRCPY_S
             strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "TIFF format not recognized\0");
 #else
@@ -772,13 +749,13 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
         TinyTIFFReader_fsetpos(tiff, &pos);
         return !tiff->wasError;
     }
-    tiff->wasError=TINYTIFFREADER_TRUE;
+    tiff->wasError=TINYTIFF_TRUE;
 #ifdef HAVE_STRCPY_S
     strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "TIFF file not opened\0");
 #else
     strcpy(tiff->lastError, "TIFF file not opened\0");
 #endif
-    return TINYTIFFREADER_FALSE;
+    return TINYTIFF_FALSE;
 }
 
 
@@ -811,7 +788,7 @@ TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename) {
     TinyTIFFReader_fopen(tiff, filename);
     tiff->systembyteorder=TIFFReader_get_byteorder();
     memset(tiff->lastError, 0, TIFF_LAST_ERROR_SIZE);
-    tiff->wasError=TINYTIFFREADER_FALSE;
+    tiff->wasError=TINYTIFF_FALSE;
     if (TinyTIFFReader_fOK(tiff) && tiff->filesize>0) {
         const size_t tiffidsize=3;
         uint8_t tiffid[3]={0,0,0};
@@ -860,10 +837,10 @@ void TinyTIFFReader_close(TinyTIFFReaderFile* tiff) {
 
 int TinyTIFFReader_hasNext(TinyTIFFReaderFile* tiff) {
     if (tiff) {
-        if (tiff->nextifd_offset>0 && tiff->nextifd_offset<tiff->filesize) return TINYTIFFREADER_TRUE;
-        else return TINYTIFFREADER_FALSE;
+        if (tiff->nextifd_offset>0 && tiff->nextifd_offset<tiff->filesize) return TINYTIFF_TRUE;
+        else return TINYTIFF_FALSE;
     } else {
-        return TINYTIFFREADER_FALSE;
+        return TINYTIFF_FALSE;
     }
 }
 
@@ -906,7 +883,7 @@ uint16_t TinyTIFFReader_getSampleFormat(TinyTIFFReaderFile* tiff) {
 
 uint16_t TinyTIFFReader_getBitsPerSample(TinyTIFFReaderFile* tiff, int sample) {
     if (tiff) {
-        return tiff->currentFrame.bitspersample[sample];
+        return tiff->currentFrame.bitspersample;
     }
     return 0;
 }

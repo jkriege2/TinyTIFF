@@ -25,7 +25,7 @@
 #define TINYTIFFWRITER_H
 
 #include "tinytiff_export.h"
-
+#include "tinytiff_defs.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,91 +35,9 @@
     \ingroup tinytiff_maingroup
 
    The methods in this file allow to write TIFF files with limited capabilites,
-   but very fast. Usually writing TIFF files with a library like libTIFF is
-   relatively slow, when multiple images are written into a single file. The methods
-   in this files overcome this problem by implementing a tiny writer lib that
-   allows to write a TIFF file where all images have the same properties (size,
-   bit depth, ...). This is a situation thet occurs e.g. in cases where a camera
-   acquires a video that should be saved as TIFF file.
-
-   The library works like this (write 50 32x32 pixel 8-bit images:
-\code
-   TinyTIFFWriterFile* tif=TinyTIFFWriter_open("myfil.tif", 8, 1, 32, 32);
-   if (tif) {
-       for (uint16_t frame=0; frame<50; frame++) {
-           uint8_t* data=readImage();
-           TinyTIFFWriter_writeImage(tif, data);
-       }
-       TinyTIFFWriter_close(tif);
-   }
-\endcode
-   The images are written in big- or little-endian according to your system.
-   The TIFF header is set accordingly, so we do not need to shuffle around
-   bytes when writing, but the created TIFF file may differ from hardware system
-   to hardware system, although the same data is written (once in littl-endian,
-   once in big-endian).
-
-   Currently this library saves all images as unsigned int, but with given bit-depth
-   (8, 16, 32 or 64). Also this library explicitly writes a resolution of 1 in both
-   directions.
-
-   Internally this library works like this:
-   TinyTIFFWriter_open() will basically only initialize the internal datastructures
-   and write the TIFF header. It also determines the byte order used by the system
-   and sets the TIFF header acordingly.
-
-   As the image size is known, the size of
-   every image in the file can be predetermined (we assume a maximum number of TIFF
-   directory entries). The size will be: \verbatim
-      MAX_HEADER_ENTRIES*12 + SOME_FREE_SPACE + WIDTH*HEIGHT*SAMPLES*(BITS_PER_SAMPLES/8)
-      ---------------------------------------   ---------------------------------
-          directory/image description data                 image data
-\endverbatim
-   The free space, indicated as \c SOME_FREE_SPACE is used to store contents of
-   extended fields, like RATIONAL or ARRAY fields.
-
-   Every image in the file will have this size and unused bytes are set to 0x00.
-   TinyTIFFWriter_writeImage() then works like this:
-   The image description data is first assembled in memory, then the complete image description
-   data and the complete image data is written to the file all together. This reduces the
-   number of file access operations and writes the data in two reltively large chunks
-   which allows the operating system to properly optimize file access. Finally this
-   method will save the position of the \c NEXT_IFD_OFFSET field in the image header.
-   The \c NEXT_IFD_OFFSET field is filled with the adress of the next potential image.
-
-   Finally the method TinyTIFFWriter_close() will write \c 0x00000000 into the \c NEXT_IFD_OFFSET
-   of the last image (as saved above) which ends the list of images in the file.
-
-   This ansatz for writing TIFF files is only about a factor of 2 slower than directly
-   writing binary data into a file. In addition the time needed to write an image stays
-   equal also when writing many images, which is NOT the case for libtiff.
-
-   Here are some example benchmark data acquired using MinGW on a rather old CentrinoDuo notebook:
-\verbatim
-TIFF SPEED TEST, 8-Bit 1000 images 32x32 pixels
-  average time to write one image: 17.1907 usecs    range: [7.82222..274.895] usecs
-  average image rate: 58.1709 kHz
-RAW SPEED TEST, 8-Bit 1000 images 32x32 pixels
-  average time to write one image: 21.8469 usecs    range: [2.23492..299.2] usecs
-  average image rate: 45.7731 kHz
-TIFF SPEED TEST, 16-Bit 1000 images 32x32 pixels
-  average time to write one image: 15.2676 usecs    range: [5.5873..262.044] usecs
-  average image rate: 65.4983 kHz
-RAW SPEED TEST, 16-Bit 1000 images 32x32 pixels
-  average time to write one image: 27.5138 usecs    range: [3.63175..296.406] usecs
-  average image rate: 36.3454 kHz
-LIBTIFF SPEED TEST, 8-Bit 1000 images 32x32 pixels
-  average time to write one image: 3024.75 usecs    range: [113.143..7161.52] usecs
-  average image rate: 0.330606 kHz
-LIBTIFF SPEED TEST, 16-Bit 1000 images 32x32 pixels
-  average time to write one image: 3028.42 usecs    range: [120.965..10426.7] usecs
-  average image rate: 0.330205 kHz
-\endverbatim
-   So this library is about a factor of 2.2 slower than direct binary output (raw) and about a factor
-   of 500 faster than libTIFF. Note however the wide range of per-image write speeds which stems
-   from the time the operating systems takes for file access. But the average rates are very good, so
-   if your image creation is synchronous, you will need to use a FIFO to save images intermediately to
-   account for the write speed jitter.
+   but very fast. 
+   
+   \see \ref mainpagetinytiff_writer for details on how this library works
  */
 
 /** \brief struct used to describe a TIFF file
@@ -127,18 +45,7 @@ LIBTIFF SPEED TEST, 16-Bit 1000 images 32x32 pixels
   */
 typedef struct TinyTIFFWriterFile TinyTIFFWriterFile; // forward
 
-#ifndef TINYTIFFWRITER_TRUE
-/** \brief a logic value of TRUE, e.g. used by TINYTIFFWRITER_wasError()
-  * \ingroup tinytiffwriter
-  */
-#  define TINYTIFFWRITER_TRUE 1
-#endif
-#ifndef TINYTIFFWRITER_FALSE
-/** \brief a logic value of FALSE, e.g. used by TINYTIFFWRITER_wasError()
-  * \ingroup tinytiffwriter
-  */
-#  define TINYTIFFWRITER_FALSE 0
-#endif
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -165,7 +72,7 @@ extern "C" {
     */
     TINYTIFF_EXPORT int TinyTIFFWriter_wasError(TinyTIFFWriterFile* tiff);
 
-    /*! \brief returns TINYTIFFWRITER_TRUE (non-zero) when there was no error in the last function call, or TINYTIFFWRITER_FALSE if there was an error
+    /*! \brief returns TINYTIFF_TRUE (non-zero) when there was no error in the last function call, or TINYTIFF_FALSE if there was an error
         \ingroup tinytiffwriter
 
         \param tiff TIFF file
@@ -173,32 +80,129 @@ extern "C" {
         */
     TINYTIFF_EXPORT int TinyTIFFWriter_success(TinyTIFFWriterFile* tiff);
 
+    /** \brief allows to specify in TinyTIFFWriter_open() how to interpret the image channels
+     *  \ingroup tinytiffwriter
+     *
+     *  \see TinyTIFFWriter_open()
+     */
+    enum TinyTIFFWriterSampleInterpretation {
+        TinyTIFFWriter_AutodetectSampleInterpetation, /*!< tells TinyTIFFWriter_open() to try and determine the sample interpretation automatically from the sumber of samples! */
+        TinyTIFFWriter_Greyscale, /*!< Greyscale image with one channel (samples need to be at least 1) */
+        TinyTIFFWriter_GreyscaleAndAlpha, /*!< Greyscale image with one channel and one additional ALPHA channel (samples need to be at least 2) */
+        TinyTIFFWriter_RGB, /*!< RGB image with three channel (samples need to be at least 3) */
+        TinyTIFFWriter_RGBA /*!< RGBA image with four channel (samples need to be at least 4) */
+    };
+
+    /** \brief allows to specify in TinyTIFFWriter_open() the type of the data
+     *  \ingroup tinytiffwriter
+     *
+     *  \see TinyTIFFWriter_open()
+     */
+    enum TinyTIFFWriterSampleFormat {
+        TinyTIFFWriter_UInt, /*!< unsigned integer images (the default) */
+        TinyTIFFWriter_Int, /*!< signed integer images */
+        TinyTIFFWriter_Float /*!< floating point images */
+    };
+
     /*! \brief create a new TIFF file
         \ingroup tinytiffwriter
 
         \param filename name of the new TIFF file
         \param number of samples per pixel (e.g. 3 for RGB images)
         \param bitsPerSample bits used to save each sample of the images
+        \param samples number of samples in each frame, See documentation of TinyTIFFWriterSampleInterpretation for limitations that apply, if set to 0, the
+                       number of samples is automatically determined from the value of \a sampleInterpretation
         \param width width of the images in pixels
         \param height height of the images in pixels
+        \param sampleFormat data type of data in image pixels
+        \param sampleInterpretation how to interpret the samples in each frame. Note that you may specify more samples than required by the value from TinyTIFFWriterSampleInterpretation
+                                    these are then marked as unspecified samples. If you want to store alpha information or else, choose the correct value from TinyTIFFWriterSampleInterpretation!
+                                    if TinyTIFFWriter_AutodetectSampleInterpetation is specified, the sample interpretation is choosen from the number of channels (as specified in TinyTIFFWriterSampleInterpretation,
+                                    i.e. 1 channel=greyscale, 2 channels=greyscale+alpha, 3 channels=RGB, 4 channels= RGBA)
         \return a new TinyTIFFWriterFile pointer on success, or NULL on errors
 
-      */
-    TINYTIFF_EXPORT TinyTIFFWriterFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSample, uint16_t samples, uint32_t width, uint32_t height);
+        \see TinyTIFFWriterSampleInterpretation
 
-    /*! \brief write a new image to the give TIFF file
+      */
+    TINYTIFF_EXPORT TinyTIFFWriterFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSample, enum TinyTIFFWriterSampleFormat sampleFormat, uint16_t samples, uint32_t width, uint32_t height, enum TinyTIFFWriterSampleInterpretation sampleInterpretation);
+
+
+
+    /** \brief write a new image to the give TIFF file. the image ist stored in separate planes or planar configuration, dependeing on \a outputOrganization and
+     *         the data is possibly reorganized, if \a outputOrganization does not match inputOrganisation. Note that such a reorganization requires additional
+     *         time and memory!
+     *  \ingroup tinytiffwriter
+     *
+     *  \param tiff TIFF file to write to
+     *  \param data points to the image in row-major ordering with the right bit-depth,
+     *              multi-sample data has to be provided in the format defined by \a inputOrganisation
+     *  \param inputOrganisation data format of the multi-channel data in \a data
+     *  \param outputOrganization data format of the image data in the generated TIFF file
+     *  \return TINYTIFF_TRUE on success and TINYTIFF_FALSE on failure.
+     *           An error description can be obtained by calling TinyTIFFWriter_getLastError().
+     */
+    TINYTIFF_EXPORT int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile* tiff, const void* data, enum TinyTIFFSampleLayout inputOrganisation, enum TinyTIFFSampleLayout outputOrganization);
+
+
+    /*! \brief write a new image to the give TIFF file, in planar configuration, i.e. the image data is reorganized from RGBRGBRGB to RRR...GGG...BBB... before writing.
+               This operation requires additional memory and time! Use TinyTIFFWriter_writeImage() for speed
         \ingroup tinytiffwriter
+
+        This is equivalent to calling
+        \code
+          TinyTIFFWriter_writeImageMultiSample(tiff, data, TinyTIFF_Interleaved, TinyTIFF_Separate);
+        \endcode
 
         \param tiff TIFF file to write to
         \param data points to the image in row-major ordering with the right bit-depth,
                     multi-sample data has to be provided in the "chunky" format, e.g. if
                     you have 3 samples ("R", "G" and "B"), the the data in this field has to
                     be \c R1G1B1|R2G2B2|R3G3B3|R4G4B4|...
-        \return TINYTIFFWRITER_TRUE on success and TINYTIFFWRITER_FALSE on failure.
+        \return TINYTIFF_TRUE on success and TINYTIFF_FALSE on failure.
+                An error description can be obtained by calling TinyTIFFWriter_getLastError().
+    */
+    TINYTIFF_EXPORT int TinyTIFFWriter_writeImagePlanarReorder(TinyTIFFWriterFile* tiff, const void* data);
+
+
+    /*! \brief write a new image to the give TIFF file, in planar configuration, i.e. the image data is reorganized from RGBRGBRGB to RRR...GGG...BBB... before writing.
+               This operation requires additional memory and time! Use TinyTIFFWriter_writeImage() for speed
+        \ingroup tinytiffwriter
+
+        This is equivalent to calling
+        \code
+          TinyTIFFWriter_writeImageMultiSample(tiff, data, TinyTIFF_Separate, TinyTIFF_Interleaved);
+        \endcode
+
+        \param tiff TIFF file to write to
+        \param data points to the image in row-major ordering with the right bit-depth,
+                multi-sample data has to be provided in the "planat" format, e.g. if
+                you have 3 samples ("R", "G" and "B"), the the data in this field has to
+                be \c R1R2R3R4...G1G2G3G4...B1B2B3B4...
+        \return TINYTIFF_TRUE on success and TINYTIFF_FALSE on failure.
+                An error description can be obtained by calling TinyTIFFWriter_getLastError().
+    */
+    TINYTIFF_EXPORT int TinyTIFFWriter_writeImageChunkyReorder(TinyTIFFWriterFile* tiff, const void* data);
+
+
+    /*! \brief Write a new image to the give TIFF file, in chunky configuration, expects the data to be chunky too.
+               This method is here for compatibility with older version on TinyTIFFWriter an for simple semantics for
+               1-sample data, where the organization does not play any role!
+        \ingroup tinytiffwriter
+
+        This is equivalent to calling
+        \code
+          TinyTIFFWriter_writeImageMultiSample(tiff, data, TinyTIFF_Interleaved, TinyTIFF_Interleaved);
+        \endcode
+
+        \param tiff TIFF file to write to
+        \param data points to the image in row-major ordering with the right bit-depth,
+                multi-sample data has to be provided in the "chunky" format, e.g. if
+                you have 3 samples ("R", "G" and "B"), the the data in this field has to
+                be \c R1G1B1|R2G2B2|R3G3B3|R4G4B4|...
+        \return TINYTIFF_TRUE on success and TINYTIFF_FALSE on failure.
                 An error description can be obtained by calling TinyTIFFWriter_getLastError().
     */
     TINYTIFF_EXPORT int TinyTIFFWriter_writeImage(TinyTIFFWriterFile* tiff, const void* data);
-
 
     /*! \brief close a given TIFF file
         \ingroup tinytiffwriter

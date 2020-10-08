@@ -1,7 +1,5 @@
 /*
-    Copyright (c) 2008-2015 Jan W. Krieger (<jan@jkrieger.de>, <j.krieger@dkfz.de>), German Cancer Research Center (DKFZ) & IWR, University of Heidelberg
-
-    last modification: $LastChangedDate: 2015-07-07 12:07:58 +0200 (Di, 07 Jul 2015) $  (revision $Rev: 4005 $)
+    Copyright (c) 2008-2020 Jan W. Krieger (<jan@jkrieger.de>), German Cancer Research Center (DKFZ) & IWR, University of Heidelberg
 
     This software is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -97,7 +95,7 @@ bool TIFFTWriteFloat(TIFF* tif, const float *image, uint16 width, uint16 height,
 \endverbatim
 
 */
-bool TIFFTWriteDouble(TIFF* tif, double* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteDouble(TIFF* tif, const double* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
 
 
 /*! \brief write a double image as a float to the TIFF file
@@ -125,7 +123,7 @@ bool TIFFTWriteDouble(TIFF* tif, double* image, uint16 width, uint16 height, dou
 \endverbatim
 
 */
-bool TIFFTWriteDoubleAsFloat(TIFF* tif, double* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
 
 /*! \brief write a uint16 image to the TIFF file
     \ingroup libtiff_tools
@@ -152,7 +150,7 @@ bool TIFFTWriteDoubleAsFloat(TIFF* tif, double* image, uint16 width, uint16 heig
 \endverbatim
 
 */
-bool TIFFTWriteUint16(TIFF* tif, uint16* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteUint16(TIFF* tif, const uint16* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
 /*! \brief write a uint32 image to the TIFF file
     \ingroup libtiff_tools
 
@@ -178,7 +176,7 @@ bool TIFFTWriteUint16(TIFF* tif, uint16* image, uint16 width, uint16 height, dou
 \endverbatim
 
 */
-bool TIFFTWriteUint32(TIFF* tif, uint32* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteUint32(TIFF* tif, const uint32* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
 
 
 /*! \brief write a uint32 image to the TIFF file in uint16 format
@@ -209,7 +207,7 @@ bool TIFFTWriteUint32(TIFF* tif, uint32* image, uint16 width, uint16 height, dou
 
     This function scales the contents of the array to the 16-bit range if and only if pixels are larger than 65535.
 */
-bool TIFFTWriteUint16from32(TIFF* tif, uint32_t* image, uint16 width, uint16 height, bool scaled=true, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16 width, uint16 height, bool scaled=true, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
 
 /*! \brief write a uint32 image to the TIFF file in float format
     \ingroup libtiff_tools
@@ -237,7 +235,7 @@ bool TIFFTWriteUint16from32(TIFF* tif, uint32_t* image, uint16 width, uint16 hei
 
 
 */
-bool TIFFTWriteFloatfrom32(TIFF* tif, uint32_t* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
 
 
 
@@ -266,7 +264,7 @@ bool TIFFTWriteFloatfrom32(TIFF* tif, uint32_t* image, uint16 width, uint16 heig
 \endverbatim
 
 */
-bool TIFFTWriteUint8(TIFF* tif, uint8* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteUint8(TIFF* tif, const uint8* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
 
 /*! \brief write an image of bools as uint8 image (false=0/true=1) to the TIFF file
     \ingroup libtiff_tools
@@ -293,7 +291,11 @@ bool TIFFTWriteUint8(TIFF* tif, uint8* image, uint16 width, uint16 height, doubl
 \endverbatim
 
 */
-bool TIFFTWriteBoolAsUint8(TIFF* tif, bool* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteBoolAsUint8(TIFF* tif, const bool* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+
+template <class T>
+bool TIFFWrite(TIFF* tif, const T* image, uint16 width, uint16 height);
+
 
 /*! \brief return the number of directories in a TIFF file
     \ingroup libtiff_tools
@@ -480,7 +482,7 @@ inline bool TIFFLoadTiled(tout* data_out, TIFF *const tif, const uint32 width, c
     \return \c true on success, \c false on failure
 */
 template<typename T>
-inline bool TIFFReadFrame(TIFF *const tif, T* data) {
+inline bool TIFFReadFrame(TIFF *const tif, T* data, uint32_t sample=0) {
     if (!tif) return false;
 
     uint16 samplesperpixel, bitspersample;
@@ -491,9 +493,9 @@ inline bool TIFFReadFrame(TIFF *const tif, T* data) {
     TIFFGetField(tif,TIFFTAG_SAMPLESPERPIXEL,&samplesperpixel);
     TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT, &sampleformat);
     TIFFGetFieldDefaulted(tif,TIFFTAG_BITSPERSAMPLE,&bitspersample);
-    if (samplesperpixel>1) {
+    /*if (samplesperpixel>1) {
         return false;
-    } else {
+    } else {*/
         uint16 photo, config;
         TIFFGetField(tif,TIFFTAG_PLANARCONFIG,&config);
         TIFFGetField(tif,TIFFTAG_PHOTOMETRIC,&photo);
@@ -503,28 +505,28 @@ inline bool TIFFReadFrame(TIFF *const tif, T* data) {
             TIFFGetField(tif,TIFFTAG_TILEWIDTH,&tw);
             TIFFGetField(tif,TIFFTAG_TILELENGTH,&th);
             if (bitspersample==8 && sizeof(T)>=1) {
-                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadTiled<uint8_t,  T>(data,  tif, nx, ny, tw, th);
-                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadTiled<int8_t,  T>(data,  tif, nx, ny, tw, th);
+                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadTiled<uint8_t,  T>(data,  tif, nx, ny, tw, th, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadTiled<int8_t,  T>(data,  tif, nx, ny, tw, th, sample, samplesperpixel, config);
                 else {
                     return false;
                 }
             } else if (bitspersample==16 && sizeof(T)>=2) {
-                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadTiled<uint16_t,  T>(data,  tif, nx, ny, tw, th);
-                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadTiled<int16_t,  T>(data,  tif, nx, ny, tw, th);
+                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadTiled<uint16_t,  T>(data,  tif, nx, ny, tw, th, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadTiled<int16_t,  T>(data,  tif, nx, ny, tw, th, sample, samplesperpixel, config);
                 else {
                     return false;
                 }
             } else if (bitspersample==32 && sizeof(T)>=4) {
-                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadTiled<uint32_t,  T>(data,  tif, nx, ny, tw, th);
-                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadTiled<int32_t,  T>(data,  tif, nx, ny, tw, th);
-                else if (sampleformat==SAMPLEFORMAT_IEEEFP) TIFFLoadTiled<float,  T>(data,  tif, nx, ny, tw, th);
+                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadTiled<uint32_t,  T>(data,  tif, nx, ny, tw, th, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadTiled<int32_t,  T>(data,  tif, nx, ny, tw, th, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_IEEEFP) TIFFLoadTiled<float,  T>(data,  tif, nx, ny, tw, th, sample, samplesperpixel, config);
                 else {
                     return false;
                 }
             } else if (bitspersample==64 && sizeof(T)>=8) {
-                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadTiled<uint64_t,  T>(data,  tif, nx, ny, tw, th);
-                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadTiled<int64_t,  T>(data,  tif, nx, ny, tw, th);
-                else if (sampleformat==SAMPLEFORMAT_IEEEFP) TIFFLoadTiled<double,  T>(data,  tif, nx, ny, tw, th);
+                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadTiled<uint64_t,  T>(data,  tif, nx, ny, tw, th, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadTiled<int64_t,  T>(data,  tif, nx, ny, tw, th, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_IEEEFP) TIFFLoadTiled<double,  T>(data,  tif, nx, ny, tw, th, sample, samplesperpixel, config);
                 else {
                     return false;
                 }
@@ -534,28 +536,28 @@ inline bool TIFFReadFrame(TIFF *const tif, T* data) {
 
         } else { // load a non-tiled frame
             if (bitspersample==8 && sizeof(T)>=1) {
-                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadNontiled<uint8_t,  T>(data,  tif, nx, ny);
-                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadNontiled<int8_t,  T>(data,  tif, nx, ny);
+                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadNontiled<uint8_t,  T>(data,  tif, nx, ny, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadNontiled<int8_t,  T>(data,  tif, nx, ny, sample, samplesperpixel, config);
                 else {
                     return false;
                 }
             } else if (bitspersample==16 && sizeof(T)>=2) {
-                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadNontiled<uint16_t,  T>(data,  tif, nx, ny);
-                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadNontiled<int16_t,  T>(data,  tif, nx, ny);
+                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadNontiled<uint16_t,  T>(data,  tif, nx, ny, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadNontiled<int16_t,  T>(data,  tif, nx, ny, sample, samplesperpixel, config);
                 else {
                     return false;
                 }
             } else if (bitspersample==32 && sizeof(T)>=4) {
-                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadNontiled<uint32_t,  T>(data,  tif, nx, ny);
-                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadNontiled<int32_t,  T>(data,  tif, nx, ny);
-                else if (sampleformat==SAMPLEFORMAT_IEEEFP) TIFFLoadNontiled<float,  T>(data,  tif, nx, ny);
+                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadNontiled<uint32_t,  T>(data,  tif, nx, ny, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadNontiled<int32_t,  T>(data,  tif, nx, ny, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_IEEEFP) TIFFLoadNontiled<float,  T>(data,  tif, nx, ny, sample, samplesperpixel, config);
                 else {
                     return false;
                 }
             } else if (bitspersample==64 && sizeof(T)>=8) {
-                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadNontiled<uint64_t,  T>(data,  tif, nx, ny);
-                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadNontiled<int64_t,  T>(data,  tif, nx, ny);
-                else if (sampleformat==SAMPLEFORMAT_IEEEFP) TIFFLoadNontiled<double,  T>(data,  tif, nx, ny);
+                if (sampleformat==SAMPLEFORMAT_UINT) TIFFLoadNontiled<uint64_t,  T>(data,  tif, nx, ny, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_INT) TIFFLoadNontiled<int64_t,  T>(data,  tif, nx, ny, sample, samplesperpixel, config);
+                else if (sampleformat==SAMPLEFORMAT_IEEEFP) TIFFLoadNontiled<double,  T>(data,  tif, nx, ny, sample, samplesperpixel, config);
                 else {
                     return false;
                 }
@@ -563,7 +565,7 @@ inline bool TIFFReadFrame(TIFF *const tif, T* data) {
                 return false;
             }
         }
-    }
+    //}
     return true;
 }
 

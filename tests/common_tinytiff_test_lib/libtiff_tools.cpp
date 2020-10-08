@@ -1,7 +1,5 @@
 /*
-    Copyright (c) 2008-2015 Jan W. Krieger (<jan@jkrieger.de>, <j.krieger@dkfz.de>), German Cancer Research Center (DKFZ) & IWR, University of Heidelberg
-
-    last modification: $LastChangedDate: 2015-07-07 12:07:58 +0200 (Di, 07 Jul 2015) $  (revision $Rev: 4005 $)
+    Copyright (c) 2008-2020 Jan W. Krieger (<jan@jkrieger.de>), German Cancer Research Center (DKFZ) & IWR, University of Heidelberg
 
     This software is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License (LGPL) as published by
@@ -108,7 +106,7 @@ bool TIFFTWriteFloat(TIFF* tif, const float* image, uint16 width, uint16 height,
 }
 
 
-bool TIFFTWriteDoubleAsFloat(TIFF* tif, double* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
+bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
     uint16 frame_width=width;
     uint16 frame_height=height;
     uint32 rowsperstrip = (uint32)-1;
@@ -157,7 +155,7 @@ bool TIFFTWriteDoubleAsFloat(TIFF* tif, double* image, uint16 width, uint16 heig
     return true;
 }
 
-bool TIFFTWriteFloatfrom32(TIFF* tif, uint32_t* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
+bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t *image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
     uint16 frame_width=width;
     uint16 frame_height=height;
     uint32 rowsperstrip = (uint32)-1;
@@ -206,7 +204,7 @@ bool TIFFTWriteFloatfrom32(TIFF* tif, uint32_t* image, uint16 width, uint16 heig
     return true;
 }
 
-bool TIFFTWriteUint16(TIFF* tif, uint16* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
+bool TIFFTWriteUint16(TIFF* tif, const uint16* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
     uint16 frame_width=width;
     uint16 frame_height=height;
     uint32 rowsperstrip = (uint32)-1;
@@ -256,7 +254,7 @@ bool TIFFTWriteUint16(TIFF* tif, uint16* image, uint16 width, uint16 height, dou
 }
 
 
-bool TIFFTWriteUint32(TIFF* tif, uint32* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
+bool TIFFTWriteUint32(TIFF* tif, const uint32 *image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
     uint16 frame_width=width;
     uint16 frame_height=height;
     uint32 rowsperstrip = (uint32)-1;
@@ -305,7 +303,7 @@ bool TIFFTWriteUint32(TIFF* tif, uint32* image, uint16 width, uint16 height, dou
     return true;
 }
 
-bool TIFFTWriteUint16from32(TIFF* tif, uint32_t* image, uint16 width, uint16 height, bool scaled, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
+bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16 width, uint16 height, bool scaled, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
     uint16 frame_width=width;
     uint16 frame_height=height;
     uint32 rowsperstrip = (uint32)-1;
@@ -380,7 +378,7 @@ bool TIFFTWriteUint16from32(TIFF* tif, uint32_t* image, uint16 width, uint16 hei
     return true;
 }
 
-bool TIFFTWriteUint8(TIFF* tif, uint8* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
+bool TIFFTWriteUint8(TIFF* tif, const uint8* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
     uint16 frame_width=width;
     uint16 frame_height=height;
     uint32 rowsperstrip = (uint32)-1;
@@ -531,7 +529,7 @@ uint32 TIFFCountDirectories(TIFF* tif) {
 
 
 
-bool TIFFTWriteDouble(TIFF *tif, double *image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression)
+bool TIFFTWriteDouble(TIFF *tif, const double *image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression)
 {
     uint16 frame_width=width;
     uint16 frame_height=height;
@@ -581,7 +579,7 @@ bool TIFFTWriteDouble(TIFF *tif, double *image, uint16 width, uint16 height, dou
 }
 
 
-bool TIFFTWriteBoolAsUint8(TIFF *tif, bool *image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression)
+bool TIFFTWriteBoolAsUint8(TIFF *tif, const bool *image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression)
 {
     uint16 frame_width=width;
     uint16 frame_height=height;
@@ -629,4 +627,18 @@ bool TIFFTWriteBoolAsUint8(TIFF *tif, bool *image, uint16 width, uint16 height, 
     }
     _TIFFfree(buf);
     return true;
+}
+
+
+template <>
+bool TIFFWrite<uint8_t>(TIFF* tif, const uint8_t* image, uint16 width, uint16 height) {
+    return TIFFTWriteUint8(tif, image, width, height);
+}
+template <>
+bool TIFFWrite<uint16_t>(TIFF* tif, const uint16_t* image, uint16 width, uint16 height) {
+    return TIFFTWriteUint16(tif, image, width, height);
+}
+template <>
+bool TIFFWrite<uint32_t>(TIFF* tif, const uint32_t* image, uint16 width, uint16 height) {
+    return TIFFTWriteUint32(tif, image, width, height);
 }

@@ -16,11 +16,12 @@
 
 
 */
-#define TINYTIFF_WRITE_COMMENTS
+//#define TINYTIFF_WRITE_COMMENTS
 
 #include <math.h>
 #include <float.h>
 #include "tinytiffwriter.h"
+#include "tiff_definitions_internal.h"
 
 #ifndef __WINDOWS__
 # if defined(WIN32) || defined(WIN64) || defined(_MSC_VER) || defined(_WIN32)
@@ -46,11 +47,6 @@
 #  warning COMPILING TinyTIFFWriter with WinAPI
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 
-#define TIFF_ORDER_UNKNOWN 0
-#define TIFF_ORDER_BIGENDIAN 1
-#define TIFF_ORDER_LITTLEENDIAN 2
-#define TRUE (0==0)
-#define FALSE (0==1)
 
 #define TINYTIFFWRITER_DESCRIPTION_SIZE 1024
 #define TIFF_LAST_ERROR_SIZE 1024
@@ -91,39 +87,47 @@ int TIFF_get_byteorder()
  */
 struct TinyTIFFWriterFile {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
-    /* \brief the windows API file handle */
+    /** \brief the windows API file handle */
     HANDLE hFile;
 #else
-    /* \brief the libc file handle */
+    /** \brief the libc file handle */
     FILE* file;
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
-    /* \brief position of the field in the previously written IFD/header, which points to the next frame. This is set to 0, when closing the file to indicate, the last frame! */
+    /** \brief position of the field in the previously written IFD/header, which points to the next frame. This is set to 0, when closing the file to indicate, the last frame! */
     uint32_t lastIFDOffsetField;
-    /* \brief file position (from ftell) of the first byte of the previous IFD/frame header */
+    /** \brief file position (from ftell) of the first byte of the previous IFD/frame header */
     long int lastStartPos;
     //uint32_t lastIFDEndAdress;
     uint32_t lastIFDDATAAdress;
-    /* \brief counts the entries in the current IFD/frame header */
+    /** \brief counts the entries in the current IFD/frame header */
     uint16_t lastIFDCount;
-    /* \brief temporary data array for the current header */
+    /** \brief temporary data array for the current header */
     uint8_t* lastHeader;
     int lastHeaderSize;
-    /* \brief current write position in lastHeader */
+    /** \brief current write position in lastHeader */
     uint32_t pos;
-    /* \brief width of the frames */
+    /** \brief width of the frames */
     uint32_t width;
-    /* \brief height of the frames */
+    /** \brief height of the frames */
     uint32_t height;
-    /* \brief bits per sample of the frames */
+    /** \brief bits per sample of the frames */
     uint16_t bitspersample;
-    /* \brief number of samples of the frames */
+    /** \brief format of the samples */
+    uint16_t sampleformat;
+    /** \brief number of samples of the frames */
     uint16_t samples;
     uint32_t descriptionOffset;
     uint32_t descriptionSizeOffset;
-    /* \brief counter for the frames, written into the file */
+    /** \brief counter for the frames, written into the file */
     uint64_t frames;
-    /* \brief specifies the byte order of the system (and the written file!) */
+    /** \brief specifies the byte order of the system (and the written file!) */
     uint8_t byteorder;
+    /** \brief photometric interpretation to store in the file */
+    uint16_t photometricInterpretation;
+    /** \brief type of the first extra channel */
+    uint16_t firstExtraChannelType;
+    /** \brief type of all extraChannels after the first, which is specified by firstExtraChannelType */
+    uint16_t secondaryExtraChannelType;
     char lastError[TIFF_LAST_ERROR_SIZE];
     int wasError;
 };
@@ -156,11 +160,11 @@ static void TinyTIFFWriter_fopen(TinyTIFFWriterFile* tiff, const char* filename)
  */
 static int TinyTIFFWriter_fOK(TinyTIFFWriterFile* tiff) {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
-   if (tiff->hFile == INVALID_HANDLE_VALUE) return FALSE;
-   else return TRUE;
+   if (tiff->hFile == INVALID_HANDLE_VALUE) return TINYTIFF_FALSE;
+   else return TINYTIFF_TRUE;
 #else
-   if (tiff->file) return TRUE;
-   else return FALSE;
+   if (tiff->file) return TINYTIFF_TRUE;
+   else return TINYTIFF_FALSE;
 #endif
 }
 
@@ -251,40 +255,26 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
-#define TIFF_FIELD_IMAGEWIDTH 256
-#define TIFF_FIELD_IMAGELENGTH 257
-#define TIFF_FIELD_BITSPERSAMPLE 258
-#define TIFF_FIELD_COMPRESSION 259
-#define TIFF_FIELD_PHOTOMETRICINTERPRETATION 262
-#define TIFF_FIELD_IMAGEDESCRIPTION 270
-#define TIFF_FIELD_STRIPOFFSETS 273
-#define TIFF_FIELD_SAMPLESPERPIXEL 277
-#define TIFF_FIELD_ROWSPERSTRIP 278
-#define TIFF_FIELD_STRIPBYTECOUNTS 279
-#define TIFF_FIELD_XRESOLUTION 282
-#define TIFF_FIELD_YRESOLUTION 283
-#define TIFF_FIELD_PLANARCONFIG 284
-#define TIFF_FIELD_RESOLUTIONUNIT 296
-#define TIFF_FIELD_SAMPLEFORMAT 339
 
-#define TIFF_TYPE_BYTE 1
-#define TIFF_TYPE_ASCII 2
-#define TIFF_TYPE_SHORT 3
-#define TIFF_TYPE_LONG 4
-#define TIFF_TYPE_RATIONAL 5
+/*! \brief calculates the number of channels, covered by the photometric interpretation. If samples is larger than this, the difference are extraSamples!
+    \ingroup tinytiffwriter_internal
+    \internal
+ */
+static uint16_t TinyTIFFWriter_getPhotometricChannels(uint16_t photometric) {
+    if (photometric==TIFF_PHOTOMETRICINTERPRETATION_RGB) return 3;
+    else if (photometric==TIFF_PHOTOMETRICINTERPRETATION_CMYK) return 4;
+    else if (photometric==TIFF_PHOTOMETRICINTERPRETATION_YCBCR) return 3;
+    else if (photometric==TIFF_PHOTOMETRICINTERPRETATION_CIELAB) return 3;
+    else return 1;
+}
 
-#define TIFF_PHOTOMETRIC_WHITEISZERO 0
-#define TIFF_PHOTOMETRIC_BLACKISZERO 1
-#define TIFF_PHOTOMETRIC_RGB 2
-#define TIFF_PHOTOMETRIC_PALETTE 3
-#define TIFF_PHOTOMETRIC_TRANSPARENCY 4
 
 
 /*! \brief fixed size of the TIFF frame header in bytes
     \ingroup tinytiffwriter_internal
     \internal
  */
-#define TIFF_HEADER_SIZE 700
+#define TIFF_HEADER_SIZE 500
 /*! \brief maximum number of field entries in a TIFF header
     \ingroup tinytiffwriter_internal
     \internal
@@ -453,7 +443,7 @@ static void TinyTIFFWriter_endIFD(TinyTIFFWriterFile* tiff, int hsize) {
     WRITEH16DIRECT(tiff, tiff->lastIFDCount);
 
     tiff->pos=2+tiff->lastIFDCount*12; // header start (2byte) + 12 bytes per IFD entry
-    WRITEH32(tiff, tiff->lastStartPos+2+hsize+tiff->width*tiff->height*(tiff->bitspersample/8));
+    WRITEH32(tiff, tiff->lastStartPos+2+hsize+tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8));
     //printf("imagesize = %d\n", tiff->width*tiff->height*(tiff->bitspersample/8));
 
     //fwrite((void*)tiff->lastHeader, TIFF_HEADER_SIZE+2, 1, tiff->file);
@@ -576,7 +566,11 @@ static void TinyTIFFWriter_writeIFDEntrySHORTARRAY(TinyTIFFWriterFile* tiff, uin
         WRITEH16(tiff, TIFF_TYPE_SHORT);
         WRITEH32(tiff, N);
         if (N==1) {
-            WRITEH32DIRECT(tiff, *data);
+            WRITEH16DIRECT(tiff, data[0]);
+            WRITEH16DIRECT(tiff, 0);
+        } else if (N==2) {
+            WRITEH16DIRECT(tiff, data[0]);
+            WRITEH16DIRECT(tiff, data[1]);
         } else {
             WRITEH32DIRECT(tiff, tiff->lastIFDDATAAdress+tiff->lastStartPos);
             int pos=tiff->pos;
@@ -590,6 +584,35 @@ static void TinyTIFFWriter_writeIFDEntrySHORTARRAY(TinyTIFFWriterFile* tiff, uin
 
 
     }
+}
+
+
+/*! \brief write an array of 16-bit words as IFD entry, where every entry has the same value
+    \ingroup tinytiffwriter_internal
+    \internal
+
+\note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
+                                                                  */
+                                                              static void TinyTIFFWriter_writeIFDEntrySHORTARRAY_allsame(TinyTIFFWriterFile* tiff, uint16_t tag, uint16_t data, uint32_t N) {
+    uint16_t* tmp=(uint16_t*)malloc(N*sizeof(uint16_t));
+    uint16_t i;
+    for(i=0; i<N; i++) tmp[i]=data;
+    TinyTIFFWriter_writeIFDEntrySHORTARRAY(tiff, tag, tmp, N);
+    free(tmp);
+}
+
+/*! \brief write an array of 32-bit words as IFD entry, where every entry has the same value
+    \ingroup tinytiffwriter_internal
+    \internal
+
+\note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
+                                                                  */
+static void TinyTIFFWriter_writeIFDEntryLONGARRAY_allsame(TinyTIFFWriterFile* tiff, uint16_t tag, uint32_t data, uint16_t N) {
+    uint32_t* tmp=(uint32_t*)malloc(N*sizeof(uint32_t));
+    uint16_t i;
+    for(i=0; i<N; i++) tmp[i]=data;
+    TinyTIFFWriter_writeIFDEntryLONGARRAY(tiff, tag, tmp, N);
+    free(tmp);
 }
 
 /*! \brief write an array of characters (ASCII TEXT) as IFD entry
@@ -660,14 +683,89 @@ static void TinyTIFFWriter_writeIFDEntryRATIONAL(TinyTIFFWriterFile* tiff, uint1
 
 
 
-TinyTIFFWriterFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSample, uint16_t samples, uint32_t width, uint32_t height) {
+TinyTIFFWriterFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSample, enum TinyTIFFWriterSampleFormat sampleFormat, uint16_t samples, uint32_t width, uint32_t height, enum TinyTIFFWriterSampleInterpretation sampleInterpretation) {
     TinyTIFFWriterFile* tiff=(TinyTIFFWriterFile*)malloc(sizeof(TinyTIFFWriterFile));
 
     //tiff->file=fopen(filename, "wb");
     TinyTIFFWriter_fopen(tiff, filename);
+    memset(tiff->lastError, 0, TIFF_LAST_ERROR_SIZE);
+    tiff->wasError=TINYTIFF_FALSE;
     tiff->width=width;
     tiff->height=height;
+    tiff->sampleformat=TIFF_SAMPLEFORMAT_UINT;
+    if (sampleFormat==TinyTIFFWriter_Int) tiff->sampleformat=TIFF_SAMPLEFORMAT_INT;
+    if (sampleFormat==TinyTIFFWriter_Float) tiff->sampleformat=TIFF_SAMPLEFORMAT_IEEEFP;
     tiff->samples=samples;
+    tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
+    tiff->firstExtraChannelType=TIFF_EXTRASAMPLES_UNSPECIFIED;
+    tiff->secondaryExtraChannelType=TIFF_EXTRASAMPLES_UNSPECIFIED;
+    if (samples==0 && sampleInterpretation==TinyTIFFWriter_AutodetectSampleInterpetation) {
+        tiff->wasError=TINYTIFF_TRUE;
+#ifdef HAVE_STRCPY_S
+        strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "the parameter combination samples=0 and sampleInterpretation=TinyTIFFWriter_AutodetectSampleInterpetation is not allowed\0");
+#else
+        strcpy(tiff->lastError, "the parameter combination samples=0 and sampleInterpretation=TinyTIFFWriter_AutodetectSampleInterpetation is not allowed\0");
+#endif
+    } else if (samples==0) {
+        switch(sampleInterpretation) {
+        case TinyTIFFWriter_Greyscale:
+            tiff->samples=1;
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
+            break;
+        case TinyTIFFWriter_GreyscaleAndAlpha:
+            tiff->samples=2;
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
+            tiff->firstExtraChannelType=TIFF_EXTRASAMPLES_UNASSOCIATEDALPHA;
+            break;
+        case TinyTIFFWriter_RGB:
+            tiff->samples=3;
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_RGB;
+            break;
+        case TinyTIFFWriter_RGBA:
+            tiff->samples=4;
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_RGB;
+            tiff->firstExtraChannelType=TIFF_EXTRASAMPLES_UNASSOCIATEDALPHA;
+            break;
+        default:
+            tiff->samples=1;
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
+            break;
+        }
+    } else if (sampleInterpretation==TinyTIFFWriter_AutodetectSampleInterpetation) {
+        if (samples==1) {
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
+        } else if (samples==2) {
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
+            tiff->firstExtraChannelType=TIFF_EXTRASAMPLES_UNASSOCIATEDALPHA;
+        } else if (samples==3) {
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_RGB;
+        } else if (samples==4) {
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_RGB;
+            tiff->firstExtraChannelType=TIFF_EXTRASAMPLES_UNASSOCIATEDALPHA;
+        }
+    } else {
+        switch(sampleInterpretation) {
+        case TinyTIFFWriter_Greyscale:
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
+            break;
+        case TinyTIFFWriter_GreyscaleAndAlpha:
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
+            tiff->firstExtraChannelType=TIFF_EXTRASAMPLES_UNASSOCIATEDALPHA;
+            break;
+        case TinyTIFFWriter_RGB:
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_RGB;
+            break;
+        case TinyTIFFWriter_RGBA:
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_RGB;
+            tiff->firstExtraChannelType=TIFF_EXTRASAMPLES_UNASSOCIATEDALPHA;
+            break;
+        default:
+            tiff->photometricInterpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
+            break;
+        }
+
+    }
+
     tiff->bitspersample=bitsPerSample;
     tiff->lastHeader=NULL;
     tiff->lastHeaderSize=0;
@@ -679,8 +777,6 @@ TinyTIFFWriterFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSa
     tiff->lastIFDDATAAdress=0;
     tiff->lastIFDCount=0;
     tiff->pos=0;
-    memset(tiff->lastError, 0, TIFF_LAST_ERROR_SIZE);
-    tiff->wasError=TINYTIFFWRITER_FALSE;
 
     if (TinyTIFFWriter_fOK(tiff)) {
         if (TIFF_get_byteorder()==TIFF_ORDER_BIGENDIAN) {
@@ -703,46 +799,48 @@ void TinyTIFFWriter_close_withdescription(TinyTIFFWriterFile* tiff, const char* 
    if (tiff) {
         TinyTIFFWriter_fseek_set(tiff, tiff->lastIFDOffsetField);
         WRITE32DIRECT_CAST(tiff, 0);
-#ifdef TINYTIFF_WRITE_COMMENTS
-        if (tiff->descriptionOffset>0) {
-          const size_t inlen=strlen(imageDescription);
-          char description[TINYTIFFWRITER_DESCRIPTION_SIZE+1];
-          memset(description, 0, TINYTIFFWRITER_DESCRIPTION_SIZE+1);
+        if (imageDescription) {
+    #ifdef TINYTIFF_WRITE_COMMENTS
+            if (tiff->descriptionOffset>0) {
+              const size_t inlen=strlen(imageDescription);
+              char description[TINYTIFFWRITER_DESCRIPTION_SIZE+1];
+              memset(description, 0, TINYTIFFWRITER_DESCRIPTION_SIZE+1);
 
-          if (inlen>0) {
-              if (inlen<=TINYTIFFWRITER_DESCRIPTION_SIZE) {
-#ifdef HAVE_STRCPY_S
-                strcpy_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, imageDescription);
-#else
-                strcpy(description, imageDescription);
-#endif
+              if (inlen>0) {
+                  if (inlen<=TINYTIFFWRITER_DESCRIPTION_SIZE) {
+    #ifdef HAVE_STRCPY_S
+                    strcpy_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, imageDescription);
+    #else
+                    strcpy(description, imageDescription);
+    #endif
+                  } else {
+    #ifdef HAVE_MEMCPY_S
+                      memcpy_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, imageDescription, TINYTIFFWRITER_DESCRIPTION_SIZE);
+    #else
+                      memcpy(description, imageDescription, TINYTIFFWRITER_DESCRIPTION_SIZE);
+    #endif
+                  }
               } else {
-#ifdef HAVE_MEMCPY_S
-                  memcpy_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, imageDescription, TINYTIFFWRITER_DESCRIPTION_SIZE);
-#else
-                  memcpy(description, imageDescription, TINYTIFFWRITER_DESCRIPTION_SIZE);
-#endif
+    #ifdef HAVE_SPRINTF_S
+                  sprintf_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, "TinyTIFFWriter_version=1.1\nimages=%ld", (unsigned long)(tiff->frames));
+    #else
+                  sprintf(description, "TinyTIFFWriter_version=1.1\nimages=%ld", (unsigned long)(tiff->frames));
+    #endif
               }
-          } else {
-#ifdef HAVE_SPRINTF_S
-              sprintf_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, "TinyTIFFWriter_version=1.1\nimages=%ld", (unsigned long)(tiff->frames));
-#else
-              sprintf(description, "TinyTIFFWriter_version=1.1\nimages=%ld", (unsigned long)(tiff->frames));
-#endif
-		  }
-          description[TINYTIFFWRITER_DESCRIPTION_SIZE-1]='\0';
-          //const size_t dlen=strlen(description);
+              description[TINYTIFFWRITER_DESCRIPTION_SIZE-1]='\0';
+              //const size_t dlen=strlen(description);
 
-          //printf("WRITING COMMENT\n***");
-          //printf(description);
-          //printf("***\nlen=%ld\n\n", dlen);
-          //printf("***\ninlen=%ld\n\n", inlen);
-          TinyTIFFWriter_fseek_set(tiff, tiff->descriptionOffset);
-          TinyTIFFWriter_fwrite(description, 1, TINYTIFFWRITER_DESCRIPTION_SIZE+1, tiff);//<<" / "<<dlen<<"\n";
-          TinyTIFFWriter_fseek_set(tiff, tiff->descriptionSizeOffset);
-          WRITE32DIRECT_CAST(tiff, (TINYTIFFWRITER_DESCRIPTION_SIZE+1));
+              //printf("WRITING COMMENT\n***");
+              //printf(description);
+              //printf("***\nlen=%ld\n\n", dlen);
+              //printf("***\ninlen=%ld\n\n", inlen);
+              TinyTIFFWriter_fseek_set(tiff, tiff->descriptionOffset);
+              TinyTIFFWriter_fwrite(description, 1, TINYTIFFWRITER_DESCRIPTION_SIZE+1, tiff);//<<" / "<<dlen<<"\n";
+              TinyTIFFWriter_fseek_set(tiff, tiff->descriptionSizeOffset);
+              WRITE32DIRECT_CAST(tiff, (TINYTIFFWRITER_DESCRIPTION_SIZE+1));
+            }
+    #endif // TINYTIFF_WRITE_COMMENTS
         }
-#endif // TINYTIFF_WRITE_COMMENTS
         TinyTIFFWriter_fclose(tiff);
         free(tiff->lastHeader);
         free(tiff);
@@ -843,53 +941,149 @@ void TinyTIFFWriter_close_withmetadatadescription(TinyTIFFWriterFile* tiff, doub
      }
 #endif
 
-
-
-int TinyTIFFWriter_writeImage(TinyTIFFWriterFile* tiff, const void* data) {
+int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *data, enum TinyTIFFSampleLayout inputOrganisation, enum TinyTIFFSampleLayout outputOrganization)
+{
     if (!tiff) {
-        return TINYTIFFWRITER_FALSE;
+        return TINYTIFF_FALSE;
     }
-    long pos=TinyTIFFWriter_ftell(tiff);
+    if (!data) {
+        tiff->wasError=TINYTIFF_TRUE;
+#ifdef HAVE_STRCPY_S
+        strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "no data provided to TinyTIFFWriter_writeImage()\0");
+#else
+        strcpy(tiff->lastError, "no data provided to TinyTIFFWriter_writeImage()\0");
+#endif
+        return TINYTIFF_FALSE;
+    }
+    const long pos=TinyTIFFWriter_ftell(tiff);
     int hsize=TIFF_HEADER_SIZE;
 #ifdef TINYTIFF_WRITE_COMMENTS
     if (tiff->frames<=0) {
         hsize=TIFF_HEADER_SIZE+TINYTIFFWRITER_DESCRIPTION_SIZE+1+16;
     }
 #endif // TINYTIFF_WRITE_COMMENTS
+    const uint16_t photoChannels=TinyTIFFWriter_getPhotometricChannels(tiff->photometricInterpretation);
+    if (tiff->samples<photoChannels) {
+        tiff->wasError=TINYTIFF_TRUE;
+#ifdef HAVE_STRCPY_S
+        strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "too few samples specified for given photometric interpretation\0");
+#else
+        strcpy(tiff->lastError, "too few samples specified for given photometric interpretation\0");
+#endif
+        return TINYTIFF_FALSE;
+
+    }
+
     TinyTIFFWriter_startIFD(tiff,hsize);
     TinyTIFFWriter_writeIFDEntryLONG(tiff, TIFF_FIELD_IMAGEWIDTH, tiff->width);
     TinyTIFFWriter_writeIFDEntryLONG(tiff, TIFF_FIELD_IMAGELENGTH, tiff->height);
     TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_BITSPERSAMPLE, tiff->bitspersample);
-    TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_COMPRESSION, 1);
-    if (tiff->samples==1) {
-        TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_PHOTOMETRICINTERPRETATION, TIFF_PHOTOMETRIC_BLACKISZERO);
-    } else if (tiff->samples>1) {
-        TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_PHOTOMETRICINTERPRETATION, TIFF_PHOTOMETRIC_RGB);
-    }
+    TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_COMPRESSION, TIFF_COMPRESSION_NONE);
+    TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_PHOTOMETRICINTERPRETATION, tiff->photometricInterpretation);
+
 #ifdef TINYTIFF_WRITE_COMMENTS
     TINTIFFWRITER_WRITEImageDescriptionTemplate(tiff);
 #endif // TINYTIFF_WRITE_COMMENTS
-    TinyTIFFWriter_writeIFDEntryLONG(tiff, TIFF_FIELD_STRIPOFFSETS, pos+2+hsize);
+
+    if (outputOrganization==TinyTIFF_Separate) {
+        uint32_t* stripoffset=(uint32_t*)malloc(tiff->samples*sizeof(uint32_t));
+        stripoffset[0]=pos+2+hsize;
+        uint32_t i;
+        for (i=1; i<tiff->samples; i++) {
+            stripoffset[i]=stripoffset[i-1]+tiff->width*tiff->height*(tiff->bitspersample/8);
+        }
+        TinyTIFFWriter_writeIFDEntryLONGARRAY(tiff, TIFF_FIELD_STRIPOFFSETS, stripoffset, tiff->samples);
+        free(stripoffset);
+    } else {
+        TinyTIFFWriter_writeIFDEntryLONG(tiff, TIFF_FIELD_STRIPOFFSETS, pos+2+hsize);
+    }
+
     TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_SAMPLESPERPIXEL, tiff->samples);
     TinyTIFFWriter_writeIFDEntryLONG(tiff, TIFF_FIELD_ROWSPERSTRIP, tiff->height);
-    TinyTIFFWriter_writeIFDEntryLONG(tiff, TIFF_FIELD_STRIPBYTECOUNTS, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8));
+    if (outputOrganization==TinyTIFF_Separate)     {
+        TinyTIFFWriter_writeIFDEntryLONGARRAY_allsame(tiff, TIFF_FIELD_STRIPBYTECOUNTS, tiff->width*tiff->height*(tiff->bitspersample/8), tiff->samples);
+    } else {
+        TinyTIFFWriter_writeIFDEntryLONG(tiff, TIFF_FIELD_STRIPBYTECOUNTS, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8));
+    }
     TinyTIFFWriter_writeIFDEntryRATIONAL(tiff, TIFF_FIELD_XRESOLUTION, 1,1);
     TinyTIFFWriter_writeIFDEntryRATIONAL(tiff, TIFF_FIELD_YRESOLUTION, 1,1);
-    TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_PLANARCONFIG, 1);
-    TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_RESOLUTIONUNIT, 1);
+    if (outputOrganization==TinyTIFF_Separate) {
+        TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_PLANARCONFIG, TIFF_PLANARCONFIG_PLANAR);
+    } else {
+        TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_PLANARCONFIG, TIFF_PLANARCONFIG_CHUNKY);
+    }
+    TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_RESOLUTIONUNIT, TIFF_RESOLUTIONUNIT_NONE);
+    if (tiff->samples>photoChannels) {
+        const uint16_t NExtraSamples=tiff->samples-photoChannels;
+        uint16_t* extraSamples=(uint16_t*)malloc(NExtraSamples*sizeof(uint16_t));
+        extraSamples[0]=tiff->firstExtraChannelType;
+        if (NExtraSamples>1) {
+            uint16_t i=0;
+            for (i=1; i<NExtraSamples; i++) {
+                extraSamples[i]=tiff->secondaryExtraChannelType;
+            }
+        }
+        TinyTIFFWriter_writeIFDEntrySHORTARRAY(tiff, TIFF_FIELD_EXTRASAMPLES, extraSamples, NExtraSamples);
+        free(extraSamples);
+    }
+    TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_SAMPLEFORMAT, tiff->sampleformat);
     TinyTIFFWriter_endIFD(tiff, hsize);
-    TinyTIFFWriter_fwrite(data, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);
+    if (inputOrganisation==outputOrganization) {
+        TinyTIFFWriter_fwrite(data, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);
+    } else if (inputOrganisation==TinyTIFF_Interleaved && outputOrganization==TinyTIFF_Separate) {
+        uint8_t* tmp=(uint8_t*)malloc(tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8));
+        uint32_t pix;
+        uint32_t sampidx=0;
+        for (pix=0; pix<tiff->width*tiff->height; pix++) {
+            uint32_t sample=0;
+            for (sample=0; sample<tiff->samples; sample++) {
+                const size_t bytecount=tiff->bitspersample/8;
+                const size_t tmpidx=(sample*tiff->width*tiff->height+pix)*bytecount;
+                memcpy(&(tmp[tmpidx]), &(((uint8_t*)data)[sampidx]), bytecount);
+                sampidx++;
+            }
+        }
+        TinyTIFFWriter_fwrite(tmp, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);
+        free(tmp);
+    } else if (inputOrganisation==TinyTIFF_Separate && outputOrganization==TinyTIFF_Interleaved) {
+        uint8_t* tmp=(uint8_t*)malloc(tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8));
+        uint32_t sample;
+        for (sample=0; sample<tiff->samples; sample++) {
+            uint32_t pix;
+            for (pix=0; pix<tiff->width*tiff->height; pix++) {
+                const size_t bytecount=tiff->bitspersample/8;
+                const size_t tmpidx=(pix*tiff->samples+sample)*bytecount;
+                const size_t sampidx=(sample*tiff->width*tiff->height+pix)*bytecount;
+                memcpy(&(tmp[tmpidx]), &(((uint8_t*)data)[sampidx]), bytecount);
+            }
+        }
+        TinyTIFFWriter_fwrite(tmp, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);
+        free(tmp);
+    }
     tiff->frames=tiff->frames+1;
 
-    return TINYTIFFWRITER_TRUE;
+    return TINYTIFF_TRUE;
 }
 
 
+int TinyTIFFWriter_writeImagePlanarReorder(TinyTIFFWriterFile* tiff, const void* data)
+{
+    return TinyTIFFWriter_writeImageMultiSample(tiff, data, TinyTIFF_Interleaved, TinyTIFF_Separate);
+}
 
+int TinyTIFFWriter_writeImageChunkyReorder(TinyTIFFWriterFile *tiff, const void *data)
+{
+    return TinyTIFFWriter_writeImageMultiSample(tiff, data, TinyTIFF_Separate, TinyTIFF_Interleaved);
+}
+
+int TinyTIFFWriter_writeImage(TinyTIFFWriterFile *tiff, const void *data)
+{
+    return TinyTIFFWriter_writeImageMultiSample(tiff, data, TinyTIFF_Interleaved, TinyTIFF_Interleaved);
+}
 
 void TinyTIFFWriter_close(TinyTIFFWriterFile *tiff)
 {
-    TinyTIFFWriter_close_withdescription(tiff, "");
+    TinyTIFFWriter_close_withdescription(tiff, NULL);
 }
 
 const char *TinyTIFFWriter_getLastError(TinyTIFFWriterFile *tiff)
@@ -901,11 +1095,12 @@ const char *TinyTIFFWriter_getLastError(TinyTIFFWriterFile *tiff)
 int TinyTIFFWriter_wasError(TinyTIFFWriterFile *tiff)
 {
     if (tiff) return tiff->wasError;
-    return TINYTIFFWRITER_TRUE;
+    return TINYTIFF_TRUE;
 }
 
 int TinyTIFFWriter_success(TinyTIFFWriterFile *tiff)
 {
     if (tiff) return !tiff->wasError;
-    return TINYTIFFWRITER_FALSE;
+    return TINYTIFF_FALSE;
 }
+

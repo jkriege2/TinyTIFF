@@ -1,308 +1,324 @@
 #include "tinytiffwriter.h"
 #include "tinytiffhighrestimer.h"
-
+#include "test_results.h"
+#include "testimage_tools.h"
+#include <fstream>
+#include <array>
 #ifdef TINYTIFF_TEST_LIBTIFF
 #include <tiffio.h>
 #include "libtiff_tools.h"
 #endif
-#include <iostream>
-#include <vector>
-#include <algorithm>
+#include "tinytiff_tools.hxx"
+
 
 
 using namespace std;
 
-#define WIDTH 32
-#define HEIGHT 32
-#define PATTERNSIZE 12
-#define SPEEDTEST_SIZE 100000
-#define SPEEDTEST_REMOVESLOWEST_PERCENT 0.1
-
-struct Statistics {
-    double mean;
-    double std;
-    double min;
-    double max;
-    size_t removed_records;
-};
-
-Statistics evaluateRuntimes(std::vector<double> runtimes, double remove_slowest_percent=SPEEDTEST_REMOVESLOWEST_PERCENT) {
-    std::sort(runtimes.begin(), runtimes.end());
-    size_t removed_records=0;
-    if (remove_slowest_percent>0 && remove_slowest_percent/100.0*runtimes.size()>0) {
-        removed_records=static_cast<size_t>(remove_slowest_percent/100.0*runtimes.size());
-        runtimes.erase(runtimes.end()-removed_records, runtimes.end());
-    }
-    double sum=0, sum2=0, mmin=0, mmax=0;
-
-    for (size_t i=0; i<runtimes.size(); i++) {
-
-        sum+=runtimes[i];
-        sum2+=(runtimes[i]*runtimes[i]);
-        if (i==0) mmin=mmax=runtimes[i];
-        else {
-            if (runtimes[i]>mmax) mmax=runtimes[i];
-            if (runtimes[i]<mmin) mmin=runtimes[i];
-        }
-    }
-    Statistics stat;
-    const double NN=static_cast<double>(runtimes.size());
-    stat.mean=sum/NN;
-    stat.std=sqrt((sum2-sum*sum/NN)/(NN-1.0));
-    stat.min=mmin;
-    stat.max=mmax;
-    stat.removed_records=removed_records;
-    return stat;
-}
-
-void reportRuntimes(const std::vector<double>& runtimes, double remove_slowest_percent=SPEEDTEST_REMOVESLOWEST_PERCENT) {
-    Statistics stat=evaluateRuntimes(runtimes, 0);
-    std::cout<<"  ALL:     average time to write one image: "<<stat.mean<<" usecs    std: "<<stat.std<<" usecs     range: ["<<stat.min<<".."<<stat.max<<"] usecs\n";
-    std::cout<<"  ALL:     average image rate: "<<1.0/(stat.mean)*1000.0<<" kHz\n";
-    stat=evaluateRuntimes(runtimes, remove_slowest_percent);
-    std::cout<<"  CLEANED: removed slowest "<<stat.removed_records<<" records\n";
-    std::cout<<"  CLEANED: average time to write one image: "<<stat.mean<<" usecs    std: "<<stat.std<<" usecs     range: ["<<stat.min<<".."<<stat.max<<"] usecs\n";
-    std::cout<<"  CLEANED: average image rate: "<<1.0/(stat.mean)*1000.0<<" kHz\n";
-}
 
 
 template <class T>
-void libtiffTestRead(const char* filename, T* written, int width, int height)  {
+bool libtiffTestRead(const char* filename, const T* writteneven, const T* writtenodd, uint32_t width, uint32_t height, uint16_t samples=1, uint32_t frames_expected=0, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky)  {
+    bool ok=true;
 #ifdef TINYTIFF_TEST_LIBTIFF
     TIFF* tif = TIFFOpen(filename, "r");
     T* data=(T*)malloc(width*height*sizeof(T));
     if (tif) {
-        uint32 nx,ny;
-        TIFFGetField(tif,TIFFTAG_IMAGEWIDTH,&nx);
-        TIFFGetField(tif,TIFFTAG_IMAGELENGTH,&ny);
-		char* val=NULL; 
-		TIFFGetField(tif,TIFFTAG_IMAGEDESCRIPTION,&val); 
-		if (val) std::cout<<"    ImageDescription("<<strlen(val)<<"):\n"<<val<<"\n"; 
-        TIFFPrintDirectory(tif, stdout, TIFFPRINT_STRIPS);
-        if (nx==width && ny==height) {
-            if (TIFFReadFrame(tif, data)) {
-                bool ok=true;
-                for (int i=0; i<width*height; i++) {
-                    ok=ok&&(data[i]==written[i]);
+        uint32_t frame=0;
+        do {
+            uint32 nx,ny;
+            uint16_t ns,bs;
+            TIFFGetField(tif,TIFFTAG_IMAGEWIDTH,&nx);
+            TIFFGetField(tif,TIFFTAG_IMAGELENGTH,&ny);
+            TIFFGetField(tif,TIFFTAG_SAMPLESPERPIXEL,&ns);
+            TIFFGetField(tif,TIFFTAG_BITSPERSAMPLE,&bs);
+            char* val=NULL;
+            TIFFGetField(tif,TIFFTAG_IMAGEDESCRIPTION,&val);
+            if (val) std::cout<<"    ImageDescription("<<strlen(val)<<"):\n"<<val<<"\n";
+            TIFFPrintDirectory(tif, stdout);
+            if (nx==width && ny==height && ns==samples && bs==sizeof(T)*8) {
+                size_t errcnt=0;
+                size_t pixcnt=0;
+                for (uint16_t samp=0; samp<samples; samp++) {
+                    if (TIFFReadFrame(tif, data, samp)) {
+                        ok=true;
+                        const T* written=writteneven;
+                        if (writtenodd && frame%2==1) written=writtenodd;
+                        if (inputOrg==TinyTIFF_Chunky) {
+                            for (uint32 i=0; i<width*height; i++) {
+                                if (data[i]!=written[i*samples+samp]) {
+                                    ok=false;
+                                    errcnt++;
+                                    if (errcnt<50) std::cout<<" -- READ-ERROR: pixel-value differs in frame "<<frame<<" for pixel ("<<i%width<<","<<i/width<<"): file: "<<static_cast<typename atleast_int<T>::TPrint>(data[i])<<" expected: "<<static_cast<typename atleast_int<T>::TPrint>(written[i*samples+samp])<<"\n";
+                                    if (errcnt==50) std::cout<<" -- READ-ERROR: ...\n";
+                                } else {
+                                    pixcnt++;
+                                }
+                            }
+                        } else {
+                            for (uint32 i=0; i<width*height; i++) {
+                                if (data[i]!=written[i+samp*width*height]) {
+                                    ok=false;
+                                    errcnt++;
+                                    if (errcnt<50) std::cout<<" -- READ-ERROR: pixel-value differs in frame "<<frame<<" for pixel ("<<i%width<<","<<i/width<<"): file: "<<static_cast<typename atleast_int<T>::TPrint>(data[i])<<" expected: "<<static_cast<typename atleast_int<T>::TPrint>(written[i+samp*width*height])<<"\n";
+                                    if (errcnt==50) std::cout<<" -- READ-ERROR: ...\n";
+                                } else {
+                                    pixcnt++;
+                                }
+                            }
+                        }
+                        if (!ok) {
+                            std::cout<<" -- TEST READ WITH LIBTIFF: READ WRONG DATA for "<<errcnt<<" pixels in frame "<<frame<<"!!!\n";
+                        }
+                    } else {
+                        std::cout<<" -- TEST READ WITH LIBTIFF: COULD NOT READ FRAME "<<frame<<"!\n";
+                        ok=false;
+                    }
                 }
                 if (ok) {
-                    std::cout<<" -- TEST READ WITH LIBTIFF: TEST PASSED!!!\n";
-                } else  {
-                    std::cout<<" -- TEST READ WITH LIBTIFF: READ WRONG DATA!!!\n";
+                    std::cout<<" -- TEST READ WITH LIBTIFF: SUCCESS FOR FRAME "<<frame<<"! All "<<pixcnt<<" pixels&samples as expected!\n";
                 }
             } else {
-                std::cout<<" -- TEST READ WITH LIBTIFF: COULD NOT READ FRAME!\n";
+                std::cout<<" -- TEST READ WITH LIBTIFF: FRAME SIZE OF FRAME "<<frame<<" DOES NOT MATCH (width: file:"<<nx<<"/expected:"<<width<<",   height: file:"<<ny<<"/expected:"<<height<<",   samples: file:"<<ns<<"/expected:"<<samples<<",   bitspersample: file:"<<bs<<"/expected:"<<(sizeof(T)*8)<<")!\n";
+                ok=false;
             }
-        } else {
-            std::cout<<" -- TEST READ WITH LIBTIFF: FRAME SIZE DOES NOT MATCH ("<<nx<<"!="<<width<<",   "<<ny<<"!="<<height<<")!\n";
+            frame++;
+        } while (ok && TIFFReadDirectory(tif));
+        if (frames_expected>0 && frames_expected!=frame) {
+            std::cout<<" -- ERROR IN TEST READ WITH LIBTIFF: number of frames ("<<frame<<")does not match expected number of frames ("<<frames_expected<<")\n";
+            ok=false;
         }
-
         TIFFClose(tif);
     } else {
         std::cout<<" -- TEST READ WITH LIBTIFF: COULD NOT OPEN FILE!\n";
+        ok=false;
     }
     free(data);
 #endif
+    return ok;
 }
 
-int main() {
-    uint8_t* image8=(uint8_t*)calloc(WIDTH*HEIGHT, sizeof(uint8_t));
-    uint8_t* image8i=(uint8_t*)calloc(WIDTH*HEIGHT, sizeof(uint8_t));
-    uint16_t* image16=(uint16_t*)calloc(WIDTH*HEIGHT, sizeof(uint16_t));
-    uint16_t* image16i=(uint16_t*)calloc(WIDTH*HEIGHT, sizeof(uint16_t));
-    float* imagef=(float*)calloc(WIDTH*HEIGHT, sizeof(float));
-    float* imagefi=(float*)calloc(WIDTH*HEIGHT, sizeof(float));
-    uint8_t* imagergb=(uint8_t*)calloc(WIDTH*HEIGHT*3, sizeof(uint8_t));
-    uint8_t* imagergbi=(uint8_t*)calloc(WIDTH*HEIGHT*3, sizeof(uint8_t));
 
-    int i=0;
-    for (int x=0; x<WIDTH; x++) {
-        for (int y=0; y<HEIGHT; y++) {
-            if (x==y) image8[i]=254;
-            else if ((x%PATTERNSIZE==0) && (y%PATTERNSIZE==0)) image8[i]=200;
-            else if (x%PATTERNSIZE==0) image8[i]=75;
-            else if (y%PATTERNSIZE==0) image8[i]=150;
-            image8i[i]=255-image8[i];
-            image16[i]=(255-image8[i])*255;
-            image16i[i]=0xFFFF-image16[i];
-            imagef[i]=float(image8[i])/255.0-0.5;
-            imagefi[i]=1.0-float(image8[i])/255.0-0.5;
-            imagergb[i*3+0]=x*255/WIDTH;
-            imagergb[i*3+1]=0;
-            imagergb[i*3+2]=y*255/WIDTH;
-            if (x==y) imagergb[i*3+1]=254;
-            else if ((x%PATTERNSIZE==0) && (y%PATTERNSIZE==0)) imagergb[i*3+1]=200;
-            else if (x%PATTERNSIZE==0) imagergb[i*3+1]=75;
-            else if (y%PATTERNSIZE==0) imagergb[i*3+1]=150;
-            imagergbi[i*3+0]=255-imagergb[i*3+0];
-            imagergbi[i*3+1]=255-imagergb[i*3+1];
-            imagergbi[i*3+2]=255-imagergb[i*3+2];
-            i++;
-        }
-    }
-
-    std::cout<<"WRITING 8-Bit UINT TIFF\n";
-    TinyTIFFWriterFile* tiff = TinyTIFFWriter_open("test8.tif", 8, 1, WIDTH,HEIGHT);
-    TinyTIFFWriter_writeImage(tiff, image8);
-    TinyTIFFWriter_close_withdescription(tiff, "");
-    tiff = TinyTIFFWriter_open("test8m.tif", 8, 1, WIDTH,HEIGHT);
-    TinyTIFFWriter_writeImage(tiff, image8);
-    TinyTIFFWriter_writeImage(tiff, image8i);
-    TinyTIFFWriter_writeImage(tiff, image8);
-    TinyTIFFWriter_writeImage(tiff, image8i);
-    TinyTIFFWriter_close(tiff);
-    libtiffTestRead<uint8_t>("test8.tif", image8, WIDTH, HEIGHT);
-
-
-    std::cout<<"WRITING 16-Bit UINT TIFF\n";
-    tiff = TinyTIFFWriter_open("test16.tif", 16, 1, WIDTH,HEIGHT);
-    TinyTIFFWriter_writeImage(tiff, image16);
-    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
-    tiff = TinyTIFFWriter_open("test16m.tif", 16, 1, WIDTH,HEIGHT);
-    TinyTIFFWriter_writeImage(tiff, image16);
-    TinyTIFFWriter_writeImage(tiff, image16i);
-    TinyTIFFWriter_writeImage(tiff, image16);
-    TinyTIFFWriter_writeImage(tiff, image16i);
-    TinyTIFFWriter_writeImage(tiff, image16);
-    TinyTIFFWriter_writeImage(tiff, image16i);
-    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
-    libtiffTestRead<uint16_t>("test16.tif", image16, WIDTH, HEIGHT);
-
-    std::cout<<"WRITING 32-Bit FLOAT TIFF\n";
-    tiff = TinyTIFFWriter_open("testf.tif", 32, 1, WIDTH,HEIGHT);
-    TinyTIFFWriter_writeImage(tiff, imagef);
-    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
-    tiff = TinyTIFFWriter_open("testfm.tif", 32, 1, WIDTH,HEIGHT);
-    TinyTIFFWriter_writeImage(tiff, imagef);
-    TinyTIFFWriter_writeImage(tiff, imagefi);
-    TinyTIFFWriter_writeImage(tiff, imagef);
-    TinyTIFFWriter_writeImage(tiff, imagefi);
-    TinyTIFFWriter_writeImage(tiff, imagef);
-    TinyTIFFWriter_writeImage(tiff, imagefi);
-    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
-    libtiffTestRead<float>("testf.tif", imagef, WIDTH, HEIGHT);
-
-
-    std::cout<<"WRITING 3-CHANNEL 8-Bit UINT RGB TIFF\n";
-    tiff = TinyTIFFWriter_open("test_rgb.tif", 8, 3, WIDTH,HEIGHT);
-    TinyTIFFWriter_writeImage(tiff, imagergb);
-    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
-    tiff = TinyTIFFWriter_open("test_rgbm.tif", 8, 3, WIDTH,HEIGHT);
-    TinyTIFFWriter_writeImage(tiff, imagergb);
-    TinyTIFFWriter_writeImage(tiff, imagergbi);
-    TinyTIFFWriter_writeImage(tiff, imagergb);
-    TinyTIFFWriter_writeImage(tiff, imagergbi);
-    TinyTIFFWriter_writeImage(tiff, imagergb);
-    TinyTIFFWriter_writeImage(tiff, imagergbi);
-    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
-    //libtiffTestReadRGB<float>("test_rgb.tif", imagergb, WIDTH, HEIGHT);
-
-    std::cout<<"TIFF SPEED TEST, 8-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
+template <class T>
+void performWriteTest(const std::string& name, const char* filename, const T* imagedata, size_t WIDTH, size_t HEIGHT, size_t SAMPLES, TinyTIFFWriterSampleInterpretation interpret, std::vector<TestResult>& test_results, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky, TinyTIFFSampleLayout outputOrg=TinyTIFF_Chunky) {
+    const size_t bits=sizeof(T)*8;
+    std::string desc=std::to_string(WIDTH)+"x"+std::to_string(HEIGHT)+"pix/"+std::to_string(bits)+"bit/"+std::to_string(SAMPLES)+"ch/1frame";
+    if (inputOrg==TinyTIFF_Chunky && outputOrg==TinyTIFF_Chunky) desc+="/CHUNKY_FROM_CHUNKY";
+    if (inputOrg==TinyTIFF_Chunky && outputOrg==TinyTIFF_Planar) desc+="/PLANAR_FROM_CHUNKY";
+    if (inputOrg==TinyTIFF_Planar && outputOrg==TinyTIFF_Chunky) desc+="/CHUNKY_FROM_PLANAR";
+    if (inputOrg==TinyTIFF_Planar && outputOrg==TinyTIFF_Planar) desc+="/PLANAR_FROM_PLANAR";
+    test_results.emplace_back();
+    test_results.back().name=name+" ["+desc+", "+std::string(filename)+"]";
+    test_results.back().success=true;
+    std::cout<<"\n\n*****************************************************************************\n";
+    std::cout<<"* "<<test_results.back().name<<"\n";
     HighResTimer timer;
-
-    tiff = TinyTIFFWriter_open("test8_speedtest.tif", 8, 1, WIDTH,HEIGHT);
-    std::vector<double> runtimes;
-    for (int i=0; i<SPEEDTEST_SIZE; i++) {
-        timer.start();
-        TinyTIFFWriter_writeImage(tiff, image8i);
-        const double duration=timer.get_time();
-        runtimes.push_back(duration);
+    timer.start();
+    TinyTIFFWriterFile* tiff = TinyTIFFWriter_open(filename, bits, TinyTIFF_SampleFormatFromType<T>().format, SAMPLES, WIDTH,HEIGHT, interpret);
+    if (tiff) {
+        int res;
+        res=TinyTIFFWriter_writeImageMultiSample(tiff, imagedata, inputOrg, outputOrg);
+        if (res!=TINYTIFF_TRUE) {
+            test_results.back().success=false;
+            std::cout<<"ERROR: error writing image data into '"<<filename<<"'! MESSAGE: "<<TinyTIFFWriter_getLastError(tiff)<<"\n";
+        }
+        TinyTIFFWriter_close(tiff);
+        test_results.back().duration_ms=timer.get_time()/1e3;
+        if ((get_filesize(filename)<=0)) {
+            test_results.back().success=false;
+            std::cout<<"ERROR: file '"<<filename<<"' has no contents!\n";
+        } else if (!libtiffTestRead<T>(filename, imagedata, nullptr, WIDTH, HEIGHT, SAMPLES, 1, inputOrg)) {
+            test_results.back().success=false;
+            std::cout<<"ERROR: reading '"<<filename<<"' with libTIFF failed!\n";
+        }
+    } else {
+        std::cout<<"ERROR: could not open '"<<filename<<"' for writing!\n";
+        test_results.back().success=false;
     }
-    reportRuntimes(runtimes);
-    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
-
-
-
-
-    std::cout<<"RAW SPEED TEST, 8-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
-    FILE* fraw=fopen("test8_speedtest.raw", "w");
-    runtimes.clear();
-    for (int i=0; i<SPEEDTEST_SIZE; i++) {
-        timer.start();
-        fwrite(image8i, WIDTH*HEIGHT, 1, fraw);
-        const double duration=timer.get_time();
-        runtimes.push_back(duration);
+    if (test_results.back().success) {
+        std::cout<<"* ==> SUCCESSFUL,   duration="<<test_results.back().duration_ms<<"ms\n";
+    } else {
+        std::cout<<"* ==> FAILED\n";
     }
-    reportRuntimes(runtimes);
+}
 
+template <class T>
+void performMultiFrameWriteTest(const std::string& name, const char* filename, const T* imagedata, const T* imagedatai, size_t WIDTH, size_t HEIGHT, size_t SAMPLES, size_t FRAMES, TinyTIFFWriterSampleInterpretation interpret, std::vector<TestResult>& test_results, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky, TinyTIFFSampleLayout outputOrg=TinyTIFF_Chunky) {
+    const size_t bits=sizeof(T)*8;
+    std::string desc=std::to_string(WIDTH)+"x"+std::to_string(HEIGHT)+"pix/"+std::to_string(bits)+"bit/"+std::to_string(SAMPLES)+"ch/"+std::to_string(FRAMES)+"frames";
+    if (inputOrg==TinyTIFF_Chunky && outputOrg==TinyTIFF_Chunky) desc+="/CHUNKY_FROM_CHUNKY";
+    if (inputOrg==TinyTIFF_Chunky && outputOrg==TinyTIFF_Planar) desc+="/PLANAR_FROM_CHUNKY";
+    if (inputOrg==TinyTIFF_Planar && outputOrg==TinyTIFF_Chunky) desc+="/CHUNKY_FROM_PLANAR";
+    if (inputOrg==TinyTIFF_Planar && outputOrg==TinyTIFF_Planar) desc+="/PLANAR_FROM_PLANAR";
+    test_results.emplace_back();
+    test_results.back().name=name+" ["+desc+", "+std::string(filename)+"]";
+    test_results.back().success=true;
+    std::cout<<"\n\n*****************************************************************************\n";
+    std::cout<<"* "<<test_results.back().name<<"\n";
+    HighResTimer timer;
+    timer.start();
+    TinyTIFFWriterFile* tiff = TinyTIFFWriter_open(filename, bits, TinyTIFF_SampleFormatFromType<T>().format, SAMPLES, WIDTH,HEIGHT, interpret);
+    if (tiff) {
+        for (size_t f=0; f<FRAMES; f++) {
+            int res;
+            if (f%2==0) res=TinyTIFFWriter_writeImageMultiSample(tiff, imagedata, inputOrg, outputOrg);
+            else res=TinyTIFFWriter_writeImageMultiSample(tiff, imagedatai, inputOrg, outputOrg);
+            if (res!=TINYTIFF_TRUE) {
+                test_results.back().success=false;
+                std::cout<<"ERROR: error writing image data into '"<<filename<<"'! MESSAGE: "<<TinyTIFFWriter_getLastError(tiff)<<"\n";
+            }
 
-
-    std::cout<<"TIFF SPEED TEST, 16-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
-
-    tiff = TinyTIFFWriter_open("test16_speedtest.tif", 16, 1, WIDTH,HEIGHT);
-    runtimes.clear();
-
-    for (int i=0; i<SPEEDTEST_SIZE; i++) {
-        timer.start();
-        TinyTIFFWriter_writeImage(tiff, image16);
-        const double duration=timer.get_time();
-        runtimes.push_back(duration);
+        }
+        TinyTIFFWriter_close(tiff);
+        test_results.back().duration_ms=timer.get_time()/1e3;
+        if ((get_filesize(filename)<=0)) {
+            test_results.back().success=false;
+            std::cout<<"ERROR: file '"<<filename<<"' has no contents!\n";
+        } else if (!libtiffTestRead<T>(filename, imagedata, imagedatai, WIDTH, HEIGHT, SAMPLES, FRAMES, inputOrg)) {
+            test_results.back().success=false;
+            std::cout<<"ERROR: reading '"<<filename<<"' with libTIFF failes!\n";
+        }
+    } else {
+        std::cout<<"ERROR: could not open '"<<filename<<"' for writing!\n";
+        test_results.back().success=false;
     }
-    reportRuntimes(runtimes);
-
-    TinyTIFFWriter_close_withmetadatadescription(tiff, 100, 200, 300, 1e-4);
-
-
-
-
-
-    std::cout<<"RAW SPEED TEST, 16-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
-    fraw=fopen("test16_speedtest.raw", "w");
-    runtimes.clear();
-
-    for (int i=0; i<SPEEDTEST_SIZE; i++) {
-        timer.start();
-        fwrite(image16i, WIDTH*HEIGHT*2, 1, fraw);
-        const double duration=timer.get_time();
-        runtimes.push_back(duration);
+    if (test_results.back().success) {
+        std::cout<<"* ==> SUCCESSFUL,   duration="<<test_results.back().duration_ms<<"ms\n";
+    } else {
+        std::cout<<"* ==> FAILED\n";
     }
-    reportRuntimes(runtimes);
-
+}
 
 
 #ifdef TINYTIFF_TEST_LIBTIFF
-    if (SPEEDTEST_SIZE<60000) {
-        std::cout<<"LIBTIFF SPEED TEST, 8-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
-        TIFF* tifvideo=TIFFOpen("libtifftest8_speedtest.tif", "w");
-        runtimes.clear();
+static void errorhandler(const char* module, const char* fmt, va_list ap)
+{
+    static std::array<char, 1024> errorbuffer;
+    vsnprintf(errorbuffer.data(), errorbuffer.size(), fmt, ap);
 
-        for (int i=0; i<SPEEDTEST_SIZE; i++) {
-            timer.start();
-            TIFFTWriteUint8(tifvideo, image8i, WIDTH, HEIGHT);
-            TIFFWriteDirectory(tifvideo);
-            const double duration=timer.get_time();
-            runtimes.push_back(duration);
+    std::cout<<"###LIBTIFF-ERROR: "<<module<<": "<<errorbuffer.data()<<"\n";
+}
+static void warninghandler(const char* module, const char* fmt, va_list ap)
+{
+    static std::array<char, 1024> errorbuffer;
+    vsnprintf(errorbuffer.data(), errorbuffer.size(), fmt, ap);
 
-        }
-        TIFFClose(tifvideo);
-        reportRuntimes(runtimes);
-
-
-
-
-
-
-        std::cout<<"LIBTIFF SPEED TEST, 16-Bit "<<SPEEDTEST_SIZE<<" images "<<WIDTH<<"x"<<HEIGHT<<" pixels\n";
-        tifvideo=TIFFOpen("libtifftest16_speedtest.tif", "w");
-        runtimes.clear();
-
-        for (int i=0; i<SPEEDTEST_SIZE; i++) {
-            timer.start();
-            TIFFTWriteUint16(tifvideo, image16i, WIDTH, HEIGHT);
-            TIFFWriteDirectory(tifvideo);
-            const double duration=timer.get_time();
-            runtimes.push_back(duration);
-
-        }
-        TIFFClose(tifvideo);
-        reportRuntimes(runtimes);
-
-    }
+    std::cout<<"###LIBTIFF-WARNING: "<<module<<": "<<errorbuffer.data()<<"\n";
+}
 #endif
 
+int main() {
+#ifdef TINYTIFF_TEST_LIBTIFF
+    TIFFSetErrorHandler(errorhandler);
+    TIFFSetWarningHandler(warninghandler);
+#endif
+    std::vector<TestResult> test_results;
+
+    const size_t WIDTH = 300;
+    const size_t HEIGHT = 125;
+    const size_t PATTERNSIZE = 12;
+
+
+    std::vector<uint8_t> image8(WIDTH*HEIGHT, 0);
+    std::vector<uint8_t> image8i(WIDTH*HEIGHT, 0);
+    std::vector<uint16_t> image16(WIDTH*HEIGHT, 0);
+    std::vector<uint16_t> image16i(WIDTH*HEIGHT, 0);
+    std::vector<uint32_t> image32(WIDTH*HEIGHT, 0);
+    std::vector<uint32_t> image32i(WIDTH*HEIGHT, 0);
+    std::vector<uint64_t> image64(WIDTH*HEIGHT, 0);
+    std::vector<uint64_t> image64i(WIDTH*HEIGHT, 0);
+    std::vector<float> imagef(WIDTH*HEIGHT, 0);
+    std::vector<float> imagefi(WIDTH*HEIGHT, 0);
+    std::vector<double> imaged(WIDTH*HEIGHT, 0);
+    std::vector<double> imagedi(WIDTH*HEIGHT, 0);
+    std::vector<uint8_t> imagergb(WIDTH*HEIGHT*3, 0);
+    std::vector<uint8_t> imagergbi(WIDTH*HEIGHT*3, 0);
+    std::vector<uint8_t> imagergba(WIDTH*HEIGHT*4, 0);
+    std::vector<uint8_t> imagergbai(WIDTH*HEIGHT*4, 0);
+    std::vector<uint8_t> greyalpha(WIDTH*HEIGHT*2, 0);
+    std::vector<uint8_t> greyalphai(WIDTH*HEIGHT*2, 0);
+    std::vector<uint8_t> imagergbplan(WIDTH*HEIGHT*3, 0);
+    std::vector<uint8_t> imagergbplani(WIDTH*HEIGHT*3, 0);
+
+
+    write1ChannelTestData(image8.data(), WIDTH, HEIGHT, PATTERNSIZE, 1);
+    write1ChannelTestData(image8i.data(), WIDTH, HEIGHT, PATTERNSIZE, 1);
+    invertTestImage(image8i.data(), WIDTH, HEIGHT, 1);
+    write1ChannelTestData(image16.data(), WIDTH, HEIGHT, PATTERNSIZE, 1);
+    write1ChannelTestData(image16i.data(), WIDTH, HEIGHT, PATTERNSIZE, 1);
+    invertTestImage(image16i.data(), WIDTH, HEIGHT, 1);
+    write1ChannelTestData(image32.data(), WIDTH, HEIGHT, PATTERNSIZE, 1);
+    write1ChannelTestData(image32i.data(), WIDTH, HEIGHT, PATTERNSIZE, 1);
+    invertTestImage(image32i.data(), WIDTH, HEIGHT, 1);
+    write1ChannelTestData(image64.data(), WIDTH, HEIGHT, PATTERNSIZE, 1);
+    write1ChannelTestData(image64i.data(), WIDTH, HEIGHT, PATTERNSIZE, 1);
+    invertTestImage(image64i.data(), WIDTH, HEIGHT, 1);
+    write1ChannelFloatTestData<float>(imagef.data(), WIDTH, HEIGHT, PATTERNSIZE, 1, 1.0);
+    write1ChannelFloatTestData<float>(imagefi.data(), WIDTH, HEIGHT, PATTERNSIZE, 1, 1.0);
+    invertFloatTestImage<float>(imagefi.data(), WIDTH, HEIGHT, 1, 1.0);
+    write1ChannelFloatTestData<double>(imaged.data(), WIDTH, HEIGHT, PATTERNSIZE, 1, 1.0);
+    write1ChannelFloatTestData<double>(imagedi.data(), WIDTH, HEIGHT, PATTERNSIZE, 1, 1.0);
+    invertFloatTestImage<double>(imagedi.data(), WIDTH, HEIGHT, 1, 1.0);
+    writeRGBTestDataChunky(imagergb.data(), WIDTH, HEIGHT, PATTERNSIZE,3);
+    writeRGBTestDataChunky(imagergbi.data(), WIDTH, HEIGHT, PATTERNSIZE,3);
+    invertTestImage(imagergbi.data(), WIDTH, HEIGHT,3);
+    writeRGBTestDataPlanar(imagergbplan.data(), WIDTH, HEIGHT, PATTERNSIZE,3);
+    writeRGBTestDataPlanar(imagergbplani.data(), WIDTH, HEIGHT, PATTERNSIZE,3);
+    invertTestImage(imagergbplani.data(), WIDTH, HEIGHT,3);
+    writeRGBTestDataChunky(imagergba.data(), WIDTH, HEIGHT, PATTERNSIZE,4);
+    writeALPHATestData(imagergba.data(), 3, WIDTH, HEIGHT, 4);
+    writeRGBTestDataChunky(imagergbai.data(), WIDTH, HEIGHT, PATTERNSIZE,4);
+    writeALPHATestData(imagergbai.data(), 3, WIDTH, HEIGHT, 4);
+    invertTestImage(imagergbai.data(), WIDTH, HEIGHT,4);
+    write1ChannelTestData(greyalpha.data(), WIDTH, HEIGHT, PATTERNSIZE, 2);
+    writeALPHATestData(greyalpha.data(), 1, WIDTH, HEIGHT, 2);
+    write1ChannelTestData(greyalphai.data(), WIDTH, HEIGHT, PATTERNSIZE, 2);
+    writeALPHATestData(greyalphai.data(), 1, WIDTH, HEIGHT, 2);
+    invertTestImage(greyalphai.data(), WIDTH, HEIGHT, 2);
+
+
+    performWriteTest("WRITING 8-Bit UINT GREY TIFF", "test8.tif", image8.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
+    performMultiFrameWriteTest("WRITING 8-Bit UINT GREY TIFF", "test8m.tif", image8.data(), image8i.data(), WIDTH, HEIGHT, 1, 6, TinyTIFFWriter_Greyscale, test_results);
+
+    performWriteTest("WRITING 16-Bit UINT GREY TIFF", "test16.tif", image16.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
+    performMultiFrameWriteTest("WRITING 16-Bit UINT GREY TIFF", "test16m.tif", image16.data(), image16i.data(), WIDTH, HEIGHT, 1, 6, TinyTIFFWriter_Greyscale, test_results);
+
+    performWriteTest("WRITING 32-Bit UINT GREY TIFF", "test32.tif", image32.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
+    performMultiFrameWriteTest("WRITING 32-Bit UINT GREY TIFF", "test32m.tif", image32.data(), image32i.data(), WIDTH, HEIGHT, 1, 6, TinyTIFFWriter_Greyscale, test_results);
+
+    performWriteTest("WRITING 64-Bit UINT GREY TIFF", "test64.tif", image64.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
+    performMultiFrameWriteTest("WRITING 64-Bit UINT GREY TIFF", "test64m.tif", image64.data(), image64i.data(), WIDTH, HEIGHT, 1, 6, TinyTIFFWriter_Greyscale, test_results);
+
+    performWriteTest("WRITING 32-Bit FLOAT GREY TIFF", "testf.tif", imagef.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
+    performMultiFrameWriteTest("WRITING 32-Bit FLOAT GREY TIFF", "testfm.tif", imagef.data(), imagefi.data(), WIDTH, HEIGHT, 1, 6, TinyTIFFWriter_Greyscale, test_results);
+
+    performWriteTest("WRITING 64-Bit FLOAT GREY TIFF", "testd.tif", imaged.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
+    performMultiFrameWriteTest("WRITING 64-Bit FLOAT GREY TIFF", "testdm.tif", imaged.data(), imagedi.data(), WIDTH, HEIGHT, 1, 6, TinyTIFFWriter_Greyscale, test_results);
+
+    performWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgb.tif", imagergb.data(), WIDTH, HEIGHT, 3, TinyTIFFWriter_RGB, test_results);
+    performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm.tif", imagergb.data(), imagergbi.data(), WIDTH, HEIGHT, 3, 6, TinyTIFFWriter_RGB, test_results);
+
+    performWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgb_chunkplan.tif", imagergb.data(), WIDTH, HEIGHT, 3, TinyTIFFWriter_RGB, test_results, TinyTIFF_Chunky, TinyTIFF_Planar);
+    performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm_chunkplan.tif", imagergb.data(), imagergbi.data(), WIDTH, HEIGHT, 3, 6, TinyTIFFWriter_RGB, test_results, TinyTIFF_Chunky, TinyTIFF_Planar);
+
+    performWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgb_planchunk.tif", imagergbplan.data(), WIDTH, HEIGHT, 3, TinyTIFFWriter_RGB, test_results, TinyTIFF_Planar, TinyTIFF_Chunky);
+    performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm_planchunk.tif", imagergbplan.data(), imagergbplani.data(), WIDTH, HEIGHT, 3, 6, TinyTIFFWriter_RGB, test_results, TinyTIFF_Planar, TinyTIFF_Chunky);
+
+    performWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgb_planplan.tif", imagergbplan.data(), WIDTH, HEIGHT, 3, TinyTIFFWriter_RGB, test_results, TinyTIFF_Planar, TinyTIFF_Planar);
+    performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm_planplan.tif", imagergbplan.data(), imagergbplani.data(), WIDTH, HEIGHT, 3, 6, TinyTIFFWriter_RGB, test_results, TinyTIFF_Planar, TinyTIFF_Planar);
+
+    performWriteTest("WRITING 8-Bit UINT RGBA TIFF", "testrgba.tif", imagergba.data(), WIDTH, HEIGHT, 4, TinyTIFFWriter_RGBA, test_results);
+    performMultiFrameWriteTest("WRITING 8-Bit UINT RGBA TIFF", "testrgbam.tif", imagergba.data(), imagergbai.data(), WIDTH, HEIGHT, 4, 6, TinyTIFFWriter_RGBA, test_results);
+
+    performWriteTest("WRITING 8-Bit UINT GREY+ALPHA  TIFF", "test_ga.tif", greyalpha.data(), WIDTH, HEIGHT, 2, TinyTIFFWriter_GreyscaleAndAlpha, test_results);
+    performMultiFrameWriteTest("WRITING 8-Bit UINT GREY+ALPHA TIFF", "test_gam.tif", greyalpha.data(), greyalphai.data(), WIDTH, HEIGHT, 2, 6, TinyTIFFWriter_GreyscaleAndAlpha, test_results);
 
 
 
-    free(image8);
+    const std::string testsum=writeTestSummary(test_results);
+    std::cout<<"\n\n\n\n\n\n"<<testsum<<std::endl;
+    std::ofstream file;
+    file.open("tintytiffwriter_test_result.txt");
+    file<<testsum;
+
     return 0;
 }

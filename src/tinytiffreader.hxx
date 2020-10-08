@@ -56,7 +56,7 @@ extern "C" {
         uint16_t sformat=TinyTIFFReader_getSampleFormat(tif);
         uint16_t bits=TinyTIFFReader_getBitsPerSample(tif);
 
-        if (sformat==TINYTIFFREADER_SAMPLEFORMAT_UINT) {
+        if (sformat==TINYTIFF_SAMPLEFORMAT_UINT) {
             if (bits==8) TinyTIFFReader_readFrame<uint8_t, float>(tif, data);
             else if (bits==16) TinyTIFFReader_readFrame<uint16_t, float>(tif, data);
             else if (bits==32) TinyTIFFReader_readFrame<uint32_t, float>(tif, data);
@@ -64,7 +64,7 @@ extern "C" {
                 tinyTIFFErrorHandler("QFImageReaderTinyTIFF", QObject::tr("frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n").arg(frame).arg(sformat).arg(bits));
                 return false;
             }
-        } else if (sformat==TINYTIFFREADER_SAMPLEFORMAT_INT) {
+        } else if (sformat==TINYTIFF_SAMPLEFORMAT_INT) {
             if (bits==8) TinyTIFFReader_readFrame<int8_t, float>(tif, data);
             else if (bits==16) TinyTIFFReader_readFrame<int16_t, float>(tif, data);
             else if (bits==32) TinyTIFFReader_readFrame<int32_t, float>(tif, data);
@@ -72,7 +72,7 @@ extern "C" {
                 tinyTIFFErrorHandler("QFImageReaderTinyTIFF", QObject::tr("frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n").arg(frame).arg(sformat).arg(bits));
                 return false;
             }
-        } else if (sformat==TINYTIFFREADER_SAMPLEFORMAT_FLOAT) {
+        } else if (sformat==TINYTIFF_SAMPLEFORMAT_FLOAT) {
             if (bits==32) TinyTIFFReader_readFrame<float, float>(tif, data);
             else {
                 tinyTIFFErrorHandler("QFImageReaderTinyTIFF", QObject::tr("frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n").arg(frame).arg(sformat).arg(bits));
@@ -91,13 +91,13 @@ extern "C" {
     return true;
 }
 \endcode
-        */
-    template <class Tin, class Tout>
-    inline void TinyTIFFReader_readFrame(TinyTIFFReaderFile* tif, Tout* buffer) {
+    */
+template <class Tin, class Tout>
+inline void TinyTIFFReader_readFrame(TinyTIFFReaderFile* tif, Tout* buffer, uint16_t sample=0) {
     uint32_t wwidth=TinyTIFFReader_getWidth(tif);
     uint32_t hheight=TinyTIFFReader_getHeight(tif);
     Tin* tmp=(Tin*)calloc(wwidth*hheight, sizeof(Tin));
-    TinyTIFFReader_getSampleData(tif, tmp, 0);
+    TinyTIFFReader_getSampleData(tif, tmp, sample);
     for (uint32_t i=0; i<wwidth*hheight; i++) {
         buffer[i]=tmp[i];
     }

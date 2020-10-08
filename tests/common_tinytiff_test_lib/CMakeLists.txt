@@ -7,8 +7,12 @@ target_include_directories(common_tinytiff_test_lib PUBLIC ${CMAKE_CURRENT_SOURC
 target_sources(common_tinytiff_test_lib
   PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/tinytiffhighrestimer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_results.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/testimage_tools.cpp
   PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/tinytiffhighrestimer.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_results.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/testimage_tools.h
 )
 
 if (TIFF_FOUND)

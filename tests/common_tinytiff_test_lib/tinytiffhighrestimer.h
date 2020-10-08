@@ -1,7 +1,5 @@
 /*
-    Copyright (c) 2008-2015 Jan W. Krieger (<jan@jkrieger.de>, <j.krieger@dkfz.de>), German Cancer Research Center (DKFZ) & IWR, University of Heidelberg
-
-    last modification: $LastChangedDate: 2015-07-07 12:07:58 +0200 (Di, 07 Jul 2015) $  (revision $Rev: 4005 $)
+    Copyright (c) 2008-2020 Jan W. Krieger (<jan@jkrieger.de>), German Cancer Research Center (DKFZ) & IWR, University of Heidelberg
 
     This software is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License (LGPL) as published by
@@ -24,15 +22,12 @@
 #ifndef TINYTIFHIGHRESTIMER_H
 #define TINYTIFHIGHRESTIMER_H
 
-#include <cmath>
-#include <cstdlib>
-#include <iostream>
-#include <chrono>
+#include <memory>
 
 
 class HighResTimer {
   protected:
-      std::chrono::high_resolution_clock::time_point last;
+
 	public:
 		/** \brief class constructor. */
 		HighResTimer();
@@ -41,8 +36,10 @@ class HighResTimer {
 		/** \brief start the timer */
 		void start();
 		/** \brief get the time since the last call of start() in microseconds */
-		double get_time();
-
+        double get_time();
+    private:
+        struct D;
+        std::unique_ptr<D> d;
 
 };
 

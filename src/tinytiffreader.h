@@ -22,7 +22,7 @@
 #define TINYTIFFREADER_H
 
 #include "tinytiff_export.h"
-
+#include "tinytiff_defs.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,75 +32,9 @@
 /*! \defgroup tinytiffreader Tiny TIFF reader library
    \ingroup tinytiff_maingroup
 
-   The methods in this file allow to read TIFF files with limited capabilites,
-   but very fast (comapred to libtiff) and also more frames from a multi-frame
-   TIFF than libtiff (which is currently limited to 65535 frames due to internal
-   data sizes!).
+   The methods in this file allow to read TIFF files with limited capabilites.	 
    
-   This library currently support TIFF files, which meet the following criteria:
-     * TIFF-only (no BigTIFF), i.e. max. 4GB
-	 * uncompressed frames
-	 * one, or more samples per frame
-	 * data types: UINT, INT, FLOAT
-   .	 
-   
-   This example reads all frames from a TIFF file:
-   \code
-   TinyTIFFReaderFile* tiffr=NULL;
-   tiffr=TinyTIFFReader_open(filename); 
-    if (!tiffr) { 
-        std::cout<<"    ERROR reading (not existent, not accessible or no TIFF file)\n"; 
-    } else { 
-        if (TinyTIFFReader_wasError(tiffr)) std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; 
-        std::cout<<"    ImageDescription:\n"<< TinyTIFFReader_getImageDescription(tiffr) <<"\n"; 
-        uint32_t frames=TinyTIFFReader_countFrames(tiffr); 
-        std::cout<<"    frames: "<<frames<<"\n"; 
-        if (TinyTIFFReader_wasError(tiffr)) std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; 
-        uint32_t frame=0; 
-        do { 
-            uint32_t width=TinyTIFFReader_getWidth(tiffr); 
-            uint32_t height=TinyTIFFReader_getHeight(tiffr); 
-			bool ok=true;
-            if (width>0 && height>0) std::cout<<"    size of frame "<<frame<<": "<<width<<"x"<<height<<"\n"; 
-            else { std::cout<<"    ERROR IN FRAME "<<frame<<": size too small "<<width<<"x"<<height<<"\n"; ok=false; } 
-            if (ok) { 
-                frame++; 
-                uint16_t* image=(uint16_t*)calloc(width*height, sizeof(uint16_t));  
-                TinyTIFFReader_getSampleData(tiffr, image, 0); 
-                if (TinyTIFFReader_wasError(tiffr)) { ok=false; std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; } 
-				
-                ///////////////////////////////////////////////////////////////////
-				// HERE WE CAN DO SOMETHING WITH THE IMAGE IN image (ROW-MAJOR!)
-                ///////////////////////////////////////////////////////////////////
-				
-                free(image); 
-            } 
-        } while (TinyTIFFReader_readNext(tiffr)); // iterate over all frames
-        std::cout<<"    read "<<frame<<" frames\n"; 
-    } 
-    TinyTIFFReader_close(tiffr); 
-   \endcode
-   
-   This example reads the first frame in a TIFF file:
-   \code
-   TinyTIFFReaderFile* tiffr=NULL;
-   tiffr=TinyTIFFReader_open(filename); 
-   if (!tiffr) { 
-        std::cout<<"    ERROR reading (not existent, not accessible or no TIFF file)\n"; 
-   } else { 
-		uint32_t width=TinyTIFFReader_getWidth(tiffr); 
-        uint32_t height=TinyTIFFReader_getHeight(tiffr); 
-		uint16_t* image=(uint16_t*)calloc(width*height, sizeof(uint16_t));  
-        TinyTIFFReader_getSampleData(tiffr, image, 0); 
-				
-                ///////////////////////////////////////////////////////////////////
-				// HERE WE CAN DO SOMETHING WITH THE IMAGE IN image (ROW-MAJOR!)
-                ///////////////////////////////////////////////////////////////////
-				
-		free(image); 
-	} 
-    TinyTIFFReader_close(tiffr); 
-   \endcode
+   \see \ref mainpagetinytiff_reader for details on how this library works
 
 
  */
@@ -110,18 +44,7 @@
 
 */
 
-#ifndef TINYTIFFREADER_TRUE
-/** \brief a logic value of TRUE, e.g. used by TinyTIFFReader_wasError()
-  * \ingroup tinytiffreader
-  */
-#  define TINYTIFFREADER_TRUE 1
-#endif
-#ifndef TINYTIFFREADER_FALSE
-/** \brief a logic value of FALSE, e.g. used by TinyTIFFReader_wasError()
-  * \ingroup tinytiffreader
-  */
-#  define TINYTIFFREADER_FALSE 0
-#endif
+
 
 /** \brief struct used to describe a TIFF file
   * \ingroup tinytiffreader
@@ -161,7 +84,7 @@ extern "C" {
      */
     TINYTIFF_EXPORT const char* TinyTIFFReader_getLastError(TinyTIFFReaderFile* tiff);
 
-    /*! \brief returns TINYTIFFREADER_TRUE (non-zero) when there was an error in the last function call, or TINYTIFFREADER_FALSE if there was no error
+    /*! \brief returns TINYTIFF_TRUE (non-zero) when there was an error in the last function call, or TINYTIFF_FALSE if there was no error
         \ingroup tinytiffreader_C
 
         \param tiff TIFF file
@@ -169,7 +92,7 @@ extern "C" {
      */
     TINYTIFF_EXPORT int TinyTIFFReader_wasError(TinyTIFFReaderFile* tiff);
 
-    /*! \brief returns TINYTIFFREADER_TRUE (non-zero) when there was no error in the last function call, or TINYTIFFREADER_FALSE if there was an error
+    /*! \brief returns TINYTIFF_TRUE (non-zero) when there was no error in the last function call, or TINYTIFF_FALSE if there was an error
         \ingroup tinytiffreader_C
 
         \param tiff TIFF file
@@ -177,7 +100,7 @@ extern "C" {
      */
     TINYTIFF_EXPORT int TinyTIFFReader_success(TinyTIFFReaderFile* tiff);
 
-    /*! \brief returns TINYTIFFREADER_TRUE (non-zero) if another frame exists in the TIFF file
+    /*! \brief returns TINYTIFF_TRUE (non-zero) if another frame exists in the TIFF file
         \ingroup tinytiffreader_C
 
         \param tiff TIFF file
@@ -189,7 +112,7 @@ extern "C" {
         \ingroup tinytiffreader_C
 
         \param tiff TIFF file
-        \return TINYTIFFREADER_TRUE (non-zero) if another frame exists in the TIFF file
+        \return TINYTIFF_TRUE (non-zero) if another frame exists in the TIFF file
 
      */
     TINYTIFF_EXPORT int TinyTIFFReader_readNext(TinyTIFFReaderFile* tiff);
@@ -220,10 +143,6 @@ extern "C" {
     TINYTIFF_EXPORT const char* TinyTIFFReader_getImageDescription(TinyTIFFReaderFile* tiff);
 
 
-    #define TINYTIFFREADER_SAMPLEFORMAT_UINT 1
-    #define TINYTIFFREADER_SAMPLEFORMAT_INT 2
-    #define TINYTIFFREADER_SAMPLEFORMAT_FLOAT 3
-    #define TINYTIFFREADER_SAMPLEFORMAT_UNDEFINED 4
 
     /*! \brief return the sample format of the current frame
         \ingroup tinytiffreader_C
@@ -255,9 +174,9 @@ extern "C" {
         \ingroup tinytiffreader_C
 
         \param tiff TIFF file
-        \param buffer the buffer this function writes into
+        \param buffer the buffer this function writes into, the size has to be at least <code>TinyTIFFReader_getWidth() * TinyTIFFReader_getHeight() * TinyTIFFReader_getBitsPerSample() / 8 </code>
         \param sample the sample to read [default: 0]
-        \return \c TINYTIFFREADER_TRUE (non-zero) on success
+        \return \c TINYTIFF_TRUE (non-zero) on success, if an error occured \c TINYTIFF_FALSE is returned and the error message can be retrieved with TinyTIFFReader_getLastError()
 
         \note The user is responsible for providing the correct buffer size
               (taking width, height and bitsPerSample into account).

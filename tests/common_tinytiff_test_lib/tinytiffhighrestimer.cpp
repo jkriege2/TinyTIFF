@@ -1,7 +1,5 @@
 /*
-    Copyright (c) 2008-2015 Jan W. Krieger (<jan@jkrieger.de>, <j.krieger@dkfz.de>), German Cancer Research Center (DKFZ) & IWR, University of Heidelberg
-
-    last modification: $LastChangedDate: 2015-07-07 12:07:58 +0200 (Di, 07 Jul 2015) $  (revision $Rev: 4005 $)
+    Copyright (c) 2008-2020 Jan W. Krieger (<jan@jkrieger.de>), German Cancer Research Center (DKFZ) & IWR, University of Heidelberg
 
     This software is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License (LGPL) as published by
@@ -27,9 +25,50 @@
 */
 
 #include "tinytiffhighrestimer.h" // class's header file
+#include <chrono>
+#include <cmath>
+#include <cstdlib>
+#include <iostream>
+
+#ifndef __WINDOWS__
+# if defined(WIN32) || defined(WIN64) || defined(_MSC_VER) || defined(_WIN32)
+#  define __WINDOWS__
+# endif
+#endif
+
+#ifndef __LINUX__
+# if defined(linux)
+#  define __LINUX__
+# endif
+#endif
+
+#ifndef __WINDOWS__
+# ifndef __LINUX__
+#  warning("these methods are ment to be used under windows or linux ... no other system were tested")
+# endif
+#endif
+
+#if defined(__WINDOWS__)
+#include<windows.h>
+#endif
 
 
-HighResTimer::HighResTimer() {
+struct HighResTimer::D {
+#ifdef __WINDOWS__
+    /** \brief internal: time stamp of the last call of start() */
+    LARGE_INTEGER last;
+
+    /** \brief internal: timer frequency */
+    double freq;
+#else
+    std::chrono::high_resolution_clock::time_point last;
+#endif
+
+};
+
+HighResTimer::HighResTimer():
+    d(new D)
+{
   start();
 }
 
@@ -37,10 +76,23 @@ HighResTimer::~HighResTimer() {
 }
 
 void HighResTimer::start(){
-  last=std::chrono::high_resolution_clock::now();
+#ifdef __WINDOWS__
+    LARGE_INTEGER fr;
+    QueryPerformanceFrequency(&fr);
+    d->freq=(double)(fr.QuadPart);
+    QueryPerformanceCounter(&(d->last));
+#else
+    d->last=std::chrono::high_resolution_clock::now();
+#endif
 }
 
 double HighResTimer::get_time(){
-  const std::chrono::high_resolution_clock::time_point n=std::chrono::high_resolution_clock::now();
-  return static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(n-last).count())/1e3;
+#ifdef __WINDOWS__
+    LARGE_INTEGER now;
+    QueryPerformanceCounter(&now);
+    return ((double)(now.QuadPart-d->last.QuadPart)/d->freq)*1e6;
+#else
+    const std::chrono::high_resolution_clock::time_point n=std::chrono::high_resolution_clock::now();
+    return static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(n-d->last).count())/1e3;
+#endif
 }
