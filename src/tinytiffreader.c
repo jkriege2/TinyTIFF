@@ -155,11 +155,12 @@ struct TinyTIFFReaderFile {
     TinyTIFFReaderFrame currentFrame;
 };
 
-errno_t TinyTIFFReader_memcpy_s( void *restrict dest, rsize_t destsz, const void *restrict src, rsize_t count ) {
+int TinyTIFFReader_memcpy_s( void * dest, size_t destsz, const void * src, size_t count ) {
 #ifdef HAVE_MEMCPY_S
-    memcpy_s(dest, destsz, src, count);
+    return memcpy_s(dest, destsz, src, count);
 #else
     memcpy(dest,  src, count);
+    return 0;
 #endif
 }
 
