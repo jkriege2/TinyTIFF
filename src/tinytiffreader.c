@@ -522,11 +522,7 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                             }
                             if (ok==TINYTIFF_FALSE) {
                                 tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-                                strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "this library does not support different sample sizes in a single frame\0");
-#else
-                                strcpy(tiff->lastError, "this library does not support different sample sizes in a single frame\0");
-#endif
+                                TINYTIFF_SET_LAST_ERROR(tiff, "this library does not support different sample sizes in a single frame\0");
                             }
                         }
 
@@ -580,11 +576,7 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
         //printf("      - nextifd_offset=%lu\n", tiff->nextifd_offset);
     } else {
         tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-        strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "no more images in TIF file\0");
-#else
-        strcpy(tiff->lastError, "no more images in TIF file\0");
-#endif
+        TINYTIFF_SET_LAST_ERROR(tiff, "no more images in TIF file\0");
     }
 }
 
@@ -592,65 +584,37 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
     if (tiff) {
         if (tiff->currentFrame.compression!=TIFF_COMPRESSION_NONE) {
             tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "the compression of the file is not supported by this library\0");
-#else
-            strcpy(tiff->lastError, "the compression of the file is not supported by this library\0");
-#endif
+            TINYTIFF_SET_LAST_ERROR(tiff, "the compression of the file is not supported by this library\0");
             return TINYTIFF_FALSE;
         }
         if (tiff->currentFrame.samplesperpixel>1 && tiff->currentFrame.planarconfiguration!=TIFF_PLANARCONFIG_PLANAR) {
             tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "only planar TIFF files are supported by this library\0");
-#else
-            strcpy(tiff->lastError, "only planar TIFF files are supported by this library\0");
-#endif
+            TINYTIFF_SET_LAST_ERROR(tiff, "only planar TIFF files are supported by this library\0");
             return TINYTIFF_FALSE;
         }
         if (tiff->currentFrame.samplesperpixel>1 && tiff->currentFrame.stripcount%tiff->currentFrame.samplesperpixel>0) {
             tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "in planar multi-sample data, stripcount has to be dividable by samplesperpixel\0");
-#else
-            strcpy(tiff->lastError, "in planar multi-sample data, stripcount has to be dividable by samplesperpixel\0");
-#endif
+            TINYTIFF_SET_LAST_ERROR(tiff, "in planar multi-sample data, stripcount has to be dividable by samplesperpixel\0");
             return TINYTIFF_FALSE;
         }
         if (tiff->currentFrame.orientation!=TIFF_ORIENTATION_STANDARD) {
             tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "only standard TIFF orientations are supported by this library\0");
-#else
-            strcpy(tiff->lastError, "only standard TIFF orientations are supported by this library\0");
-#endif
+            TINYTIFF_SET_LAST_ERROR(tiff, "only standard TIFF orientations are supported by this library\0");
             return TINYTIFF_FALSE;
         }
         if (tiff->currentFrame.photometric_interpretation==TIFF_PHOTOMETRICINTERPRETATION_PALETTE) {
             tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "palette-colored TIFF images are supported by this library\0");
-#else
-            strcpy(tiff->lastError, "palette-colored TIFF images are supported by this library\0");
-#endif
+            TINYTIFF_SET_LAST_ERROR(tiff, "palette-colored TIFF images are supported by this library\0");
             return TINYTIFF_FALSE;
         }
         if (tiff->currentFrame.width==0 || tiff->currentFrame.height==0 ) {
             tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "the current frame does not contain images\0");
-#else
-            strcpy(tiff->lastError, "the current frame does not contain images\0");
-#endif
+            TINYTIFF_SET_LAST_ERROR(tiff, "the current frame does not contain images\0");
             return TINYTIFF_FALSE;
         }
         if (tiff->currentFrame.bitspersample!=8 && tiff->currentFrame.bitspersample!=16 && tiff->currentFrame.bitspersample!=32) {
             tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "this library only support 8,16 and 32 bits per sample\0");
-#else
-            strcpy(tiff->lastError, "this library only support 8,16 and 32 bits per sample\0");
-#endif
+            TINYTIFF_SET_LAST_ERROR(tiff, "this library only support 8,16 and 32 bits per sample\0");
             return TINYTIFF_FALSE;
         }
         TinyTIFFReader_POSTYPE pos;
@@ -729,20 +693,12 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                 }
             } else {
                 tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-                strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "TINYTIFFReader does not support the bitsPerSample, given in teh file (only 8,16,32bit are supported)\0");
-#else
-                strcpy(tiff->lastError, "TINYTIFFReader does not support the bitsPerSample, given in teh file (only 8,16,32bit are supported)\0");
-#endif
+                TINYTIFF_SET_LAST_ERROR(tiff, "TINYTIFFReader does not support the bitsPerSample, given in teh file (only 8,16,32bit are supported)\0");
             }
 
         } else {
             tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-            strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "TIFF format not recognized\0");
-#else
-            strcpy(tiff->lastError, "TIFF format not recognized\0");
-#endif
+            TINYTIFF_SET_LAST_ERROR(tiff, "TIFF format not recognized\0");
         }
 
         //fsetpos(tiff->file, &pos);
@@ -750,11 +706,7 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
         return !tiff->wasError;
     }
     tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-    strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "TIFF file not opened\0");
-#else
-    strcpy(tiff->lastError, "TIFF file not opened\0");
-#endif
+    TINYTIFF_SET_LAST_ERROR(tiff, "TIFF file not opened\0");
     return TINYTIFF_FALSE;
 }
 

@@ -86,4 +86,12 @@
 
 
 
+
+#ifdef HAVE_STRCPY_S
+#define TINYTIFF_SET_LAST_ERROR(tiff, message) strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, message);
+#else
+#define TINYTIFF_SET_LAST_ERROR(tiff, message) strcpy(tiff->lastError, message);
+#endif
+
+
 #endif // TIFF_DEFINITIONS_INTERNAL_H

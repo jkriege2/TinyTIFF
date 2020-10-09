@@ -16,7 +16,7 @@
 
 
 */
-//#define TINYTIFF_WRITE_COMMENTS
+#define TINYTIFF_WRITE_COMMENTS
 
 #include <math.h>
 #include <float.h>
@@ -701,11 +701,7 @@ TinyTIFFWriterFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSa
     tiff->secondaryExtraChannelType=TIFF_EXTRASAMPLES_UNSPECIFIED;
     if (samples==0 && sampleInterpretation==TinyTIFFWriter_AutodetectSampleInterpetation) {
         tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-        strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "the parameter combination samples=0 and sampleInterpretation=TinyTIFFWriter_AutodetectSampleInterpetation is not allowed\0");
-#else
-        strcpy(tiff->lastError, "the parameter combination samples=0 and sampleInterpretation=TinyTIFFWriter_AutodetectSampleInterpetation is not allowed\0");
-#endif
+        TINYTIFF_SET_LAST_ERROR(tiff, "the parameter combination samples=0 and sampleInterpretation=TinyTIFFWriter_AutodetectSampleInterpetation is not allowed\0");
     } else if (samples==0) {
         switch(sampleInterpretation) {
         case TinyTIFFWriter_Greyscale:
@@ -948,11 +944,7 @@ int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *d
     }
     if (!data) {
         tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-        strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "no data provided to TinyTIFFWriter_writeImage()\0");
-#else
-        strcpy(tiff->lastError, "no data provided to TinyTIFFWriter_writeImage()\0");
-#endif
+        TINYTIFF_SET_LAST_ERROR(tiff, "no data provided to TinyTIFFWriter_writeImage()\0");
         return TINYTIFF_FALSE;
     }
     const long pos=TinyTIFFWriter_ftell(tiff);
@@ -965,11 +957,7 @@ int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *d
     const uint16_t photoChannels=TinyTIFFWriter_getPhotometricChannels(tiff->photometricInterpretation);
     if (tiff->samples<photoChannels) {
         tiff->wasError=TINYTIFF_TRUE;
-#ifdef HAVE_STRCPY_S
-        strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, "too few samples specified for given photometric interpretation\0");
-#else
-        strcpy(tiff->lastError, "too few samples specified for given photometric interpretation\0");
-#endif
+        TINYTIFF_SET_LAST_ERROR(tiff, "too few samples specified for given photometric interpretation\0");
         return TINYTIFF_FALSE;
 
     }
