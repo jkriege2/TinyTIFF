@@ -15,7 +15,7 @@ This is a lightweight C++ library that allows to read and write TIFF files. It o
     - TIFF-only (no BigTIFF), i.e. max. 4GB
     - uncompressed frames
     - one, or more samples per frame
-    - data types: UINT, INT, FLOAT, 8-64bit
+    - data types: UINT, INT, FLOAT, 8-32bit
 	- planar data organization only, for multi-sample data
 .
 

@@ -102,7 +102,7 @@ This library currently creates TIFF files, which meet the following criteria:
 * multiple frames per file (actually this is the scope of this lib, to write such multi-page files fast), but with the limitation that all frames have the same dimension, data-type and number of samples. The latter allows for the desired speed optimizations!
 * uncompressed frames
 * one sample per frame
-* data types: UINT, INT, FLOAT, 8-64-bit
+* data types: UINT, INT, FLOAT, 8-32-bit
 * photometric interpretations: Greyscale, RGB, including ALPHA information
 * planar (R1R2R3...G1G2G3...B1B2B3...) or chunky (R1G1B1R2G2B2R3G3B3...) data organization for 
 
