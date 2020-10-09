@@ -160,6 +160,24 @@ void SAVE_TIFF(const char* filename, const TDATA* data, size_t width, size_t hei
     TinyTIFFWriter_close(tiff);
 }
 
+// save data (size=width*height*sizeof(TDATA)) into a file \a filename
+template<class TDATA>
+void SAVE_TIFF_libtiff(const char* filename, const TDATA* data, size_t width, size_t height, bool little_endian=true) {
+#ifdef TINYTIFF_TEST_LIBTIFF
+    TIFF* tifvideo;
+    if (little_endian) {
+        tifvideo=TIFFOpen(filename, "wl");
+    } else {
+        tifvideo=TIFFOpen(filename, "wb");
+    }
+    if (tifvideo) {
+        TIFFWrite<TDATA>(tifvideo, data, width, height);
+        TIFFWriteDirectory(tifvideo);
+        TIFFClose(tifvideo);
+    }
+#endif
+}
+
 
 // try to open a TIFF file with TInyTIFFReader, if read successfully, the read frames are stored using SAVE_TIFF,
 // does not check the contents for correctness!
@@ -517,6 +535,10 @@ int main() {
     TinyTIFFWriterFile* tiff = TinyTIFFWriter_open("test8.tif", 8, TinyTIFFWriter_UInt, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
     TinyTIFFWriter_writeImage(tiff, image8.data());
     TinyTIFFWriter_close(tiff);
+#ifdef TINYTIFF_TEST_LIBTIFF
+    SAVE_TIFF_libtiff("test8_littleendian.tif", image8.data(), WIDTH, HEIGHT, true);
+    SAVE_TIFF_libtiff("test8_bigendian.tif", image8.data(), WIDTH, HEIGHT, false);
+#endif
     tiff = TinyTIFFWriter_open("test8m.tif", 8, TinyTIFFWriter_UInt, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
     for (size_t i=0; i<TEST_FRAMES/2; i++) {
         TinyTIFFWriter_writeImage(tiff, image8.data());
@@ -527,6 +549,10 @@ int main() {
     tiff = TinyTIFFWriter_open("test16.tif", 16, TinyTIFFWriter_UInt, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
     TinyTIFFWriter_writeImage(tiff, image16.data());
     TinyTIFFWriter_close(tiff);
+#ifdef TINYTIFF_TEST_LIBTIFF
+    SAVE_TIFF_libtiff("test16_littleendian.tif", image16.data(), WIDTH, HEIGHT, true);
+    SAVE_TIFF_libtiff("test16_bigendian.tif", image16.data(), WIDTH, HEIGHT, false);
+#endif
     tiff = TinyTIFFWriter_open("test16m.tif", 16, TinyTIFFWriter_UInt, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
     for (size_t i=0; i<TEST_FRAMES/2; i++) {
         TinyTIFFWriter_writeImage(tiff, image16.data());
@@ -537,6 +563,10 @@ int main() {
     tiff = TinyTIFFWriter_open("test32.tif", 32, TinyTIFFWriter_UInt, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
     TinyTIFFWriter_writeImage(tiff, image32.data());
     TinyTIFFWriter_close(tiff);
+#ifdef TINYTIFF_TEST_LIBTIFF
+    SAVE_TIFF_libtiff("test32_littleendian.tif", image32.data(), WIDTH, HEIGHT, true);
+    SAVE_TIFF_libtiff("test32_bigendian.tif", image32.data(), WIDTH, HEIGHT, false);
+#endif
     tiff = TinyTIFFWriter_open("test32m.tif", 32, TinyTIFFWriter_UInt, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
     for (size_t i=0; i<TEST_FRAMES/2; i++) {
         TinyTIFFWriter_writeImage(tiff, image32.data());
@@ -581,8 +611,15 @@ int main() {
     TEST<uint8_t>("testrgb.tif", imagergb.data(), imagergbi.data(), WIDTH, HEIGHT, 3, 1, test_results);
     TEST<uint8_t>("testrgbm.tif", imagergb.data(), imagergbi.data(), WIDTH, HEIGHT, 3, TEST_FRAMES, test_results);
 
-
 #ifdef TINYTIFF_TEST_LIBTIFF
+
+    TEST<uint8_t>("test8_littleendian.tif", image8.data(), image8i.data(), WIDTH, HEIGHT, 1, 1, test_results);
+    TEST<uint8_t>("test8_bigendian.tif", image8.data(), image8i.data(), WIDTH, HEIGHT, 1, 1, test_results);
+    TEST<uint16_t>("test16_littleendian.tif", image16.data(), image16i.data(), WIDTH, HEIGHT, 1, 1, test_results);
+    TEST<uint16_t>("test16_bigendian.tif", image16.data(), image16i.data(), WIDTH, HEIGHT, 1, 1, test_results);
+    TEST<uint32_t>("test32_littleendian.tif", image32.data(), image32i.data(), WIDTH, HEIGHT, 1, 1, test_results);
+    TEST<uint32_t>("test32_bigendian.tif", image32.data(), image32i.data(), WIDTH, HEIGHT, 1, 1, test_results);
+
     //TEST_AGAINST_LIBTIFF<uint16_t>("2K_source_Stack.tif",  test_results);
     //TEST_AGAINST_LIBTIFF<uint16_t>("2K_tiff_image.tif",  test_results);
     //TEST_AGAINST_LIBTIFF<uint8_t>("cell.tif",  test_results);
