@@ -155,6 +155,13 @@ struct TinyTIFFReaderFile {
     TinyTIFFReaderFrame currentFrame;
 };
 
+errno_t TinyTIFFReader_memcpy_s( void *restrict dest, rsize_t destsz, const void *restrict src, rsize_t count ) {
+#ifdef HAVE_MEMCPY_S
+    memcpy_s(dest, destsz, src, count);
+#else
+    memcpy(dest,  src, count);
+#endif
+}
 
 void TinyTIFFReader_fopen(TinyTIFFReaderFile* tiff, const char* filename) {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
@@ -532,7 +539,7 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                 case TIFF_FIELD_STRIPOFFSETS: {
                         tiff->currentFrame.stripcount=ifd.count;
                         tiff->currentFrame.stripoffsets=(uint32_t*)calloc(ifd.count, sizeof(uint32_t));
-                        memcpy(tiff->currentFrame.stripoffsets, ifd.pvalue, ifd.count*sizeof(uint32_t));
+                        TinyTIFFReader_memcpy_s(tiff->currentFrame.stripoffsets, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
                     } break;
                 case TIFF_FIELD_SAMPLESPERPIXEL: tiff->currentFrame.samplesperpixel=ifd.value; break;
                 case TIFF_FIELD_ROWSPERSTRIP: tiff->currentFrame.rowsperstrip=ifd.value; break;
@@ -553,7 +560,7 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                 case TIFF_FIELD_STRIPBYTECOUNTS: {
                         tiff->currentFrame.stripcount=ifd.count;
                         tiff->currentFrame.stripbytecounts=(uint32_t*)calloc(ifd.count, sizeof(uint32_t));
-                        memcpy(tiff->currentFrame.stripbytecounts, ifd.pvalue, ifd.count*sizeof(uint32_t));
+                        TinyTIFFReader_memcpy_s(tiff->currentFrame.stripbytecounts, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
                     } break;
                 case TIFF_FIELD_PLANARCONFIG: tiff->currentFrame.planarconfiguration=ifd.value; break;
                 case TIFF_FIELD_ORIENTATION: tiff->currentFrame.orientation=ifd.value; break;
@@ -725,8 +732,6 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
         TinyTIFFReader_fsetpos(tiff, &pos);
         return !tiff->wasError;
     }
-    tiff->wasError=TINYTIFF_TRUE;
-    TINYTIFF_SET_LAST_ERROR(tiff, "TIFF file not opened\0");
     return TINYTIFF_FALSE;
 }
 
@@ -786,7 +791,7 @@ TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename) {
         tiff->firstrecord_offset=TinyTIFFReader_readuint32(tiff);
         tiff->nextifd_offset=tiff->firstrecord_offset;
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
-        printf("      - filesize=%u\n", tiff->filesize);
+        printf("      - filesize=%lu\n", tiff->filesize);
         printf("      - firstrecord_offset=%4X\n", tiff->firstrecord_offset);
 #endif
         TinyTIFFReader_readNextFrame(tiff);
