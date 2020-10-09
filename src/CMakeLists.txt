@@ -3,6 +3,32 @@ cmake_minimum_required(VERSION 3.10)
 set(lib_name "TinyTIFF")
 set(libsh_name "TinyTIFFShared")
 
+cmake_minimum_required(VERSION 3.0.0)
+
+message(STATUS "Resolving GIT Version")
+
+set(_build_version "unknown")
+
+find_package(Git)
+if(GIT_FOUND)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    OUTPUT_VARIABLE TINYTIFF_GITVERSION
+    ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  message( STATUS "GIT hash: ${TINYTIFF_GITVERSION} (from ${PROJECT_SOURCE_DIR})")
+else()
+  message(STATUS "GIT not found")
+endif()
+
+
+string(TIMESTAMP TINYTIFF_COMPILETIME "%Y-%m-%d %H:%M:%S")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tinytiff_version.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/tinytiff_version.h)
+
+
 # Set up source files
 set(SOURCES
     tinytiffreader.c
@@ -16,10 +42,11 @@ set(HEADERS_C
 )
 set(HEADERS_CXX
     tinytiffreader.hxx
-	tinytiff_tools.hxx
+    tinytiff_tools.hxx
 )
 set(HEADERS_INTERNAL
     tiff_definitions_internal.h
+    ${CMAKE_CURRENT_BINARY_DIR}/tinytiff_version.h
 )
 set(HEADERS_INSTALL
     ${HEADERS_C}

@@ -315,7 +315,7 @@ int main() {
 
 
     const std::string testsum=writeTestSummary(test_results);
-    std::cout<<"\n\n\n\n\n\n"<<testsum<<std::endl;
+    std::cout<<"\n\n\n\nTinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\nTinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n\n"<<testsum<<std::endl;
     std::ofstream file;
     file.open("tintytiffwriter_test_result.txt");
     file<<testsum;

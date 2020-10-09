@@ -22,6 +22,7 @@
 #include <float.h>
 #include "tinytiffwriter.h"
 #include "tiff_definitions_internal.h"
+#include "tinytiff_version.h"
 
 #ifndef __WINDOWS__
 # if defined(WIN32) || defined(WIN64) || defined(_MSC_VER) || defined(_WIN32)
@@ -1090,5 +1091,18 @@ int TinyTIFFWriter_success(TinyTIFFWriterFile *tiff)
 {
     if (tiff) return !tiff->wasError;
     return TINYTIFF_FALSE;
+}
+
+
+const char *TinyTIFFWriter_getVersion()
+{
+    static char tmp[1024];
+    memset(tmp,0,1024);
+#ifdef HAVE_SPRINTF_S
+    sprintf_s(tmp, 1024, "%s (%s, Git: %s)", TINYTIFF_VERSION, TINYTIFF_COMPILETIME, TINYTIFF_GITVERSION);
+#else
+    sprintf(tmp, "%s (%s, Git: %s)", TINYTIFF_VERSION, TINYTIFF_COMPILETIME, TINYTIFF_GITVERSION);
+#endif
+    return tmp;
 }
 

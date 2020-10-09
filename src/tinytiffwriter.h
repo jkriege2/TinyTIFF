@@ -50,6 +50,12 @@ typedef struct TinyTIFFWriterFile TinyTIFFWriterFile; // forward
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+    /** \brief returns the version number of TinyTIFFReader
+      * \ingroup tinytiffreader_C
+      */
+    TINYTIFF_EXPORT const char* TinyTIFFWriter_getVersion();
+
     /** \brief maximum size of the imageDescription field in the first frame (including trailing \c 0, which has to be present!)
       * \ingroup tinytiffwriter
       */

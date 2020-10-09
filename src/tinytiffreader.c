@@ -18,6 +18,7 @@
 */
 #include "tinytiffreader.h"
 #include "tiff_definitions_internal.h"
+#include "tinytiff_version.h"
 //#define DEBUG_IFDTIMING
 #ifdef DEBUG_IFDTIMING
 #include "highrestimer.h"
@@ -632,6 +633,30 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
 #endif
 
             const uint32_t stripspersample=tiff->currentFrame.stripcount/tiff->currentFrame.samplesperpixel;
+/*
+            const uint32_t sample_image_size_bytes=tiff->currentFrame.width*tiff->currentFrame.height*tiff->currentFrame.bitspersample/8;
+            const uint32_t sample_start_bytes=sample*sample_image_size_bytes;
+            const uint32_t sample_end_bytes=sample_start_bytes+sample_image_size_bytes;
+            uint32_t strip;
+            uint32_t fileimageidx_bytes=0;
+            uint32_t outputimageidx_bytes=0;
+            for (strip=0; strip<tiff->currentFrame.stripcount; strip++) {
+                const size_t stripsize_bytes=tiff->currentFrame.stripbytecounts[strip];
+                if (fileimageidx_bytes>=sample_start_bytes && fileimageidx_bytes<sample_end_bytes) {
+                    if (sample_start_bytes>fileimageidx_bytes) TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[strip]+(sample_start_bytes-fileimageidx_bytes));
+                    else TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[strip]);
+                    uint32_t bytes_to_read_end=stripsize_bytes;
+                    if (sample_start_bytes>fileimageidx_bytes) bytes_to_read_end=bytes_to_read_end-(sample_start_bytes-fileimageidx_bytes);
+                    if (sample_end_bytes<=stripsize_bytes) bytes_to_read_end=bytes_to_read_end-(fileimageidx_bytes+stripsize_bytes-sample_end_bytes);
+                    if (tiff->currentFrame.bitspersample==8) {
+                        TinyTIFFReader_fread(tmp, tmpsize, tmpsize, 1, tiff);
+                    }
+                }
+
+                fileimageidx_bytes+=stripsize_bytes;
+            }*/
+
+
             if (tiff->currentFrame.bitspersample==8) {
                 for (s=sample*stripspersample; s<(sample+1)*stripspersample; s++) {
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
@@ -641,7 +666,7 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     uint8_t* tmp=(uint8_t*)calloc(tmpsize, sizeof(uint8_t));
                     TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
                     TinyTIFFReader_fread(tmp, tmpsize, tmpsize, 1, tiff);
-                    uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
+                    const uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                     printf("          bufferoffset=%u\n", offset);
 #endif
@@ -657,9 +682,9 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     uint16_t* tmp=(uint16_t*)calloc(tmpsize, sizeof(uint8_t));
                     TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
                     TinyTIFFReader_fread(tmp, tmpsize, tiff->currentFrame.stripbytecounts[s], 1, tiff);
-                    uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
+                    const uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
                     uint32_t pixels=tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
-                    uint32_t imagesize=tiff->currentFrame.width*tiff->currentFrame.height;
+                    const uint32_t imagesize=tiff->currentFrame.width*tiff->currentFrame.height;
                     if (offset+pixels>imagesize) pixels=imagesize-offset;
                     uint32_t x;
                     if (tiff->systembyteorder==tiff->filebyteorder) {
@@ -676,20 +701,15 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                     printf("      - s=%u: stripoffset=0x%X stripbytecounts=%u\n", s, tiff->currentFrame.stripoffsets[s], tiff->currentFrame.stripbytecounts[s]);
 #endif
-                    uint32_t* tmp=(uint32_t*)calloc(tiff->currentFrame.stripbytecounts[s], sizeof(uint8_t));
-                    //fseek(tiff->file, tiff->currentFrame.stripoffsets[s], SEEK_SET);
                     TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
-                    //fread(tmp, tiff->currentFrame.stripbytecounts[s], 1, tiff->file);
-                    uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
-                    //memcpy(&(((uint8_t*)buffer)[offset*2]), tmp, tiff->currentFrame.stripbytecounts[s]);
+                    const uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
                     uint32_t pixels=tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
-                    uint32_t imagesize=tiff->currentFrame.width*tiff->currentFrame.height;
+                    const uint32_t imagesize=tiff->currentFrame.width*tiff->currentFrame.height;
                     if (offset+pixels>imagesize) pixels=imagesize-offset;
                     uint32_t x;
                     for (x=0; x<pixels; x++) {
                         ((uint32_t*)buffer)[offset+x]=TinyTIFFReader_readuint32(tiff);
                     }
-                    free(tmp);
                 }
             } else {
                 tiff->wasError=TINYTIFF_TRUE;
@@ -875,4 +895,16 @@ uint32_t TinyTIFFReader_countFrames(TinyTIFFReaderFile* tiff) {
         return frames;
     }
     return 0;
+}
+
+const char *TinyTIFFReader_getVersion()
+{
+    static char tmp[1024];
+    memset(tmp,0,1024);
+#ifdef HAVE_SPRINTF_S
+    sprintf_s(tmp, 1024, "%s (%s, Git: %s)", TINYTIFF_VERSION, TINYTIFF_COMPILETIME, TINYTIFF_GITVERSION);
+#else
+    sprintf(tmp, "%s (%s, Git: %s)", TINYTIFF_VERSION, TINYTIFF_COMPILETIME, TINYTIFF_GITVERSION);
+#endif
+    return tmp;
 }

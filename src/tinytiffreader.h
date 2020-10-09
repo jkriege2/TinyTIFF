@@ -84,6 +84,11 @@ extern "C" {
      */
     TINYTIFF_EXPORT const char* TinyTIFFReader_getLastError(TinyTIFFReaderFile* tiff);
 
+    /** \brief returns the version number of TinyTIFFReader
+      * \ingroup tinytiffreader_C
+      */
+    TINYTIFF_EXPORT const char* TinyTIFFReader_getVersion();
+
     /*! \brief returns TINYTIFF_TRUE (non-zero) when there was an error in the last function call, or TINYTIFF_FALSE if there was no error
         \ingroup tinytiffreader_C
 
