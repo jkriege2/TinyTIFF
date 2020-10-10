@@ -25,7 +25,7 @@ bool libtiffTestRead(const char* filename, const T* writteneven, const T* writte
     if (tif) {
         uint32_t frame=0;
         do {
-            uint32 nx,ny;
+            uint32_t nx,ny;
             uint16_t ns,bs;
             TIFFGetField(tif,TIFFTAG_IMAGEWIDTH,&nx);
             TIFFGetField(tif,TIFFTAG_IMAGELENGTH,&ny);

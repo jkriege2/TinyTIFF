@@ -68,7 +68,7 @@
 \endverbatim
 
 */
-bool TIFFTWriteFloat(TIFF* tif, const float *image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteFloat(TIFF* tif, const float *image, uint16_t width, uint16_t height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32_t compression=COMPRESSION_NONE);
 
 /*! \brief write a float image to the TIFF file
     \ingroup libtiff_tools
@@ -95,7 +95,7 @@ bool TIFFTWriteFloat(TIFF* tif, const float *image, uint16 width, uint16 height,
 \endverbatim
 
 */
-bool TIFFTWriteDouble(TIFF* tif, const double* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteDouble(TIFF* tif, const double* image, uint16_t width, uint16_t height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32_t compression=COMPRESSION_NONE);
 
 
 /*! \brief write a double image as a float to the TIFF file
@@ -123,9 +123,9 @@ bool TIFFTWriteDouble(TIFF* tif, const double* image, uint16 width, uint16 heigh
 \endverbatim
 
 */
-bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16_t width, uint16_t height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32_t compression=COMPRESSION_NONE);
 
-/*! \brief write a uint16 image to the TIFF file
+/*! \brief write a uint16_t image to the TIFF file
     \ingroup libtiff_tools
 
     \param tif the TIFF file to write to
@@ -150,8 +150,8 @@ bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16 width, uint1
 \endverbatim
 
 */
-bool TIFFTWriteUint16(TIFF* tif, const uint16* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
-/*! \brief write a uint32 image to the TIFF file
+bool TIFFTWriteUint16(TIFF* tif, const uint16_t* image, uint16_t width, uint16_t height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32_t compression=COMPRESSION_NONE);
+/*! \brief write a uint32_t image to the TIFF file
     \ingroup libtiff_tools
 
     \param tif the TIFF file to write to
@@ -176,10 +176,12 @@ bool TIFFTWriteUint16(TIFF* tif, const uint16* image, uint16 width, uint16 heigh
 \endverbatim
 
 */
-bool TIFFTWriteUint32(TIFF* tif, const uint32* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteUint32(TIFF* tif, const uint32_t* image, uint16_t width, uint16_t height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32_t compression=COMPRESSION_NONE);
+
+bool TIFFTWriteUint64(TIFF* tif, const uint64_t* image, uint16_t width, uint16_t height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32_t compression=COMPRESSION_NONE);
 
 
-/*! \brief write a uint32 image to the TIFF file in uint16 format
+/*! \brief write a uint32_t image to the TIFF file in uint16_t format
     \ingroup libtiff_tools
 
     \param tif the TIFF file to write to
@@ -207,9 +209,9 @@ bool TIFFTWriteUint32(TIFF* tif, const uint32* image, uint16 width, uint16 heigh
 
     This function scales the contents of the array to the 16-bit range if and only if pixels are larger than 65535.
 */
-bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16 width, uint16 height, bool scaled=true, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16_t width, uint16_t height, bool scaled=true, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32_t compression=COMPRESSION_NONE);
 
-/*! \brief write a uint32 image to the TIFF file in float format
+/*! \brief write a uint32_t image to the TIFF file in float format
     \ingroup libtiff_tools
 
     \param tif the TIFF file to write to
@@ -235,11 +237,11 @@ bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16 width, uint
 
 
 */
-bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t* image, uint16_t width, uint16_t height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32_t compression=COMPRESSION_NONE);
 
 
 
-/*! \brief write a uint8 image to the TIFF file
+/*! \brief write a uint8_t image to the TIFF file
     \ingroup libtiff_tools
 
     \param tif the TIFF file to write to
@@ -264,9 +266,9 @@ bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t* image, uint16 width, uint1
 \endverbatim
 
 */
-bool TIFFTWriteUint8(TIFF* tif, const uint8* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteUint8(TIFF* tif, const uint8_t* image, uint16_t width, uint16_t height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32_t compression=COMPRESSION_NONE);
 
-/*! \brief write an image of bools as uint8 image (false=0/true=1) to the TIFF file
+/*! \brief write an image of bools as uint8_t image (false=0/true=1) to the TIFF file
     \ingroup libtiff_tools
 
     \param tif the TIFF file to write to
@@ -291,10 +293,10 @@ bool TIFFTWriteUint8(TIFF* tif, const uint8* image, uint16 width, uint16 height,
 \endverbatim
 
 */
-bool TIFFTWriteBoolAsUint8(TIFF* tif, const bool* image, uint16 width, uint16 height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32 compression=COMPRESSION_NONE);
+bool TIFFTWriteBoolAsUint8(TIFF* tif, const bool* image, uint16_t width, uint16_t height, double pixel_width=0.0, double pixel_height=0.0, double deltaz=0.0, double frametime=0.0, uint32_t compression=COMPRESSION_NONE);
 
 template <class T>
-bool TIFFWrite(TIFF* tif, const T* image, uint16 width, uint16 height);
+bool TIFFWrite(TIFF* tif, const T* image, uint16_t width, uint16_t height);
 
 
 /*! \brief return the number of directories in a TIFF file
@@ -305,7 +307,7 @@ bool TIFFWrite(TIFF* tif, const T* image, uint16 width, uint16 height);
 uint32 TIFFCountDirectories(TIFF* tif);
 
 
-/*! \brief read a uint16 image from the TIFF file
+/*! \brief read a uint16_t image from the TIFF file
     \ingroup libtiff_tools
 
     \param tif the TIFF file to write to
@@ -338,7 +340,7 @@ uint32 TIFFCountDirectories(TIFF* tif);
     \note After a call to this function (even if it returns \c false ) there may be memory allocated in
     \c *image !!!
 */
-bool TIFFTReadUInt16(TIFF* tif, uint16** image, uint16* width, uint16* height, char* errormessage=NULL, unsigned int sample=0);
+bool TIFFTReadUInt16(TIFF* tif, uint16_t** image, uint16_t* width, uint16_t* height, char* errormessage=NULL, unsigned int sample=0);
 
 
 
@@ -357,14 +359,14 @@ bool TIFFTReadUInt16(TIFF* tif, uint16** image, uint16* width, uint16* height, c
     \return \c true on success, \c false on failure
 */
 template<typename t, typename tout>
-inline bool TIFFLoadNontiled(tout* data_out, TIFF *const tif, const uint32 width, const uint32 height, const uint32 sample=0, const uint32 samplesperpixel=1, const uint16 planarconfig=PLANARCONFIG_SEPARATE) {
+inline bool TIFFLoadNontiled(tout* data_out, TIFF *const tif, const uint32_t width, const uint32_t height, const uint32_t sample=0, const uint32_t samplesperpixel=1, const uint16_t planarconfig=PLANARCONFIG_SEPARATE) {
     if (planarconfig==PLANARCONFIG_SEPARATE) { // sample order RRR...GGG...BBB...
         t *const buf = (t*)_TIFFmalloc(TIFFStripSize(tif));
         if (buf && data_out) {
-            uint32 row, rowsperstrip = (uint32)-1;
+            uint32_t row, rowsperstrip = (uint32)-1;
             TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rowsperstrip);
             for (row = 0; row<height; row+= rowsperstrip) {
-                uint32 nrow = (row+rowsperstrip>height?height-row:rowsperstrip);
+                uint32_t nrow = (row+rowsperstrip>height?height-row:rowsperstrip);
                 tstrip_t strip = TIFFComputeStrip(tif, row, sample);
                 if ((TIFFReadEncodedStrip(tif,strip,buf,-1))<0) {
                     _TIFFfree(buf);
@@ -383,10 +385,10 @@ inline bool TIFFLoadNontiled(tout* data_out, TIFF *const tif, const uint32 width
     } else if (planarconfig==PLANARCONFIG_CONTIG) { // sample order RGBRGBRGB...
         t *const buf = (t*)_TIFFmalloc(TIFFStripSize(tif));
         if (buf && data_out) {
-            uint32 row, rowsperstrip = (uint32)-1;
+            uint32_t row, rowsperstrip = (uint32)-1;
             TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rowsperstrip);
             for (row = 0; row<height; row+= rowsperstrip) {
-                uint32 nrow = (row+rowsperstrip>height?height-row:rowsperstrip);
+                uint32_t nrow = (row+rowsperstrip>height?height-row:rowsperstrip);
                 tstrip_t strip = TIFFComputeStrip(tif, row, 0);
                 if ((TIFFReadEncodedStrip(tif,strip,buf,-1))<0) {
                     _TIFFfree(buf);
@@ -422,7 +424,7 @@ inline bool TIFFLoadNontiled(tout* data_out, TIFF *const tif, const uint32 width
     \return \c true on success, \c false on failure
 */
 template<typename t, typename tout>
-inline bool TIFFLoadTiled(tout* data_out, TIFF *const tif, const uint32 width, const uint32 height, const uint32 tile_width, const uint32 tile_height, const uint32 sample=0, const uint32 samplesperpixel=1, const uint16 planarconfig=PLANARCONFIG_SEPARATE) {
+inline bool TIFFLoadTiled(tout* data_out, TIFF *const tif, const uint32_t width, const uint32_t height, const uint32_t tile_width, const uint32_t tile_height, const uint32_t sample=0, const uint32_t samplesperpixel=1, const uint16_t planarconfig=PLANARCONFIG_SEPARATE) {
     if (planarconfig==PLANARCONFIG_SEPARATE) { // sample order RRR...GGG...BBB...
         t *const buf = (t*)_TIFFmalloc(TIFFTileSize(tif));
         if (buf) {
@@ -485,9 +487,9 @@ template<typename T>
 inline bool TIFFReadFrame(TIFF *const tif, T* data, uint32_t sample=0) {
     if (!tif) return false;
 
-    uint16 samplesperpixel, bitspersample;
-    uint16 sampleformat = SAMPLEFORMAT_UINT;
-    uint32 nx,ny;
+    uint16_t samplesperpixel, bitspersample;
+    uint16_t sampleformat = SAMPLEFORMAT_UINT;
+    uint32_t nx,ny;
     TIFFGetField(tif,TIFFTAG_IMAGEWIDTH,&nx);
     TIFFGetField(tif,TIFFTAG_IMAGELENGTH,&ny);
     TIFFGetField(tif,TIFFTAG_SAMPLESPERPIXEL,&samplesperpixel);
@@ -496,12 +498,12 @@ inline bool TIFFReadFrame(TIFF *const tif, T* data, uint32_t sample=0) {
     /*if (samplesperpixel>1) {
         return false;
     } else {*/
-        uint16 photo, config;
+        uint16_t photo, config;
         TIFFGetField(tif,TIFFTAG_PLANARCONFIG,&config);
         TIFFGetField(tif,TIFFTAG_PHOTOMETRIC,&photo);
         // we only read image with one sample per pixel, so we do nothave to care for TIFFTAG_PLANARCONFIG
         if (TIFFIsTiled(tif)) { // load a tiled frame
-            uint32 tw, th;
+            uint32_t tw, th;
             TIFFGetField(tif,TIFFTAG_TILEWIDTH,&tw);
             TIFFGetField(tif,TIFFTAG_TILELENGTH,&th);
             if (bitspersample==8 && sizeof(T)>=1) {
@@ -583,7 +585,7 @@ inline bool TIFFReadFrame(char* filename, T** data, int* width, int* height) {
 
     TIFF* tif=TIFFOpen(filename, "r");
     if (tif) {
-        uint32 nx,ny;
+        uint32_t nx,ny;
         TIFFGetField(tif,TIFFTAG_IMAGEWIDTH,&nx);
         TIFFGetField(tif,TIFFTAG_IMAGELENGTH,&ny);
         *width=nx;
@@ -597,17 +599,17 @@ inline bool TIFFReadFrame(char* filename, T** data, int* width, int* height) {
 }
 
 template<typename T>
-inline bool TIFFReadRGB(TIFF* tif, T* data, uint32 nx, uint32 ny, uint16 channel) {
-    uint16 photo=1;
-    uint16 sampleformat=SAMPLEFORMAT_UINT;
-    uint16 samplesperpixel=1;
-    uint16 bitspersample=1;
+inline bool TIFFReadRGB(TIFF* tif, T* data, uint32_t nx, uint32_t ny, uint16_t channel) {
+    uint16_t photo=1;
+    uint16_t sampleformat=SAMPLEFORMAT_UINT;
+    uint16_t samplesperpixel=1;
+    uint16_t bitspersample=1;
     TIFFGetField(tif,TIFFTAG_PHOTOMETRIC,&photo);
     TIFFGetField(tif,TIFFTAG_SAMPLEFORMAT,&sampleformat);
     TIFFGetField(tif,TIFFTAG_SAMPLESPERPIXEL,&samplesperpixel);
     TIFFGetField(tif,TIFFTAG_BITSPERSAMPLE,&bitspersample);
     if (photo>=3 && sampleformat==SAMPLEFORMAT_UINT && bitspersample==8 && (samplesperpixel==3 || samplesperpixel==4)) {
-        uint32 *const raster = (uint32*)_TIFFmalloc(nx*ny*sizeof(uint32));
+        uint32_t *const raster = (uint32_t*)_TIFFmalloc(nx*ny*sizeof(uint32));
         if (!raster) {
             return false;
         }

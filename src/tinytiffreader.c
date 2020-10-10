@@ -114,7 +114,7 @@ static TinyTIFFReaderFrame TinyTIFFReader_getEmptyFrame() {
     d.stripbytecounts=0;
     d.samplesperpixel=1;
     d.bitspersample=0;
-    d.planarconfiguration=TIFF_PLANARCONFIG_PLANAR;
+    d.planarconfiguration=TIFF_PLANARCONFIG_CHUNKY;
     d.sampleformat=TINYTIFF_SAMPLEFORMAT_UINT;
     d.imagelength=0;
 	d.description=0;
@@ -154,6 +154,31 @@ struct TinyTIFFReaderFile {
 	
     TinyTIFFReaderFrame currentFrame;
 };
+
+size_t TinyTIFFReader_min(size_t a, size_t b) {
+    if (a<b) return a;
+    else return b;
+}
+
+size_t TinyTIFFReader_max(size_t a, size_t b) {
+    if (a>b) return a;
+    else return b;
+}
+
+size_t TinyTIFFReader_doRangesOverlap(size_t xstart, size_t xend, size_t ystart, size_t yend, size_t* overlap_start, size_t* overlap_end) {
+    // see: https://stackoverflow.com/questions/36035074/how-can-i-find-an-overlap-between-two-given-ranges
+
+    size_t totalRange = TinyTIFFReader_max(xend, yend) - TinyTIFFReader_min(xstart, ystart);
+    size_t sumOfRanges = (xend - xstart) + (yend - ystart);
+
+    if (sumOfRanges > totalRange) { // means they overlap
+        if (overlap_end!=NULL) *overlap_end = TinyTIFFReader_min(xend, yend);
+        if (overlap_start!=NULL) *overlap_start = TinyTIFFReader_max(xstart, ystart);
+        return TINYTIFF_TRUE;
+    }
+
+    return TINYTIFF_FALSE;
+}
 
 int TinyTIFFReader_memcpy_s( void * dest, size_t destsz, const void * src, size_t count ) {
 #ifdef HAVE_MEMCPY_S
@@ -306,10 +331,23 @@ int TinyTIFFReader_success(TinyTIFFReaderFile* tiff) {
 
 
 
+static uint64_t TinyTIFFReader_Byteswap64(uint64_t nLongNumber)
+{
+    return ( ((nLongNumber&0x00000000000000FFULL)<<56)
+            +((nLongNumber&0x000000000000FF00ULL)<<40)
+            +((nLongNumber&0x0000000000FF0000ULL)<<24)
+            +((nLongNumber&0x00000000FF000000ULL)<<8)
+            +((nLongNumber&0x000000FF00000000ULL)>>8)
+            +((nLongNumber&0x0000FF0000000000ULL)>>24)
+            +((nLongNumber&0x00FF000000000000ULL)>>40)
+            +((nLongNumber&0xFF00000000000000ULL)>>56));
+}
+
+
 static uint32_t TinyTIFFReader_Byteswap32(uint32_t nLongNumber)
 {
-   return (((nLongNumber&0x000000FF)<<24)+((nLongNumber&0x0000FF00)<<8)+
-   ((nLongNumber&0x00FF0000)>>8)+((nLongNumber&0xFF000000)>>24));
+    return (((nLongNumber&0x000000FF)<<24)+((nLongNumber&0x0000FF00)<<8)+
+            ((nLongNumber&0x00FF0000)>>8)+((nLongNumber&0xFF000000)>>24));
 }
 
 static uint16_t TinyTIFFReader_Byteswap16(uint16_t nValue)
@@ -601,11 +639,11 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
             TINYTIFF_SET_LAST_ERROR(tiff, "only planar TIFF files are supported by this library\0");
             return TINYTIFF_FALSE;
         }
-        if (tiff->currentFrame.samplesperpixel>1 && tiff->currentFrame.stripcount%tiff->currentFrame.samplesperpixel>0) {
+        /*if (tiff->currentFrame.samplesperpixel>1 && tiff->currentFrame.stripcount%tiff->currentFrame.samplesperpixel>0) {
             tiff->wasError=TINYTIFF_TRUE;
             TINYTIFF_SET_LAST_ERROR(tiff, "in planar multi-sample data, stripcount has to be dividable by samplesperpixel\0");
             return TINYTIFF_FALSE;
-        }
+        }*/
         if (tiff->currentFrame.orientation!=TIFF_ORIENTATION_STANDARD) {
             tiff->wasError=TINYTIFF_TRUE;
             TINYTIFF_SET_LAST_ERROR(tiff, "only standard TIFF orientations are supported by this library\0");
@@ -621,9 +659,9 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
             TINYTIFF_SET_LAST_ERROR(tiff, "the current frame does not contain images\0");
             return TINYTIFF_FALSE;
         }
-        if (tiff->currentFrame.bitspersample!=8 && tiff->currentFrame.bitspersample!=16 && tiff->currentFrame.bitspersample!=32) {
+        if (tiff->currentFrame.bitspersample!=8 && tiff->currentFrame.bitspersample!=16 && tiff->currentFrame.bitspersample!=32 && tiff->currentFrame.bitspersample!=64) {
             tiff->wasError=TINYTIFF_TRUE;
-            TINYTIFF_SET_LAST_ERROR(tiff, "this library only support 8,16 and 32 bits per sample\0");
+            TINYTIFF_SET_LAST_ERROR(tiff, "this library only support 8,16,32 and 64 bits per sample\0");
             return TINYTIFF_FALSE;
         }
         TinyTIFFReader_POSTYPE pos;
@@ -635,94 +673,122 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
         printf("    - stripcount=%u\n", tiff->currentFrame.stripcount);
 #endif
         if (tiff->currentFrame.stripcount>0 && tiff->currentFrame.stripbytecounts && tiff->currentFrame.stripoffsets) {
-            uint32_t s;
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
             printf("    - bitspersample=%u\n", tiff->currentFrame.bitspersample);
 #endif
 
-            const uint32_t stripspersample=tiff->currentFrame.stripcount/tiff->currentFrame.samplesperpixel;
-/*
-            const uint32_t sample_image_size_bytes=tiff->currentFrame.width*tiff->currentFrame.height*tiff->currentFrame.bitspersample/8;
-            const uint32_t sample_start_bytes=sample*sample_image_size_bytes;
-            const uint32_t sample_end_bytes=sample_start_bytes+sample_image_size_bytes;
+            // we assume the set of strips form a continuous memory-range. The actual strip offsets are only taken into account, when actually seeking in the file
+            //
+            //  strip 0                          strip 1                          strip 2                          strip 3                          strip 4
+            //  +--------------------------------+--------------------------------+--------------------------------+--------------------------------+--------------------------------+
+            //  |                                |                                |                                |                                |                                |
+            //  +--------------------------------+--------------------------------+--------------------------------+--------------------------------+--------------------------------+
+            //  0                                stripsize0                       stripsize0+1                     stripsize0+1+2                   stripsize0+1+2+3                 stripsize0+1+2+3+4
+            //
+            //                                   ^
+            //                                   |
+            //                                   fileimageidx_bytes: points to start of strip in continuous strip space
+            //                                   |
+            //                                   v
+            //
+            //                          image to read (length=sample_image_size_bytes)
+            //                       +--------------------------------------------------------------------------------------------------+
+            //                       |                                                                                                  |
+            //                       +--------------------------------------------------------------------------------------------------+
+            //                       sample_start_bytes=sample*sample_image_size_bytes                                                  sample_end_bytes=sample_start_bytes+sample_image_size_bytes
+            //
+            //              READ:    |===========|================================|================================|====================|
+            //                                   |                                |
+            //                                   +--------------------------------+
+            //                                        read segment in strip 1
+            //                                   bytes_to_read_start              bytes_to_read_end (0=start of strip, stripsize_bytes-1=endofstrip)
+            //
+            //                                   ^
+            //                                   |
+            //                                   outputimageidx_bytes: points to where to start writing in output array
+
+            const size_t sample_image_size_bytes=tiff->currentFrame.width*tiff->currentFrame.height*tiff->currentFrame.bitspersample/8;
+            const size_t sample_start_bytes=sample*sample_image_size_bytes;
+            const size_t sample_end_bytes=sample_start_bytes+sample_image_size_bytes;
+#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+            printf("    - sample_image_size_bytes=%u\n", sample_image_size_bytes);
+            printf("    - sample_start_bytes=%u\n", sample_start_bytes);
+            printf("    - sample_end_bytes=%u\n", sample_end_bytes);
+#endif
             uint32_t strip;
-            uint32_t fileimageidx_bytes=0;
-            uint32_t outputimageidx_bytes=0;
+            size_t fileimageidx_bytes=0;
+            size_t outputimageidx_bytes=0;
             for (strip=0; strip<tiff->currentFrame.stripcount; strip++) {
                 const size_t stripsize_bytes=tiff->currentFrame.stripbytecounts[strip];
-                if (fileimageidx_bytes>=sample_start_bytes && fileimageidx_bytes<sample_end_bytes) {
-                    if (sample_start_bytes>fileimageidx_bytes) TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[strip]+(sample_start_bytes-fileimageidx_bytes));
-                    else TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[strip]);
-                    uint32_t bytes_to_read_end=stripsize_bytes;
-                    if (sample_start_bytes>fileimageidx_bytes) bytes_to_read_end=bytes_to_read_end-(sample_start_bytes-fileimageidx_bytes);
-                    if (sample_end_bytes<=stripsize_bytes) bytes_to_read_end=bytes_to_read_end-(fileimageidx_bytes+stripsize_bytes-sample_end_bytes);
-                    if (tiff->currentFrame.bitspersample==8) {
-                        TinyTIFFReader_fread(tmp, tmpsize, tmpsize, 1, tiff);
+                const size_t strip_offset_bytes=tiff->currentFrame.stripoffsets[strip];
+                size_t bytes_to_read_start=0, bytes_to_read_end=0;
+                const int hasToReadFromStrip=TinyTIFFReader_doRangesOverlap(sample_start_bytes, sample_end_bytes, fileimageidx_bytes, fileimageidx_bytes+stripsize_bytes, &bytes_to_read_start, &bytes_to_read_end);
+#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+                printf("    - strip %2u, stripoffset=%8ubytes, stripsize=%8ubytes, fileimageidx=%8ubytes, outputimageidx_bytes=%8ubytes\n", strip, strip_offset_bytes,stripsize_bytes,fileimageidx_bytes, outputimageidx_bytes);
+#endif
+
+                if (hasToReadFromStrip!=TINYTIFF_FALSE) {
+                    const size_t count_bytes_to_read=bytes_to_read_end-bytes_to_read_start;
+#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+                    printf("      - bytes_to_read_start=%8u, bytes_to_read_end=%8u, count_bytes_to_read=%8u\n", bytes_to_read_start-fileimageidx_bytes, bytes_to_read_end-fileimageidx_bytes, count_bytes_to_read);
+                    printf("      - READ -> Writing to %8u...%8u / %8u\n", outputimageidx_bytes, outputimageidx_bytes+count_bytes_to_read, sample_image_size_bytes);
+#endif
+                    TinyTIFFReader_fseek_set(tiff, strip_offset_bytes+(bytes_to_read_start-fileimageidx_bytes));
+                    size_t readbytes=TinyTIFFReader_fread(&(((uint8_t*)buffer)[outputimageidx_bytes]), sample_image_size_bytes, 1, count_bytes_to_read, tiff);
+                    if(readbytes!=count_bytes_to_read) {
+                        tiff->wasError=TINYTIFF_TRUE;
+                        TINYTIFF_SET_LAST_ERROR(tiff, "TINYTIFFReader was unable to read all necessary data from the strip!\0");
                     }
+                    outputimageidx_bytes+=count_bytes_to_read;
+                } else if (fileimageidx_bytes>sample_end_bytes) {
+                    // we have read all data successfully
+#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+                    printf("      - FINISHED READING, fileimageidx_bytes=%u > %u=sample_end_bytes\n", fileimageidx_bytes,sample_end_bytes);
+#endif
+                    break;
                 }
 
                 fileimageidx_bytes+=stripsize_bytes;
-            }*/
-
-
-            if (tiff->currentFrame.bitspersample==8) {
-                for (s=sample*stripspersample; s<(sample+1)*stripspersample; s++) {
-#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
-                    printf("      - s=%u: stripoffset=0x%X stripbytecounts=%u\n", s, tiff->currentFrame.stripoffsets[s], tiff->currentFrame.stripbytecounts[s]);
-#endif
-                    const size_t tmpsize=tiff->currentFrame.stripbytecounts[s];
-                    uint8_t* tmp=(uint8_t*)calloc(tmpsize, sizeof(uint8_t));
-                    TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
-                    TinyTIFFReader_fread(tmp, tmpsize, tmpsize, 1, tiff);
-                    const uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
-#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
-                    printf("          bufferoffset=%u\n", offset);
-#endif
-                    memcpy(&(((uint8_t*)buffer)[offset]), tmp, tmpsize*sizeof(uint8_t));
-                    free(tmp);
-                }
-            } else if (tiff->currentFrame.bitspersample==16) {
-                for (s=sample*stripspersample; s<(sample+1)*stripspersample; s++) {
-#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
-                    printf("      - s=%u: stripoffset=0x%X stripbytecounts=%u\n", s, tiff->currentFrame.stripoffsets[s], tiff->currentFrame.stripbytecounts[s]);
-#endif
-                    const size_t tmpsize=tiff->currentFrame.stripbytecounts[s];
-                    uint16_t* tmp=(uint16_t*)calloc(tmpsize, sizeof(uint8_t));
-                    TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
-                    TinyTIFFReader_fread(tmp, tmpsize, tiff->currentFrame.stripbytecounts[s], 1, tiff);
-                    const uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
-                    uint32_t pixels=tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
-                    const uint32_t imagesize=tiff->currentFrame.width*tiff->currentFrame.height;
-                    if (offset+pixels>imagesize) pixels=imagesize-offset;
-                    uint32_t x;
-                    if (tiff->systembyteorder==tiff->filebyteorder) {
-                        memcpy(&(((uint16_t*)buffer)[offset]), tmp, tiff->currentFrame.stripbytecounts[s]);
-                    } else {
-                        for (x=0; x<pixels; x++) {
-                            ((uint16_t*)buffer)[offset+x]=TinyTIFFReader_Byteswap16(tmp[x]);
-                        }
-                    }
-                    free(tmp);
-                }
-            } else if (tiff->currentFrame.bitspersample==32) {
-                for (s=sample*stripspersample; s<(sample+1)*stripspersample; s++) {
-#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
-                    printf("      - s=%u: stripoffset=0x%X stripbytecounts=%u\n", s, tiff->currentFrame.stripoffsets[s], tiff->currentFrame.stripbytecounts[s]);
-#endif
-                    TinyTIFFReader_fseek_set(tiff, tiff->currentFrame.stripoffsets[s]);
-                    const uint32_t offset=(s-sample*stripspersample)*tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
-                    uint32_t pixels=tiff->currentFrame.rowsperstrip*tiff->currentFrame.width;
-                    const uint32_t imagesize=tiff->currentFrame.width*tiff->currentFrame.height;
-                    if (offset+pixels>imagesize) pixels=imagesize-offset;
-                    uint32_t x;
-                    for (x=0; x<pixels; x++) {
-                        ((uint32_t*)buffer)[offset+x]=TinyTIFFReader_readuint32(tiff);
-                    }
-                }
-            } else {
-                tiff->wasError=TINYTIFF_TRUE;
-                TINYTIFF_SET_LAST_ERROR(tiff, "TINYTIFFReader does not support the bitsPerSample, given in teh file (only 8,16,32bit are supported)\0");
             }
+
+            if (tiff->systembyteorder!=tiff->filebyteorder) {
+                if (tiff->currentFrame.bitspersample==8) {
+                    // we're done no little/big-endian correction necessary for 1-byte data
+                } else if (tiff->currentFrame.bitspersample==16) {
+                    // little/big-endian correction necessary for 2-byte data
+#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+                    printf("        - correcting 16-bit little-big-endian\n");
+#endif
+                    size_t x=0;
+                    for (x=0; x<tiff->currentFrame.width*tiff->currentFrame.height; x++) {
+                        ((uint16_t*)buffer)[x]=TinyTIFFReader_Byteswap16(((uint16_t*)buffer)[x]);
+                    }
+                } else if (tiff->currentFrame.bitspersample==32) {
+#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+                    printf("        - correcting 32-bit little-big-endian\n");
+#endif
+
+                    // little/big-endian correction necessary for 4-byte data
+                    size_t x=0;
+                    for (x=0; x<tiff->currentFrame.width*tiff->currentFrame.height; x++) {
+                        ((uint32_t*)buffer)[x]=TinyTIFFReader_Byteswap32(((uint32_t*)buffer)[x]);
+                    }
+                } else if (tiff->currentFrame.bitspersample==64) {
+#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+                    printf("        - correcting 32-bit little-big-endian\n");
+#endif
+
+                    // little/big-endian correction necessary for 8-byte data
+                    size_t x=0;
+                    for (x=0; x<tiff->currentFrame.width*tiff->currentFrame.height; x++) {
+                        ((uint64_t*)buffer)[x]=TinyTIFFReader_Byteswap64(((uint64_t*)buffer)[x]);
+                    }
+                } else {
+                    tiff->wasError=TINYTIFF_TRUE;
+                    TINYTIFF_SET_LAST_ERROR(tiff, "TINYTIFFReader does not support the bitsPerSample, given in teh file (only 8,16,32bit are supported)\0");
+                }
+            }
+
 
         } else {
             tiff->wasError=TINYTIFF_TRUE;

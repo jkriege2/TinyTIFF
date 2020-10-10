@@ -394,7 +394,7 @@ void TEST_AGAINST_LIBTIFF(const char* filename, std::vector<TestResult>& test_re
                             TIFFGetField(ltiff,TIFFTAG_IMAGEWIDTH,&libTIFF_width);
                             TIFFGetField(ltiff,TIFFTAG_IMAGELENGTH,&libTIFF_height);
                             TIFFGetField(ltiff,TIFFTAG_IMAGEDESCRIPTION,&libtiff_imagedesc);
-                            TIFFPrintDirectory(ltiff, stdout);
+                            TIFFPrintDirectory(ltiff, stdout,TIFFPRINT_STRIPS|TIFFPRINT_COLORMAP);
                             std::cout<<"     libTIFF:  width="<<libTIFF_width<<", height="<<libTIFF_height<<", bitspersample="<<libTIFF_bitspersample<<", samplesperpixel="<<libTIFF_samplesperpixel<<"\n";
 
                             if (tinyTIFF_width!=libTIFF_width) {
@@ -429,21 +429,25 @@ void TEST_AGAINST_LIBTIFF(const char* filename, std::vector<TestResult>& test_re
                                     if (TinyTIFFReader_wasError(tiffr)) {
                                         std::cout<<"       TinyTIFF: ERROR reading frame "<<frame<<", sample "<<sample<<":"<<TinyTIFFReader_getLastError(tiffr)<<"\n";
                                         ok=false;
+                                        break;
                                     }
-                                    if (ok) {
-                                        std::vector<TIMAGESAMPLETYPE> libTIFF_data(libTIFF_width*libTIFF_height*sizeof(TIMAGESAMPLETYPE)*2, 0);
-                                        if (!TIFFReadFrame(ltiff, libTIFF_data.data(), sample)) {
-                                            std::cout<<"       libTIFF: ERROR reading frame "<<frame<<", sample "<<sample<<"\n";
+                                    std::vector<TIMAGESAMPLETYPE> libTIFF_data(libTIFF_width*libTIFF_height*sizeof(TIMAGESAMPLETYPE)*2, 0);
+                                    if (!TIFFReadFrame(ltiff, libTIFF_data.data(), sample)) {
+                                        std::cout<<"       libTIFF: ERROR reading frame "<<frame<<", sample "<<sample<<"\n";
+                                        ok=false;
+                                        break;
+                                    }
+                                    for (size_t i=0; i<libTIFF_data.size(); i++) {
+                                        if (i<=8) std::cout<<"          f"<<frame<<"s"<<sample<<"i"<<i<<": tiny="<<std::dec<<static_cast<typename atleast_int<TIMAGESAMPLETYPE>::TPrint>(tinyTIFF_data[i])<<" lib="<<static_cast<typename atleast_int<TIMAGESAMPLETYPE>::TPrint>(libTIFF_data[i])<<"\n";
+                                        if (libTIFF_data[i]!=tinyTIFF_data[i]) {
+                                            std::cout<<"       ERROR in frame "<<frame<<", sample "<<sample<<": TinyTIFF and libTIFF read different sample values (I="<<i<<": TinyTIFF: "<<std::dec<<static_cast<typename atleast_int<TIMAGESAMPLETYPE>::TPrint>(tinyTIFF_data[i])<<" != libTIFF: "<<std::dec<<static_cast<typename atleast_int<TIMAGESAMPLETYPE>::TPrint>(libTIFF_data[i])<<")\n";
                                             ok=false;
+                                            break;
                                         }
-                                        for (size_t i=0; i<libTIFF_data.size(); i++) {
-                                            if (i<=8) std::cout<<"          f"<<frame<<"s"<<sample<<"i"<<i<<": tiny="<<std::dec<<static_cast<typename atleast_int<TIMAGESAMPLETYPE>::TPrint>(tinyTIFF_data[i])<<" lib="<<static_cast<typename atleast_int<TIMAGESAMPLETYPE>::TPrint>(libTIFF_data[i])<<"\n";
-                                            if (libTIFF_data[i]!=tinyTIFF_data[i]) {
-                                                std::cout<<"       ERROR in frame "<<frame<<", sample "<<sample<<": TinyTIFF and libTIFF read different sample values (I="<<i<<": TinyTIFF: "<<std::dec<<static_cast<typename atleast_int<TIMAGESAMPLETYPE>::TPrint>(tinyTIFF_data[i])<<" != libTIFF: "<<std::dec<<static_cast<typename atleast_int<TIMAGESAMPLETYPE>::TPrint>(libTIFF_data[i])<<")\n";
-                                                ok=false;
-                                                break;
-                                            }
-                                        }
+                                    }
+                                    if (!ok) {
+                                        SAVE_TIFF(std::string(std::string(filename)+".tinytiff.error_sample"+std::to_string(sample)+".tif").c_str(), tinyTIFF_data.data(), tinyTIFF_width, tinyTIFF_height);
+                                        SAVE_TIFF(std::string(std::string(filename)+".libtiff.error_sample"+std::to_string(sample)+".tif").c_str(), libTIFF_data.data(), tinyTIFF_width, tinyTIFF_height);
                                     }
                                 }
                             }
@@ -511,8 +515,12 @@ int main() {
     vector<uint16_t> image16i(WIDTH*HEIGHT, 0);
     vector<uint32_t> image32(WIDTH*HEIGHT, 0);
     vector<uint32_t> image32i(WIDTH*HEIGHT, 0);
+    vector<uint64_t> image64(WIDTH*HEIGHT, 0);
+    vector<uint64_t> image64i(WIDTH*HEIGHT, 0);
     vector<float> imagef(WIDTH*HEIGHT, 0);
     vector<float> imagefi(WIDTH*HEIGHT, 0);
+    vector<double> imaged(WIDTH*HEIGHT, 0);
+    vector<double> imagedi(WIDTH*HEIGHT, 0);
     vector<uint8_t> imagergb(WIDTH*HEIGHT*3, 0);
     vector<uint8_t> imagergbi(WIDTH*HEIGHT*3, 0);
 
@@ -525,9 +533,15 @@ int main() {
     write1ChannelTestData(image32.data(), WIDTH, HEIGHT, PATTERNSIZE);
     write1ChannelTestData(image32i.data(), WIDTH, HEIGHT, PATTERNSIZE);
     invertTestImage(image32i.data(), WIDTH, HEIGHT);
+    write1ChannelTestData(image64.data(), WIDTH, HEIGHT, PATTERNSIZE);
+    write1ChannelTestData(image64i.data(), WIDTH, HEIGHT, PATTERNSIZE);
+    invertTestImage(image64i.data(), WIDTH, HEIGHT);
     write1ChannelFloatTestData(imagef.data(), WIDTH, HEIGHT, PATTERNSIZE);
     write1ChannelFloatTestData(imagefi.data(), WIDTH, HEIGHT, PATTERNSIZE);
     invertFloatTestImage(imagefi.data(), WIDTH, HEIGHT);
+    write1ChannelFloatTestData(imaged.data(), WIDTH, HEIGHT, PATTERNSIZE);
+    write1ChannelFloatTestData(imagedi.data(), WIDTH, HEIGHT, PATTERNSIZE);
+    invertFloatTestImage(imagedi.data(), WIDTH, HEIGHT);
     writeRGBTestDataChunky(imagergb.data(), WIDTH, HEIGHT, PATTERNSIZE,3);
     writeRGBTestDataChunky(imagergbi.data(), WIDTH, HEIGHT, PATTERNSIZE,3);
     invertTestImage(imagergbi.data(), WIDTH, HEIGHT,3);
@@ -574,6 +588,20 @@ int main() {
     }
     TinyTIFFWriter_close(tiff);
 
+    tiff = TinyTIFFWriter_open("test64.tif", 64, TinyTIFFWriter_UInt, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
+    TinyTIFFWriter_writeImage(tiff, image64.data());
+    TinyTIFFWriter_close(tiff);
+#ifdef TINYTIFF_TEST_LIBTIFF
+    SAVE_TIFF_libtiff("test64_littleendian.tif", image64.data(), WIDTH, HEIGHT, true);
+    SAVE_TIFF_libtiff("test64_bigendian.tif", image64.data(), WIDTH, HEIGHT, false);
+#endif
+    tiff = TinyTIFFWriter_open("test64m.tif", 64, TinyTIFFWriter_UInt, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
+    for (size_t i=0; i<TEST_FRAMES/2; i++) {
+        TinyTIFFWriter_writeImage(tiff, image64.data());
+        TinyTIFFWriter_writeImage(tiff, image64i.data());
+    }
+    TinyTIFFWriter_close(tiff);
+
     tiff = TinyTIFFWriter_open("testf.tif", 32, TinyTIFFWriter_Float, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
     TinyTIFFWriter_writeImage(tiff, imagef.data());
     TinyTIFFWriter_close(tiff);
@@ -581,6 +609,16 @@ int main() {
     for (size_t i=0; i<TEST_FRAMES/2; i++) {
         TinyTIFFWriter_writeImage(tiff, imagef.data());
         TinyTIFFWriter_writeImage(tiff, imagefi.data());
+    }
+    TinyTIFFWriter_close(tiff);
+
+    tiff = TinyTIFFWriter_open("testd.tif", 64, TinyTIFFWriter_Float, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
+    TinyTIFFWriter_writeImage(tiff, imaged.data());
+    TinyTIFFWriter_close(tiff);
+    tiff = TinyTIFFWriter_open("testdm.tif", 64, TinyTIFFWriter_Float, 1, WIDTH,HEIGHT, TinyTIFFWriter_AutodetectSampleInterpetation);
+    for (size_t i=0; i<TEST_FRAMES/2; i++) {
+        TinyTIFFWriter_writeImage(tiff, imaged.data());
+        TinyTIFFWriter_writeImage(tiff, imagedi.data());
     }
     TinyTIFFWriter_close(tiff);
 
@@ -606,8 +644,12 @@ int main() {
     TEST<uint16_t>("test16m.tif", image16.data(), image16i.data(), WIDTH, HEIGHT, 1, TEST_FRAMES, test_results);
     TEST<uint32_t>("test32.tif", image32.data(), image32i.data(), WIDTH, HEIGHT, 1, 1, test_results);
     TEST<uint32_t>("test32m.tif", image32.data(), image32i.data(), WIDTH, HEIGHT, 1, TEST_FRAMES, test_results);
+    TEST<uint64_t>("test64.tif", image64.data(), image64i.data(), WIDTH, HEIGHT, 1, 1, test_results);
+    TEST<uint64_t>("test64m.tif", image64.data(), image64i.data(), WIDTH, HEIGHT, 1, TEST_FRAMES, test_results);
     TEST<float>("testf.tif", imagef.data(), imagefi.data(), WIDTH, HEIGHT, 1, 1, test_results);
     TEST<float>("testfm.tif", imagef.data(), imagefi.data(), WIDTH, HEIGHT, 1, TEST_FRAMES, test_results);
+    TEST<double>("testd.tif", imaged.data(), imagedi.data(), WIDTH, HEIGHT, 1, 1, test_results);
+    TEST<double>("testdm.tif", imaged.data(), imagedi.data(), WIDTH, HEIGHT, 1, TEST_FRAMES, test_results);
     TEST<uint8_t>("testrgb.tif", imagergb.data(), imagergbi.data(), WIDTH, HEIGHT, 3, 1, test_results);
     TEST<uint8_t>("testrgbm.tif", imagergb.data(), imagergbi.data(), WIDTH, HEIGHT, 3, TEST_FRAMES, test_results);
 
@@ -619,6 +661,8 @@ int main() {
     TEST<uint16_t>("test16_bigendian.tif", image16.data(), image16i.data(), WIDTH, HEIGHT, 1, 1, test_results);
     TEST<uint32_t>("test32_littleendian.tif", image32.data(), image32i.data(), WIDTH, HEIGHT, 1, 1, test_results);
     TEST<uint32_t>("test32_bigendian.tif", image32.data(), image32i.data(), WIDTH, HEIGHT, 1, 1, test_results);
+    TEST<uint64_t>("test64_littleendian.tif", image64.data(), image64i.data(), WIDTH, HEIGHT, 1, 1, test_results);
+    TEST<uint64_t>("test64_bigendian.tif", image64.data(), image64i.data(), WIDTH, HEIGHT, 1, 1, test_results);
 
     //TEST_AGAINST_LIBTIFF<uint16_t>("2K_source_Stack.tif",  test_results);
     //TEST_AGAINST_LIBTIFF<uint16_t>("2K_tiff_image.tif",  test_results);

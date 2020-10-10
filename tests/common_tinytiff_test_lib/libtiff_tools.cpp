@@ -56,10 +56,10 @@ static bool TIFFMakeImageDescription(char* description, double pixel_width, doub
 }
 
 
-bool TIFFTWriteFloat(TIFF* tif, const float* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
-    uint16 frame_width=width;
-    uint16 frame_height=height;
-    uint32 rowsperstrip = (uint32)-1;
+bool TIFFTWriteFloat(TIFF* tif, const float* image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
+    uint16_t frame_width=width;
+    uint16_t frame_height=height;
+    uint32_t rowsperstrip = (uint32)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -85,7 +85,7 @@ bool TIFFTWriteFloat(TIFF* tif, const float* image, uint16 width, uint16 height,
     float* const buf = (float*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
     for (unsigned int row = 0; (row<frame_height); row+=rowsperstrip) {
         // compute rows in this strip:
-        uint32 nrow = rowsperstrip;
+        uint32_t nrow = rowsperstrip;
         if ((row + rowsperstrip)>frame_height) {
             nrow=frame_height-row; // this is the last strip ... and it is a bit smaller! ... it only contains the last rows of the image
         }
@@ -106,10 +106,10 @@ bool TIFFTWriteFloat(TIFF* tif, const float* image, uint16 width, uint16 height,
 }
 
 
-bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
-    uint16 frame_width=width;
-    uint16 frame_height=height;
-    uint32 rowsperstrip = (uint32)-1;
+bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
+    uint16_t frame_width=width;
+    uint16_t frame_height=height;
+    uint32_t rowsperstrip = (uint32)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -135,7 +135,7 @@ bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16 width, uint1
     float* const buf = (float*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
     for (unsigned int row = 0; (row<frame_height); row+=rowsperstrip) {
         // compute rows in this strip:
-        uint32 nrow = rowsperstrip;
+        uint32_t nrow = rowsperstrip;
         if ((row + rowsperstrip)>frame_height) {
             nrow=frame_height-row; // this is the last strip ... and it is a bit smaller! ... it only contains the last rows of the image
         }
@@ -155,10 +155,10 @@ bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16 width, uint1
     return true;
 }
 
-bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t *image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
-    uint16 frame_width=width;
-    uint16 frame_height=height;
-    uint32 rowsperstrip = (uint32)-1;
+bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t *image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
+    uint16_t frame_width=width;
+    uint16_t frame_height=height;
+    uint32_t rowsperstrip = (uint32)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -184,7 +184,7 @@ bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t *image, uint16 width, uint1
     float* const buf = (float*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
     for (unsigned int row = 0; (row<frame_height); row+=rowsperstrip) {
         // compute rows in this strip:
-        uint32 nrow = rowsperstrip;
+        uint32_t nrow = rowsperstrip;
         if ((row + rowsperstrip)>frame_height) {
             nrow=frame_height-row; // this is the last strip ... and it is a bit smaller! ... it only contains the last rows of the image
         }
@@ -204,10 +204,10 @@ bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t *image, uint16 width, uint1
     return true;
 }
 
-bool TIFFTWriteUint16(TIFF* tif, const uint16* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
-    uint16 frame_width=width;
-    uint16 frame_height=height;
-    uint32 rowsperstrip = (uint32)-1;
+bool TIFFTWriteUint16(TIFF* tif, const uint16_t* image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
+    uint16_t frame_width=width;
+    uint16_t frame_height=height;
+    uint32_t rowsperstrip = (uint32)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -230,10 +230,10 @@ bool TIFFTWriteUint16(TIFF* tif, const uint16* image, uint16 width, uint16 heigh
     // data is broken up into strips where each strip contains rowsperstrip complete rows of data
     // each stript then has a size of rowsperstrip*frame_width pixels. the last strip is possibly
     // smaller, so it is NOT padded with dummy data.
-    uint16* const buf = (uint16*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
+    uint16_t* const buf = (uint16_t*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
     for (unsigned int row = 0; (row<frame_height); row+=rowsperstrip) {
         // compute rows in this strip:
-        uint32 nrow = rowsperstrip;
+        uint32_t nrow = rowsperstrip;
         if ((row + rowsperstrip)>frame_height) {
             nrow=frame_height-row; // this is the last strip ... and it is a bit smaller! ... it only contains the last rows of the image
         }
@@ -254,10 +254,10 @@ bool TIFFTWriteUint16(TIFF* tif, const uint16* image, uint16 width, uint16 heigh
 }
 
 
-bool TIFFTWriteUint32(TIFF* tif, const uint32 *image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
-    uint16 frame_width=width;
-    uint16 frame_height=height;
-    uint32 rowsperstrip = (uint32)-1;
+bool TIFFTWriteUint32(TIFF* tif, const uint32_t *image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
+    uint16_t frame_width=width;
+    uint16_t frame_height=height;
+    uint32_t rowsperstrip = (uint32)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -280,10 +280,10 @@ bool TIFFTWriteUint32(TIFF* tif, const uint32 *image, uint16 width, uint16 heigh
     // data is broken up into strips where each strip contains rowsperstrip complete rows of data
     // each stript then has a size of rowsperstrip*frame_width pixels. the last strip is possibly
     // smaller, so it is NOT padded with dummy data.
-    uint32* const buf = (uint32*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
+    uint32_t* const buf = (uint32_t*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
     for (unsigned int row = 0; (row<frame_height); row+=rowsperstrip) {
         // compute rows in this strip:
-        uint32 nrow = rowsperstrip;
+        uint32_t nrow = rowsperstrip;
         if ((row + rowsperstrip)>frame_height) {
             nrow=frame_height-row; // this is the last strip ... and it is a bit smaller! ... it only contains the last rows of the image
         }
@@ -303,10 +303,61 @@ bool TIFFTWriteUint32(TIFF* tif, const uint32 *image, uint16 width, uint16 heigh
     return true;
 }
 
-bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16 width, uint16 height, bool scaled, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
-    uint16 frame_width=width;
-    uint16 frame_height=height;
-    uint32 rowsperstrip = (uint32)-1;
+
+
+bool TIFFTWriteUint64(TIFF *tif, const uint64_t *image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double frametime, uint32_t compression) {
+    uint16_t frame_width=width;
+    uint16_t frame_height=height;
+    uint32_t rowsperstrip = (uint32)-1;
+
+    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
+    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
+    TIFFSetField(tif, TIFFTAG_COMPRESSION, compression);
+    TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+    TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 64);
+    TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, 1);
+    rowsperstrip = TIFFDefaultStripSize(tif, rowsperstrip);
+    TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, rowsperstrip);
+    TIFFSetField(tif, TIFFTAG_FILLORDER, FILLORDER_MSB2LSB);
+    TIFFSetField(tif,TIFFTAG_SAMPLEFORMAT,SAMPLEFORMAT_UINT);
+    TIFFSetField(tif,TIFFTAG_ORIENTATION,ORIENTATION_TOPLEFT);
+
+    char imgd[1024];
+    if (TIFFMakeImageDescription(imgd, pixel_width, pixel_height, deltaz, frametime)) TIFFSetField(tif,TIFFTAG_IMAGEDESCRIPTION,imgd);
+
+
+    // write frame data
+    // data is broken up into strips where each strip contains rowsperstrip complete rows of data
+    // each stript then has a size of rowsperstrip*frame_width pixels. the last strip is possibly
+    // smaller, so it is NOT padded with dummy data.
+    uint64_t* const buf = (uint64_t*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
+    for (unsigned int row = 0; (row<frame_height); row+=rowsperstrip) {
+        // compute rows in this strip:
+        uint32_t nrow = rowsperstrip;
+        if ((row + rowsperstrip)>frame_height) {
+            nrow=frame_height-row; // this is the last strip ... and it is a bit smaller! ... it only contains the last rows of the image
+        }
+        tstrip_t strip = TIFFComputeStrip(tif,row,0);
+        tsize_t bi = 0;
+        // go through the fraem row-wise
+        for (unsigned int rr = 0; rr<nrow; ++rr) {
+            for (unsigned int cc = 0; cc<frame_width; ++cc) { // go through all pixels in the current row
+                buf[bi++] = (uint64_t)image[cc+(row + rr)*frame_width];
+            }
+        }
+        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint64_t))<0) {
+            return false;
+        }
+    }
+    _TIFFfree(buf);
+    return true;
+}
+
+bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16_t width, uint16_t height, bool scaled, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
+    uint16_t frame_width=width;
+    uint16_t frame_height=height;
+    uint32_t rowsperstrip = (uint32)-1;
 
     uint32_t imin=image[0];
     uint32_t imax=image[0];
@@ -342,10 +393,10 @@ bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16 width, uint
     // data is broken up into strips where each strip contains rowsperstrip complete rows of data
     // each stript then has a size of rowsperstrip*frame_width pixels. the last strip is possibly
     // smaller, so it is NOT padded with dummy data.
-    uint16* const buf = (uint16*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
+    uint16_t* const buf = (uint16_t*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
     for (unsigned int row = 0; (row<frame_height); row+=rowsperstrip) {
         // compute rows in this strip:
-        uint32 nrow = rowsperstrip;
+        uint32_t nrow = rowsperstrip;
         if ((row + rowsperstrip)>frame_height) {
             nrow=frame_height-row; // this is the last strip ... and it is a bit smaller! ... it only contains the last rows of the image
         }
@@ -378,10 +429,10 @@ bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16 width, uint
     return true;
 }
 
-bool TIFFTWriteUint8(TIFF* tif, const uint8* image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression) {
-    uint16 frame_width=width;
-    uint16 frame_height=height;
-    uint32 rowsperstrip = (uint32)-1;
+bool TIFFTWriteUint8(TIFF* tif, const uint8_t* image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
+    uint16_t frame_width=width;
+    uint16_t frame_height=height;
+    uint32_t rowsperstrip = (uint32)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -404,10 +455,10 @@ bool TIFFTWriteUint8(TIFF* tif, const uint8* image, uint16 width, uint16 height,
     // data is broken up into strips where each strip contains rowsperstrip complete rows of data
     // each stript then has a size of rowsperstrip*frame_width pixels. the last strip is possibly
     // smaller, so it is NOT padded with dummy data.
-    uint8* const buf = (uint8*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
+    uint8_t* const buf = (uint8_t*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
     for (unsigned int row = 0; (row<frame_height); row+=rowsperstrip) {
         // compute rows in this strip:
-        uint32 nrow = rowsperstrip;
+        uint32_t nrow = rowsperstrip;
         if ((row + rowsperstrip)>frame_height) {
             nrow=frame_height-row; // this is the last strip ... and it is a bit smaller! ... it only contains the last rows of the image
         }
@@ -427,16 +478,16 @@ bool TIFFTWriteUint8(TIFF* tif, const uint8* image, uint16 width, uint16 height,
     return true;
 }
 
-bool TIFFTReadUInt16(TIFF* tif, uint16** image, uint16* width, uint16* height, char* errormessage, unsigned int /*sample*/) {
-    uint16 samplesperpixel=1;
-    uint16 bitspersample=16;
-    uint16 sampleformat = SAMPLEFORMAT_UINT;
-    uint32 nx=0;
-    uint32 ny=0;
-    uint16* tiffbuf = NULL;
-    uint16* imagebuf=NULL;
-    uint32 row = 0;
-    uint32 rowsperstrip = 0;
+bool TIFFTReadUInt16(TIFF* tif, uint16_t** image, uint16_t* width, uint16_t* height, char* errormessage, unsigned int /*sample*/) {
+    uint16_t samplesperpixel=1;
+    uint16_t bitspersample=16;
+    uint16_t sampleformat = SAMPLEFORMAT_UINT;
+    uint32_t nx=0;
+    uint32_t ny=0;
+    uint16_t* tiffbuf = NULL;
+    uint16_t* imagebuf=NULL;
+    uint32_t row = 0;
+    uint32_t rowsperstrip = 0;
     unsigned int rr=0;
     unsigned int cc=0;
     bool ok=true;
@@ -459,7 +510,7 @@ bool TIFFTReadUInt16(TIFF* tif, uint16** image, uint16* width, uint16* height, c
     }
 
     if ((*image==NULL)||(nx!=*width)||(ny!=*height)) {
-        *image=(uint16*)realloc(*image, nx*ny*sizeof(uint16));
+        *image=(uint16_t*)realloc(*image, nx*ny*sizeof(uint16));
         *width=nx;
         *height=ny;
     }
@@ -470,24 +521,24 @@ bool TIFFTReadUInt16(TIFF* tif, uint16** image, uint16* width, uint16* height, c
         return false;
     }
 
-    tiffbuf = (uint16*)_TIFFmalloc(TIFFStripSize(tif));
+    tiffbuf = (uint16_t*)_TIFFmalloc(TIFFStripSize(tif));
     if (tiffbuf) {
         row = 0;
         rowsperstrip = 0;
         TIFFGetField(tif, TIFFTAG_ROWSPERSTRIP, &rowsperstrip);
         for (row = 0; ok&&(row<ny); row+= rowsperstrip) {
-            uint32 nrow =  ( (row+rowsperstrip>ny)?(ny-row):rowsperstrip);
+            uint32_t nrow =  ( (row+rowsperstrip>ny)?(ny-row):rowsperstrip);
             tstrip_t strip = TIFFComputeStrip(tif, row, 0);
             if ((TIFFReadEncodedStrip(tif,strip,tiffbuf,-1))<0) {
                 ok=false;
                 if (errormessage) sprintf(errormessage, "invalid strip");
                 break;
             }
-            uint16* ptr = tiffbuf;
+            uint16_t* ptr = tiffbuf;
             int iii=0;
             for (rr = 0;rr<nrow; ++rr) {
                 for (cc = 0; cc<nx; ++cc) {
-                    uint16 t=(uint16)*(ptr++);
+                    uint16_t t=(uint16)*(ptr++);
                     iii++;
                     imagebuf[cc+(row+rr)*nx]=t;
                 }
@@ -504,7 +555,7 @@ bool TIFFTReadUInt16(TIFF* tif, uint16** image, uint16* width, uint16* height, c
 
 uint32 TIFFCountDirectories(TIFF* tif) {
     TIFFSetDirectory(tif,0);
-    uint32 n_images =0;
+    uint32_t n_images =0;
     do ++n_images; while (TIFFReadDirectory(tif));
     TIFFSetDirectory(tif,0);
     return n_images;
@@ -529,11 +580,11 @@ uint32 TIFFCountDirectories(TIFF* tif) {
 
 
 
-bool TIFFTWriteDouble(TIFF *tif, const double *image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression)
+bool TIFFTWriteDouble(TIFF *tif, const double *image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression)
 {
-    uint16 frame_width=width;
-    uint16 frame_height=height;
-    uint32 rowsperstrip = (uint32)-1;
+    uint16_t frame_width=width;
+    uint16_t frame_height=height;
+    uint32_t rowsperstrip = (uint32)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -558,7 +609,7 @@ bool TIFFTWriteDouble(TIFF *tif, const double *image, uint16 width, uint16 heigh
     float* const buf = (float*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
     for (unsigned int row = 0; (row<frame_height); row+=rowsperstrip) {
         // compute rows in this strip:
-        uint32 nrow = rowsperstrip;
+        uint32_t nrow = rowsperstrip;
         if ((row + rowsperstrip)>frame_height) {
             nrow=frame_height-row; // this is the last strip ... and it is a bit smaller! ... it only contains the last rows of the image
         }
@@ -579,11 +630,11 @@ bool TIFFTWriteDouble(TIFF *tif, const double *image, uint16 width, uint16 heigh
 }
 
 
-bool TIFFTWriteBoolAsUint8(TIFF *tif, const bool *image, uint16 width, uint16 height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32 compression)
+bool TIFFTWriteBoolAsUint8(TIFF *tif, const bool *image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression)
 {
-    uint16 frame_width=width;
-    uint16 frame_height=height;
-    uint32 rowsperstrip = (uint32)-1;
+    uint16_t frame_width=width;
+    uint16_t frame_height=height;
+    uint32_t rowsperstrip = (uint32)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -606,10 +657,10 @@ bool TIFFTWriteBoolAsUint8(TIFF *tif, const bool *image, uint16 width, uint16 he
     // data is broken up into strips where each strip contains rowsperstrip complete rows of data
     // each stript then has a size of rowsperstrip*frame_width pixels. the last strip is possibly
     // smaller, so it is NOT padded with dummy data.
-    uint8* const buf = (uint8*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
+    uint8_t* const buf = (uint8_t*)_TIFFmalloc(TIFFStripSize(tif)); // data buffer for a strip of the image
     for (unsigned int row = 0; (row<frame_height); row+=rowsperstrip) {
         // compute rows in this strip:
-        uint32 nrow = rowsperstrip;
+        uint32_t nrow = rowsperstrip;
         if ((row + rowsperstrip)>frame_height) {
             nrow=frame_height-row; // this is the last strip ... and it is a bit smaller! ... it only contains the last rows of the image
         }
@@ -631,14 +682,19 @@ bool TIFFTWriteBoolAsUint8(TIFF *tif, const bool *image, uint16 width, uint16 he
 
 
 template <>
-bool TIFFWrite<uint8_t>(TIFF* tif, const uint8_t* image, uint16 width, uint16 height) {
+bool TIFFWrite<uint8_t>(TIFF* tif, const uint8_t* image, uint16_t width, uint16_t height) {
     return TIFFTWriteUint8(tif, image, width, height);
 }
 template <>
-bool TIFFWrite<uint16_t>(TIFF* tif, const uint16_t* image, uint16 width, uint16 height) {
+bool TIFFWrite<uint16_t>(TIFF* tif, const uint16_t* image, uint16_t width, uint16_t height) {
     return TIFFTWriteUint16(tif, image, width, height);
 }
 template <>
-bool TIFFWrite<uint32_t>(TIFF* tif, const uint32_t* image, uint16 width, uint16 height) {
+bool TIFFWrite<uint32_t>(TIFF* tif, const uint32_t* image, uint16_t width, uint16_t height) {
     return TIFFTWriteUint32(tif, image, width, height);
 }
+template <>
+bool TIFFWrite<uint64_t>(TIFF* tif, const uint64_t* image, uint16_t width, uint16_t height) {
+    return TIFFTWriteUint64(tif, image, width, height);
+}
+

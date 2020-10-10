@@ -11,12 +11,14 @@ This is a lightweight C++ library that allows to read and write TIFF files. It o
     - data types: UINT, INT, FLOAT, 8-64-bit
 	- photometric interpretations: Greyscale, RGB, including ALPHA information
 	- planar (R1R2R3...G1G2G3...B1B2B3...) or chunky (R1G1B1R2G2B2R3G3B3...) data organization for multi-sample data
+	- writes stripped TIFFs only, no tiled TIFFs
   - for READING (TinyTIFFReader):
     - TIFF-only (no BigTIFF), i.e. max. 4GB
     - uncompressed frames
     - one, or more samples per frame
-    - data types: UINT, INT, FLOAT, 8-32bit
+    - data types: UINT, INT, FLOAT, 8-64bit
 	- planar data organization only, for multi-sample data
+	- stripped TIFFs only, tiling is not supported
 .
 
 This software is licensed under the term of the GNU Lesser General Public License 3.0 
