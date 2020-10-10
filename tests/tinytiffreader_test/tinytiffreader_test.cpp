@@ -666,29 +666,33 @@ int main() {
 
     //TEST_AGAINST_LIBTIFF<uint16_t>("2K_source_Stack.tif",  test_results);
     //TEST_AGAINST_LIBTIFF<uint16_t>("2K_tiff_image.tif",  test_results);
-    //TEST_AGAINST_LIBTIFF<uint8_t>("cell.tif",  test_results);
-    //TEST_AGAINST_LIBTIFF<uint8_t>("circuit.tif",  test_results);
-    //TEST_AGAINST_LIBTIFF<uint8_t>("galaxy.tif",  test_results);
-    //TEST_AGAINST_LIBTIFF<uint8_t>("mri.tif",  test_results);
+    TEST_AGAINST_LIBTIFF<uint8_t>("cell.tif",  test_results);
+    TEST_AGAINST_LIBTIFF<uint8_t>("circuit.tif",  test_results);
+    TEST_AGAINST_LIBTIFF<uint8_t>("galaxy.tif",  test_results);
+    TEST_AGAINST_LIBTIFF<uint8_t>("mri.tif",  test_results);
     TEST_AGAINST_LIBTIFF<uint8_t>("multi-channel-time-series.ome.tif",  test_results);
     TEST_AGAINST_LIBTIFF<uint16_t>("test16m_imagej.tif",  test_results);
     TEST_AGAINST_LIBTIFF<float>("imagej_32bit_ramp.tif",  test_results);
     TEST_AGAINST_LIBTIFF<uint8_t>("circuit_nocompression.tif",  test_results);
     TEST_AGAINST_LIBTIFF<uint8_t>("mri_nocompression.tif",  test_results);
     TEST_AGAINST_LIBTIFF<uint8_t>("galaxy_nocompression.tif",  test_results);
+    //TEST_AGAINST_LIBTIFF<uint8_t>("corel_photopaint_grey.tif",  test_results);
+    TEST_AGAINST_LIBTIFF<uint8_t>("imagej_32bit_ramp_tiled.tif",  test_results);
 #else
     //TEST_SIMPLE<uint16_t>("2K_source_Stack.tif",  test_results);
     //TEST_SIMPLE<uint16_t>("2K_tiff_image.tif",  test_results);
-    //TEST_SIMPLE<uint8_t>("cell.tif",  test_results);
-    //TEST_SIMPLE<uint8_t>("circuit.tif",  test_results);
-    //TEST_SIMPLE<uint8_t>("galaxy.tif",  test_results);
-    //TEST_SIMPLE<uint8_t>("mri.tif",  test_results);
+    TEST_SIMPLE<uint8_t>("cell.tif",  test_results);
+    TEST_SIMPLE<uint8_t>("circuit.tif",  test_results);
+    TEST_SIMPLE<uint8_t>("galaxy.tif",  test_results);
+    TEST_SIMPLE<uint8_t>("mri.tif",  test_results);
     TEST_SIMPLE<uint8_t>("multi-channel-time-series.ome.tif",  test_results);
     TEST_SIMPLE<uint16_t>("test16m_imagej.tif",  test_results);
     TEST_SIMPLE<float>("imagej_32bit_ramp.tif",  test_results);
     TEST_SIMPLE<uint8_t>("circuit_nocompression.tif",  test_results);
     TEST_SIMPLE<uint8_t>("mri_nocompression.tif",  test_results);
-    //TEST_SIMPLE<uint8_t>("galaxy_nocompression.tif",  test_results);
+    TEST_SIMPLE<uint8_t>("galaxy_nocompression.tif",  test_results);
+    //TEST_SIMPLE<uint8_t>("corel_photopaint_grey.tif",  test_results);
+    TEST_SIMPLE<uint8_t>("imagej_32bit_ramp_tiled.tif",  test_results);
 
 #endif
 

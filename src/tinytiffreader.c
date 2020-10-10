@@ -99,6 +99,7 @@ typedef struct TinyTIFFReaderFrame {
     uint8_t orientation;
     uint8_t fillorder;
     uint32_t photometric_interpretation;
+    uint8_t isTiled;
 	
 	char* description;
 } TinyTIFFReaderFrame;
@@ -121,6 +122,7 @@ static TinyTIFFReaderFrame TinyTIFFReader_getEmptyFrame() {
     d.orientation=TIFF_ORIENTATION_STANDARD;
     d.fillorder=TIFF_FILLORDER_DEFAULT;
     d.photometric_interpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
+    d.isTiled=TINYTIFF_FALSE;
     return d;
 }
 
@@ -605,6 +607,12 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                 case TIFF_FIELD_ORIENTATION: tiff->currentFrame.orientation=ifd.value; break;
                 case TIFF_FIELD_PHOTOMETRICINTERPRETATION: tiff->currentFrame.photometric_interpretation=ifd.value; break;
                 case TIFF_FIELD_FILLORDER: tiff->currentFrame.fillorder=ifd.value; break;
+                case TIFF_FIELD_TILE_BYTECOUNTS:
+                case TIFF_FIELD_TILE_LENGTH:
+                case TIFF_FIELD_TILE_OFFSETS:
+                case TIFF_FIELD_TILE_WIDTH :
+                    tiff->currentFrame.isTiled=TINYTIFF_TRUE;
+                    break;
                 default:
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                     printf("      --> unhandled FIELD %d\n", (int)ifd.tag);
@@ -634,16 +642,16 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
             TINYTIFF_SET_LAST_ERROR(tiff, "the compression of the file is not supported by this library\0");
             return TINYTIFF_FALSE;
         }
+        if (tiff->currentFrame.isTiled!=TINYTIFF_FALSE) {
+            tiff->wasError=TINYTIFF_TRUE;
+            TINYTIFF_SET_LAST_ERROR(tiff, "tiled images are not supported by this library\0");
+            return TINYTIFF_FALSE;
+        }
         if (tiff->currentFrame.samplesperpixel>1 && tiff->currentFrame.planarconfiguration!=TIFF_PLANARCONFIG_PLANAR) {
             tiff->wasError=TINYTIFF_TRUE;
             TINYTIFF_SET_LAST_ERROR(tiff, "only planar TIFF files are supported by this library\0");
             return TINYTIFF_FALSE;
         }
-        /*if (tiff->currentFrame.samplesperpixel>1 && tiff->currentFrame.stripcount%tiff->currentFrame.samplesperpixel>0) {
-            tiff->wasError=TINYTIFF_TRUE;
-            TINYTIFF_SET_LAST_ERROR(tiff, "in planar multi-sample data, stripcount has to be dividable by samplesperpixel\0");
-            return TINYTIFF_FALSE;
-        }*/
         if (tiff->currentFrame.orientation!=TIFF_ORIENTATION_STANDARD) {
             tiff->wasError=TINYTIFF_TRUE;
             TINYTIFF_SET_LAST_ERROR(tiff, "only standard TIFF orientations are supported by this library\0");
