@@ -42,12 +42,6 @@
 # endif
 #endif
 
-#ifndef __WINDOWS__
-# ifndef __LINUX__
-#  warning("these methods are ment to be used under windows or linux ... no other system were tested")
-# endif
-#endif
-
 #if defined(__WINDOWS__)
 #include<windows.h>
 #endif
