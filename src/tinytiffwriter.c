@@ -1100,13 +1100,7 @@ int TinyTIFFWriter_success(TinyTIFFWriterFile *tiff)
 
 const char *TinyTIFFWriter_getVersion()
 {
-    static char tmp[1024];
-    memset(tmp,0,1024);
-#ifdef HAVE_SPRINTF_S
-    sprintf_s(tmp, 1024, "%s (%s, Git: %s)", TINYTIFF_VERSION, TINYTIFF_COMPILETIME, TINYTIFF_GITVERSION);
-#else
-    sprintf(tmp, "%s (%s, Git: %s)", TINYTIFF_VERSION, TINYTIFF_COMPILETIME, TINYTIFF_GITVERSION);
-#endif
+    static char tmp[]=TINYTIFF_FULLVERSION;
     return tmp;
 }
 
