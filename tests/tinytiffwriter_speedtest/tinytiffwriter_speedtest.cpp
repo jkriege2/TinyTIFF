@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
     int quicktest=TINYTIFF_FALSE;
     if (argc>1 && std::string(argv[1])=="--simple")  quicktest=TINYTIFF_TRUE;
 
-    std::cout<<"tinytiffreader_speedtest:"<<std::endl;
+    std::cout<<"tinytiffwriter_speedtest:"<<std::endl;
     if (quicktest!=TINYTIFF_FALSE) std::cout<<"  - quick test with --simple"<<std::endl;
 #ifdef TINYTIFF_TEST_LIBTIFF
     std::cout<<"  - cheching against LibTIFF "<<TIFFGetVersion()<<std::endl;
@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
 
     {
         std::vector<TestConfig> image_sizes;
-        if (quicktest!=TINYTIFF_FALSE) {
+        if (quicktest==TINYTIFF_FALSE) {
             image_sizes = {
                 {128,128,10000,0.5},
                 {256,256,1000,0.2},
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
 
     {
         std::vector<TestConfig> image_sizes ;
-        if (quicktest!=TINYTIFF_FALSE) {
+        if (quicktest==TINYTIFF_FALSE) {
             image_sizes = {
                 {128,128,1,0.0},
                 {128,128,10,1},
