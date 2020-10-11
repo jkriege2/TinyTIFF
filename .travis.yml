@@ -87,8 +87,8 @@ script:
   - echo $DYLD_LIBRARY_PATH 
   - DYLD_LIBRARY_PATH =$CONDA_PREFIX/lib\:$DYLD_LIBRARY_PATH  ; export DYLD_LIBRARY_PATH 
   - echo $DYLD_LIBRARY_PATH 
-#  - ./tinytiffwriter_test --simple
-  - ./tinytiffreader_test --simple
+  - if [ $TRAVIS_OS_NAME == "linux" ]; then ./tinytiffreader_test --simple; fi
+  - if [ $TRAVIS_OS_NAME == "linux" ]; then ./tinytiffwriter_test --simple; fi
 
 notifications:
   email: false
