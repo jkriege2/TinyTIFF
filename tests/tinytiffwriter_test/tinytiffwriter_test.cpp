@@ -286,40 +286,40 @@ int main(int argc, char *argv[]) {
 
 
     performWriteTest("WRITING 8-Bit UINT GREY TIFF", "test8.tif", image8.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
-    performMultiFrameWriteTest("WRITING 8-Bit UINT GREY TIFF", "test8m.tif", image8.data(), image8i.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 8-Bit UINT GREY TIFF", "test8m.tif", image8.data(), image8i.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
 
     performWriteTest("WRITING 16-Bit UINT GREY TIFF", "test16.tif", image16.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
-    performMultiFrameWriteTest("WRITING 16-Bit UINT GREY TIFF", "test16m.tif", image16.data(), image16i.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 16-Bit UINT GREY TIFF", "test16m.tif", image16.data(), image16i.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
 
     performWriteTest("WRITING 32-Bit UINT GREY TIFF", "test32.tif", image32.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
-    performMultiFrameWriteTest("WRITING 32-Bit UINT GREY TIFF", "test32m.tif", image32.data(), image32i.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 32-Bit UINT GREY TIFF", "test32m.tif", image32.data(), image32i.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
 
     performWriteTest("WRITING 64-Bit UINT GREY TIFF", "test64.tif", image64.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
-    performMultiFrameWriteTest("WRITING 64-Bit UINT GREY TIFF", "test64m.tif", image64.data(), image64i.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 64-Bit UINT GREY TIFF", "test64m.tif", image64.data(), image64i.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
 
     performWriteTest("WRITING 32-Bit FLOAT GREY TIFF", "testf.tif", imagef.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
-    performMultiFrameWriteTest("WRITING 32-Bit FLOAT GREY TIFF", "testfm.tif", imagef.data(), imagefi.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 32-Bit FLOAT GREY TIFF", "testfm.tif", imagef.data(), imagefi.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
 
     performWriteTest("WRITING 64-Bit FLOAT GREY TIFF", "testd.tif", imaged.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
-    performMultiFrameWriteTest("WRITING 64-Bit FLOAT GREY TIFF", "testdm.tif", imaged.data(), imagedi.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 64-Bit FLOAT GREY TIFF", "testdm.tif", imaged.data(), imagedi.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
 
     performWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgb.tif", imagergb.data(), WIDTH, HEIGHT, 3, TinyTIFFWriter_RGB, test_results);
-    performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm.tif", imagergb.data(), imagergbi.data(), WIDTH, HEIGHT, 3, NUMFRAMES, TinyTIFFWriter_RGB, test_results);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm.tif", imagergb.data(), imagergbi.data(), WIDTH, HEIGHT, 3, NUMFRAMES, TinyTIFFWriter_RGB, test_results);
 
     performWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgb_chunkplan.tif", imagergb.data(), WIDTH, HEIGHT, 3, TinyTIFFWriter_RGB, test_results, TinyTIFF_Chunky, TinyTIFF_Planar);
-    performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm_chunkplan.tif", imagergb.data(), imagergbi.data(), WIDTH, HEIGHT, 3, NUMFRAMES, TinyTIFFWriter_RGB, test_results, TinyTIFF_Chunky, TinyTIFF_Planar);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm_chunkplan.tif", imagergb.data(), imagergbi.data(), WIDTH, HEIGHT, 3, NUMFRAMES, TinyTIFFWriter_RGB, test_results, TinyTIFF_Chunky, TinyTIFF_Planar);
 
     performWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgb_planchunk.tif", imagergbplan.data(), WIDTH, HEIGHT, 3, TinyTIFFWriter_RGB, test_results, TinyTIFF_Planar, TinyTIFF_Chunky);
-    performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm_planchunk.tif", imagergbplan.data(), imagergbplani.data(), WIDTH, HEIGHT, 3, NUMFRAMES, TinyTIFFWriter_RGB, test_results, TinyTIFF_Planar, TinyTIFF_Chunky);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm_planchunk.tif", imagergbplan.data(), imagergbplani.data(), WIDTH, HEIGHT, 3, NUMFRAMES, TinyTIFFWriter_RGB, test_results, TinyTIFF_Planar, TinyTIFF_Chunky);
 
     performWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgb_planplan.tif", imagergbplan.data(), WIDTH, HEIGHT, 3, TinyTIFFWriter_RGB, test_results, TinyTIFF_Planar, TinyTIFF_Planar);
-    performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm_planplan.tif", imagergbplan.data(), imagergbplani.data(), WIDTH, HEIGHT, 3, NUMFRAMES, TinyTIFFWriter_RGB, test_results, TinyTIFF_Planar, TinyTIFF_Planar);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 8-Bit UINT RGB TIFF", "testrgbm_planplan.tif", imagergbplan.data(), imagergbplani.data(), WIDTH, HEIGHT, 3, NUMFRAMES, TinyTIFFWriter_RGB, test_results, TinyTIFF_Planar, TinyTIFF_Planar);
 
     performWriteTest("WRITING 8-Bit UINT RGBA TIFF", "testrgba.tif", imagergba.data(), WIDTH, HEIGHT, 4, TinyTIFFWriter_RGBA, test_results);
-    performMultiFrameWriteTest("WRITING 8-Bit UINT RGBA TIFF", "testrgbam.tif", imagergba.data(), imagergbai.data(), WIDTH, HEIGHT, 4, NUMFRAMES, TinyTIFFWriter_RGBA, test_results);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 8-Bit UINT RGBA TIFF", "testrgbam.tif", imagergba.data(), imagergbai.data(), WIDTH, HEIGHT, 4, NUMFRAMES, TinyTIFFWriter_RGBA, test_results);
 
     performWriteTest("WRITING 8-Bit UINT GREY+ALPHA  TIFF", "test_ga.tif", greyalpha.data(), WIDTH, HEIGHT, 2, TinyTIFFWriter_GreyscaleAndAlpha, test_results);
-    performMultiFrameWriteTest("WRITING 8-Bit UINT GREY+ALPHA TIFF", "test_gam.tif", greyalpha.data(), greyalphai.data(), WIDTH, HEIGHT, 2, NUMFRAMES, TinyTIFFWriter_GreyscaleAndAlpha, test_results);
+    if (quicktest!=TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 8-Bit UINT GREY+ALPHA TIFF", "test_gam.tif", greyalpha.data(), greyalphai.data(), WIDTH, HEIGHT, 2, NUMFRAMES, TinyTIFFWriter_GreyscaleAndAlpha, test_results);
 
 
 
