@@ -336,7 +336,7 @@ int main(int argc, char *argv[]) {
 #endif
     testsum<<"\n"<<writeTestSummary(test_results)<<std::endl;
     std::cout<<testsum.str();
-    std::ofstream file("tintytiffreader_test_result.txt", std::ofstream::out | std::ofstream::trunc);
+    std::ofstream file("tintytiffwriter_test_result.txt", std::ofstream::out | std::ofstream::trunc);
     file<<testsum.str();
     file.close();
 
