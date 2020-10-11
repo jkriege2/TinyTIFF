@@ -592,9 +592,9 @@ static void TinyTIFFWriter_writeIFDEntrySHORTARRAY(TinyTIFFWriterFile* tiff, uin
     \ingroup tinytiffwriter_internal
     \internal
 
-\note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
-                                                                  */
-                                                              static void TinyTIFFWriter_writeIFDEntrySHORTARRAY_allsame(TinyTIFFWriterFile* tiff, uint16_t tag, uint16_t data, uint32_t N) {
+    \note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
+  */
+static void TinyTIFFWriter_writeIFDEntrySHORTARRAY_allsame(TinyTIFFWriterFile* tiff, uint16_t tag, uint16_t data, uint32_t N) {
     uint16_t* tmp=(uint16_t*)malloc(N*sizeof(uint16_t));
     uint16_t i;
     for(i=0; i<N; i++) tmp[i]=data;
@@ -606,8 +606,8 @@ static void TinyTIFFWriter_writeIFDEntrySHORTARRAY(TinyTIFFWriterFile* tiff, uin
     \ingroup tinytiffwriter_internal
     \internal
 
-\note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
-                                                                  */
+    \note This function writes into TinyTIFFFile::lastHeader, starting at the position TinyTIFFFile::pos
+   */
 static void TinyTIFFWriter_writeIFDEntryLONGARRAY_allsame(TinyTIFFWriterFile* tiff, uint16_t tag, uint32_t data, uint16_t N) {
     uint32_t* tmp=(uint32_t*)malloc(N*sizeof(uint32_t));
     uint16_t i;
@@ -824,8 +824,12 @@ void TinyTIFFWriter_close_withdescription(TinyTIFFWriterFile* tiff, const char* 
                   sprintf(description, "TinyTIFFWriter_version=1.1\nimages=%ld", (unsigned long)(tiff->frames));
     #endif
               }
-              description[TINYTIFFWRITER_DESCRIPTION_SIZE-1]='\0';
-              //const size_t dlen=strlen(description);
+              description[TINYTIFFWRITER_DESCRIPTION_SIZE]='\0';
+#ifdef HAVE_STRNLEN_S
+              const size_t dlen=strnlen_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1);
+#else
+              const size_t dlen=strlen(description);
+#endif
 
               //printf("WRITING COMMENT\n***");
               //printf(description);
@@ -834,7 +838,7 @@ void TinyTIFFWriter_close_withdescription(TinyTIFFWriterFile* tiff, const char* 
               TinyTIFFWriter_fseek_set(tiff, tiff->descriptionOffset);
               TinyTIFFWriter_fwrite(description, 1, TINYTIFFWRITER_DESCRIPTION_SIZE+1, tiff);//<<" / "<<dlen<<"\n";
               TinyTIFFWriter_fseek_set(tiff, tiff->descriptionSizeOffset);
-              WRITE32DIRECT_CAST(tiff, (TINYTIFFWRITER_DESCRIPTION_SIZE+1));
+              WRITE32DIRECT_CAST(tiff, dlen);//(TINYTIFFWRITER_DESCRIPTION_SIZE+1));
             }
     #endif // TINYTIFF_WRITE_COMMENTS
         }
