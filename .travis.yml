@@ -74,23 +74,21 @@ install:
   - source ci/install_travis.sh
 
 script:
-  - stage: deploy
-    mkdir build
-    cd build
-    cmake -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DTinyTIFF_QT5_SUPPORT=ON -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON -DTinyTIFF_OPENCV_SUPPORT=ON ..
-    cmake --build . 
-    cmake --install . 
-  - stage: test
-    echo "TESTING ..."
-    cd $CONDA_PREFIX/bin
-    echo $LD_LIBRARY_PATH
-    LD_LIBRARY_PATH=$CONDA_PREFIX/lib\:$LD_LIBRARY_PATH ; export LD_LIBRARY_PATH
-    echo $LD_LIBRARY_PATH
-    echo $DYLD_LIBRARY_PATH 
-    DYLD_LIBRARY_PATH =$CONDA_PREFIX/lib\:$DYLD_LIBRARY_PATH  ; export DYLD_LIBRARY_PATH 
-    echo $DYLD_LIBRARY_PATH 
-    ./tinytiffwriter_test --simple
-    ./tinytiffreader_test --simple
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DTinyTIFF_QT5_SUPPORT=ON -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON -DTinyTIFF_OPENCV_SUPPORT=ON ..
+  - cmake --build . 
+  - cmake --install . 
+  - echo "TESTING ..."
+  - cd $CONDA_PREFIX/bin
+  - echo $LD_LIBRARY_PATH
+  - LD_LIBRARY_PATH=$CONDA_PREFIX/lib\:$LD_LIBRARY_PATH ; export LD_LIBRARY_PATH
+  - echo $LD_LIBRARY_PATH
+  - echo $DYLD_LIBRARY_PATH 
+  - DYLD_LIBRARY_PATH =$CONDA_PREFIX/lib\:$DYLD_LIBRARY_PATH  ; export DYLD_LIBRARY_PATH 
+  - echo $DYLD_LIBRARY_PATH 
+  - ./tinytiffwriter_test --simple
+  - ./tinytiffreader_test --simple
 
 notifications:
   email: false
