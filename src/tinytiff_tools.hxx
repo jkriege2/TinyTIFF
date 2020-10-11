@@ -27,8 +27,31 @@ extern "C" {
 }
 #include <string>
 
+/*! \defgroup tinytiffwriter_CXX TinyTIFFWriter: Optional C++-Interface (include-only!)
+    \ingroup tinytiffwriter
+
+    All functions and tenplates in this group are extensions to the basic TinyTIFFWriter libarary. They
+    are all header-only (or templates), so no link library other than libTinyTIFF is required.
+
+*/
+
+/*! \defgroup tinytiffreader_CXX TinyTIFFReader: Optional C++-Interface (include-only!)
+    \ingroup tinytiffreader
+
+    All functions in this group are extensions to the basic TinyTIFFReader libarary. They
+    are all header-only (or templates), so no link library other than libTinyTIFF is required.
+
+*/
 
 
+/** \brief this template allows to determine a value for TinyTIFFWriterSampleFormat from a given type \a T
+ *  \ingroup tinytiffwriter_CXX
+ *
+ *  The format can be determined from the type \c TDATA by :
+ *  \code
+ *    TinyTIFFWriterFile* tiff = TinyTIFFWriter_open(filename, sizeof(TDATA)*8, TinyTIFF_SampleFormatFromType<TDATA>().format, 1, width, height, TinyTIFFWriter_Greyscale);
+ *  \endcode
+ */
 template<class T>
 struct TinyTIFF_SampleFormatFromType {
     const enum TinyTIFFWriterSampleFormat format=TinyTIFFWriter_UInt;
