@@ -494,8 +494,16 @@ static void warninghandler(const char* module, const char* fmt, va_list ap)
 }
 #endif
 
-int main() {
+
+
+int main(int argc, char *argv[]) {
+    int quicktest=TINYTIFF_FALSE;
+    if (argc>1 && std::string(argv[1])=="--simple")  quicktest=TINYTIFF_TRUE;
+
+    std::cout<<"tinytiffreader_test:"<<std::endl;
+    if (quicktest!=TINYTIFF_FALSE) std::cout<<"  - quick test with --simple"<<std::endl;
 #ifdef TINYTIFF_TEST_LIBTIFF
+    std::cout<<"  - cheching against LibTIFF"<<std::endl;
     TIFFSetErrorHandler(errorhandler);
     TIFFSetWarningHandler(warninghandler);
 #endif
@@ -503,10 +511,10 @@ int main() {
 
     HighResTimer timer, timer1;
 
-    const size_t WIDTH=513;
-    const size_t HEIGHT=333;
+    const size_t WIDTH=(quicktest!=TINYTIFF_FALSE)?32:513;
+    const size_t HEIGHT=(quicktest!=TINYTIFF_FALSE)?32:333;
     const size_t PATTERNSIZE=12;
-    const size_t TEST_FRAMES=100;
+    const size_t TEST_FRAMES=(quicktest!=TINYTIFF_FALSE)?6:100;
 
 
     vector<uint8_t> image8(WIDTH*HEIGHT, 0);
@@ -697,7 +705,17 @@ int main() {
 #endif
 
     const std::string testsum=writeTestSummary(test_results);
-    std::cout<<"\n\n\n\nTinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\nTinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n\n"<<testsum<<std::endl;
+    std::cout<<"\n\n\n\n";
+    std::cout<<"tinytiffreader_test:"<<std::endl;
+    if (quicktest!=TINYTIFF_FALSE) std::cout<<"  - quick test with --simple"<<std::endl;
+#ifdef TINYTIFF_TEST_LIBTIFF
+    std::cout<<"  - cheching against LibTIFF"<<std::endl;
+#endif
+    std::cout<<"  - TinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\n  - TinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n";
+#ifdef TINYTIFF_TEST_LIBTIFF
+    std::cout<<"  - libTIFF Version: "<<TIFFGetVersion()<<"\n";
+#endif
+    std::cout<<"\n"<<testsum<<std::endl;
     std::ofstream file("tintytiffreader_test_result.txt", std::ofstream::out | std::ofstream::trunc);
     file<<testsum;
     file.close();

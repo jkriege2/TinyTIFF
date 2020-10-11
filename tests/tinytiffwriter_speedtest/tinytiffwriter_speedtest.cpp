@@ -178,23 +178,42 @@ void performTest(const std::vector<TestConfig>& image_sizes, std::vector<TestRes
     }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    int quicktest=TINYTIFF_FALSE;
+    if (argc>1 && std::string(argv[1])=="--simple")  quicktest=TINYTIFF_TRUE;
+
+    std::cout<<"tinytiffreader_speedtest:"<<std::endl;
+    if (quicktest!=TINYTIFF_FALSE) std::cout<<"  - quick test with --simple"<<std::endl;
 #ifdef TINYTIFF_TEST_LIBTIFF
+    std::cout<<"  - cheching against LibTIFF"<<std::endl;
     TIFFSetErrorHandler(errorhandler);
     TIFFSetWarningHandler(warninghandler);
 #endif
+    std::cout<<"creating some test TIFF files ..."<<std::endl;
     std::vector<TestResult> test_results;
 
 
     {
-        std::vector<TestConfig> image_sizes {
-            {128,128,10000,0.5},
-            {256,256,1000,0.2},
-            {512,512,1000,0.1},
-            {1024,1024,10,1.0},
-            {2048,2048,10,1.0},
-            {4096,4096,10,1.0}
-        };
+        std::vector<TestConfig> image_sizes;
+        if (quicktest!=TINYTIFF_FALSE) {
+            image_sizes = {
+                {128,128,10000,0.5},
+                {256,256,1000,0.2},
+                {512,512,1000,0.1},
+                {1024,1024,10,1.0},
+                {2048,2048,10,1.0},
+                {4096,4096,10,1.0}
+            };
+        } else {
+            image_sizes = {
+                {128,128,100,0.5},
+                {256,256,100,0.2},
+                {512,512,100,0.1},
+                {1024,1024,5,1.0},
+                {2048,2048,5,1.0},
+                {4096,4096,2,1.0}
+            };
+        }
 
 
         const size_t PATTERNSIZE = 12;
@@ -203,13 +222,26 @@ int main() {
     }
 
     {
-        std::vector<TestConfig> image_sizes {
-            {128,128,1,0.0},
-            {128,128,10,1},
-            {128,128,100,0.5},
-            {128,128,1000,0.2},
-            {128,128,10000,0.1},
-        };
+        std::vector<TestConfig> image_sizes ;
+        if (quicktest!=TINYTIFF_FALSE) {
+            image_sizes = {
+                {128,128,1,0.0},
+                {128,128,10,1},
+                {128,128,100,0.5},
+                {128,128,1000,0.2},
+                {128,128,10000,0.1},
+                {128,128,100000,0.1},
+                {128,128,1000000,0.1},
+                };
+        } else {
+            image_sizes = {
+                {32,32,1,0.0},
+                {32,32,10,1},
+                {32,32,100,0.5},
+                {32,32,1000,0.2},
+                {32,32,10000,0.1},
+                };
+        }
 
 
         const size_t PATTERNSIZE = 12;
@@ -220,7 +252,17 @@ int main() {
 
 
     const std::string testsum=writeTestSummary(test_results);
-    std::cout<<"\n\n\n\nTinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\nTinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n\n"<<testsum<<std::endl;
+    std::cout<<"\n\n\n\n";
+    std::cout<<"tinytiffreader_speedtest:"<<std::endl;
+    if (quicktest!=TINYTIFF_FALSE) std::cout<<"  - quick test with --simple"<<std::endl;
+#ifdef TINYTIFF_TEST_LIBTIFF
+    std::cout<<"  - cheching against LibTIFF"<<std::endl;
+#endif
+    std::cout<<"  - TinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\n  - TinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n";
+#ifdef TINYTIFF_TEST_LIBTIFF
+    std::cout<<"  - libTIFF Version: "<<TIFFGetVersion()<<"\n";
+#endif
+    std::cout<<"\n"<<testsum<<std::endl;
     std::ofstream file;
     file.open("tintytiffwriter_speedtest_result.txt");
     file<<testsum;

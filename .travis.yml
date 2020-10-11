@@ -87,8 +87,8 @@ script:
   - echo $DYLD_LIBRARY_PATH 
   - DYLD_LIBRARY_PATH =$CONDA_PREFIX/lib\:$DYLD_LIBRARY_PATH  ; export DYLD_LIBRARY_PATH 
   - echo $DYLD_LIBRARY_PATH 
-  - ./tinytiffwriter_test
-  - ./tinytiffreader_test
+  - ./tinytiffwriter_test --simple
+  - ./tinytiffreader_test --simple
 
 notifications:
   email: false
