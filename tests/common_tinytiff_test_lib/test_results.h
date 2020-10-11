@@ -25,13 +25,14 @@
 #include <cmath>
 
 struct TestResult {
-    inline TestResult(): name(""), success(false), duration_ms(-1), durationerror_ms(0), perframe_duration_ms(-1), perframe_durationerror_ms(0) {};
+    inline TestResult(): name(""), success(false), duration_ms(-1), durationerror_ms(0), perframe_duration_ms(-1), perframe_durationerror_ms(0), numImages(0) {};
     std::string name;
     bool success;
     double duration_ms;
     double durationerror_ms;
     double perframe_duration_ms;
     double perframe_durationerror_ms;
+    int numImages;
 };
 
 std::string writeTestSummary(const std::vector<TestResult>& test_results);

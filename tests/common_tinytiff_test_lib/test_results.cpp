@@ -27,15 +27,22 @@ std::string writeTestSummary(const std::vector<TestResult> &test_results) {
     std::ostringstream str;
     str<<"TEST SUMMARY:\n";
     size_t textcolwidth=60;
-    size_t durcol=30;
+    size_t durcol=15;
+    size_t durpfcol=15;
+    size_t durcolsingle=15;
+    size_t frmcol=10;
     for (auto& r: test_results) {
         textcolwidth=std::max(textcolwidth, r.name.size()+2);
+        if (r.duration_ms>=0 && r.durationerror_ms>0) durcol=30;
+        if (r.perframe_duration_ms>=0 && r.perframe_durationerror_ms>0) durpfcol=30;
     }
-    str<<std::setw(textcolwidth)<<"NAME"<<" | "<<std::setw(6)<<"OK?"<<" | "<<std::setw(durcol)<<"DURATION"<<" | "<<std::setw(durcol)<<"DURATION_PER_FRAME"<<std::endl;
+    str<<std::setw(textcolwidth)<<"NAME"<<" | "<<std::setw(6)<<"OK?"<<" | "<<std::setw(frmcol)<<"#FRAMES"<<" | "<<std::setw(durcol)<<"DURATION"<<" | "<<std::setw(durcol/2)<<"DURATION/frames"<<" | "<<std::setw(durcol)<<"DURATION_PER_FRAME"<<std::endl;
     for (auto& r: test_results) {
         str<<std::setw(textcolwidth)<<r.name;
         if (r.success) str<<" | "<<std::setw(6)<<"    OK";
         else           str<<" | "<<std::setw(6)<<"FAILED";
+
+        str<<" | "<<std::setw(frmcol)<<r.numImages;
 
         {
             std::ostringstream strloc;
@@ -53,6 +60,15 @@ std::string writeTestSummary(const std::vector<TestResult> &test_results) {
         }
         {
             std::ostringstream strloc;
+            if (r.duration_ms>=0 && r.numImages>0) {
+                strloc<<r.duration_ms/static_cast<double>(r.numImages)<<"ms";
+            } else {
+                strloc<<"---";
+            }
+            str<<" | "<<std::setw(durcolsingle)<<strloc.str();
+        }
+        {
+            std::ostringstream strloc;
             if (r.perframe_duration_ms>=0) {
                 if (r.perframe_durationerror_ms>0) {
                     strloc<<"("<<r.perframe_duration_ms<< " +/- " <<r.perframe_durationerror_ms<<")ms";
@@ -63,7 +79,7 @@ std::string writeTestSummary(const std::vector<TestResult> &test_results) {
             } else {
                 strloc<<"---";
             }
-            str<<" | "<<std::setw(durcol)<<strloc.str();
+            str<<" | "<<std::setw(durpfcol)<<strloc.str();
         }
         str<<std::endl;
     }

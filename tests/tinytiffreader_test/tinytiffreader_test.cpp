@@ -223,6 +223,7 @@ void TEST_SIMPLE(const char* filename, std::vector<TestResult>& test_results) {
         } while (ok && TinyTIFFReader_readNext(tiffr));
         duration=timer.get_time();
         test_results.back().duration_ms=duration/1.0e3;
+        test_results.back().numImages=frame;
         std::cout<<"    read and checked all frames: "<<((ok)?std::string("SUCCESS"):std::string("ERROR"))<<"     [duration: "<<duration<<" us  =  "<<floattounitstr(duration/1.0e6, "s")<<" ]\n";
         std::cout<<"    read "<<frame<<" frames\n";
     }
@@ -304,6 +305,7 @@ void TEST(const char* filename, const TIMAGESAMPLETYPE* image, const TIMAGESAMPL
             } while (ok && next);
             duration=timer.get_time();
             test_results.back().duration_ms=duration/1.0e3;
+            test_results.back().numImages=frame;
             std::cout<<"    read and checked "<<frame<<" frames: "<<((ok)?std::string("SUCCESS"):std::string("ERROR"))<<"     [duration: "<<duration<<" us  =  "<<floattounitstr(duration/1.0e6, "s")<<" ]\n";
             std::cout<<"    getSampleData() consumed "<<floattounitstr(duration_getdata/1.0e6, "s")<<"\n";
             std::cout<<"    readNext() consumed "<<floattounitstr(duration_nextframe/1.0e6, "s")<<"\n";
@@ -336,6 +338,7 @@ void TEST_AGAINST_LIBTIFF(const char* filename, std::vector<TestResult>& test_re
     test_results.emplace_back();
     test_results.back().name=std::string("TEST_AGAINST_LIBTIFF(")+std::string(filename)+std::string(")");
     test_results.back().success=ok=false;
+    test_results.back().numImages=0;
     try {
         timer.start();
         std::cout<<"    libTIFF: opening file with     [duration: "<<floattounitstr(double(timer.get_time())/1.0e6, "s")<<" ]\n";
@@ -457,6 +460,7 @@ void TEST_AGAINST_LIBTIFF(const char* filename, std::vector<TestResult>& test_re
                         } while (ok && TIFFReadDirectory(ltiff) && TinyTIFFReader_readNext(tiffr));
 
                         test_results.back().success=ok;
+                        test_results.back().numImages=frame;
                         duration=timer.get_time();
                         test_results.back().duration_ms=duration/1.0e3;
                         std::cout<<"    read and checked all "<<frame<<" frames: "<<((ok)?std::string("SUCCESS"):std::string("ERROR"))<<"     [duration: "<<duration<<" us  =  "<<floattounitstr(duration/1.0e6, "s")<<" ]\n";

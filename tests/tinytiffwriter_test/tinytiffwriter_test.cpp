@@ -123,6 +123,7 @@ void performWriteTest(const std::string& name, const char* filename, const T* im
         }
         TinyTIFFWriter_close(tiff);
         test_results.back().duration_ms=timer.get_time()/1e3;
+        test_results.back().numImages=1;
         if ((get_filesize(filename)<=0)) {
             test_results.back().success=false;
             std::cout<<"ERROR: file '"<<filename<<"' has no contents!\n";
@@ -170,6 +171,7 @@ void performMultiFrameWriteTest(const std::string& name, const char* filename, c
         }
         TinyTIFFWriter_close(tiff);
         test_results.back().duration_ms=timer.get_time()/1e3;
+        test_results.back().numImages=FRAMES;
         if ((get_filesize(filename)<=0)) {
             test_results.back().success=false;
             std::cout<<"ERROR: file '"<<filename<<"' has no contents!\n";

@@ -43,6 +43,7 @@ void performTinyTIFFWriteTest(const std::string& name, const char* filename, con
         }
         TinyTIFFWriter_close(tiff);
         test_results.back().duration_ms=timer.get_time()/1e3;
+        test_results.back().numImages=FRAMES;
         test_results.back().success=true;
         reportRuntimes(name, runtimes, SPEEDTEST_REMOVESLOWEST_PERCENT, &test_results);
     } else {
@@ -78,6 +79,7 @@ void performRAWWriteTest(const std::string& name, const char* filename, const T*
         }
         fclose(fraw);
         test_results.back().duration_ms=timer.get_time()/1e3;
+        test_results.back().numImages=FRAMES;
         test_results.back().success=true;
         reportRuntimes(name, runtimes, SPEEDTEST_REMOVESLOWEST_PERCENT, &test_results);
     } else {
@@ -116,6 +118,7 @@ void performLibTIFFWriteTest(const std::string& name, const char* filename, cons
         TIFFClose(tifvideo);
         test_results.back().duration_ms=timer.get_time()/1e3;
         test_results.back().success=true;
+        test_results.back().numImages=FRAMES;
         reportRuntimes(name, runtimes, SPEEDTEST_REMOVESLOWEST_PERCENT, &test_results);
     } else {
         std::cout<<"ERROR: could not open '"<<filename<<"' for writing!\n";
