@@ -76,7 +76,7 @@ install:
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DTinyTIFF_QT5_SUPPORT=ON -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON -DTinyTIFF_OPENCV_SUPPORT=ON ..
+  - cmake -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON ..
   - cmake --build . 
   - cmake --install . 
   - echo "TESTING ..."
@@ -87,7 +87,7 @@ script:
   - echo $DYLD_LIBRARY_PATH 
   - DYLD_LIBRARY_PATH =$CONDA_PREFIX/lib\:$DYLD_LIBRARY_PATH  ; export DYLD_LIBRARY_PATH 
   - echo $DYLD_LIBRARY_PATH 
-  - ./tinytiffwriter_test --simple
+#  - ./tinytiffwriter_test --simple
   - ./tinytiffreader_test --simple
 
 notifications:
