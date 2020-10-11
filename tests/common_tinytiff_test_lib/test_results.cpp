@@ -48,10 +48,10 @@ std::string writeTestSummary(const std::vector<TestResult> &test_results) {
             std::ostringstream strloc;
             if (r.duration_ms>=0) {
                 if (r.durationerror_ms>0) {
-                    strloc<<"("<<r.duration_ms<< " +/- " <<r.durationerror_ms<<")ms";
+                    strloc<<"("<< std::fixed<< std::setprecision(3) <<  r.duration_ms<< " +/- " << std::fixed<< std::setprecision(3)<<r.durationerror_ms<<")ms";
 
                 } else {
-                    strloc<<r.duration_ms<<"ms";
+                    strloc<< std::fixed<< std::setprecision(3)<<r.duration_ms<<"ms";
                 }
             } else {
                 strloc<<"---";
@@ -61,7 +61,7 @@ std::string writeTestSummary(const std::vector<TestResult> &test_results) {
         {
             std::ostringstream strloc;
             if (r.duration_ms>=0 && r.numImages>0) {
-                strloc<<r.duration_ms/static_cast<double>(r.numImages)<<"ms";
+                strloc<< std::fixed<< std::setprecision(3)<<r.duration_ms/static_cast<double>(r.numImages)<<"ms";
             } else {
                 strloc<<"---";
             }
@@ -71,10 +71,10 @@ std::string writeTestSummary(const std::vector<TestResult> &test_results) {
             std::ostringstream strloc;
             if (r.perframe_duration_ms>=0) {
                 if (r.perframe_durationerror_ms>0) {
-                    strloc<<"("<<r.perframe_duration_ms<< " +/- " <<r.perframe_durationerror_ms<<")ms";
+                    strloc<<"("<< std::fixed<< std::setprecision(3)<<r.perframe_duration_ms<< " +/- " << std::fixed<< std::setprecision(3)<<r.perframe_durationerror_ms<<")ms";
 
                 } else {
-                    strloc<<r.perframe_duration_ms<<"ms";
+                    strloc<< std::fixed<< std::setprecision(3)<<r.perframe_duration_ms<<"ms";
                 }
             } else {
                 strloc<<"---";

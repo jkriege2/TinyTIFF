@@ -6,6 +6,7 @@
 #include <array>
 #include <map>
 #include <fstream>
+#include <sstream>
 #ifdef TINYTIFF_TEST_LIBTIFF
 #include <tiffio.h>
 #include "libtiff_tools.h"
@@ -188,7 +189,7 @@ int main(int argc, char *argv[]) {
     std::cout<<"tinytiffreader_speedtest:"<<std::endl;
     if (quicktest!=TINYTIFF_FALSE) std::cout<<"  - quick test with --simple"<<std::endl;
 #ifdef TINYTIFF_TEST_LIBTIFF
-    std::cout<<"  - cheching against LibTIFF"<<std::endl;
+    std::cout<<"  - cheching against LibTIFF "<<TIFFGetVersion()<<std::endl;
     TIFFSetErrorHandler(errorhandler);
     TIFFSetWarningHandler(warninghandler);
 #endif
@@ -232,17 +233,17 @@ int main(int argc, char *argv[]) {
                 {128,128,10,1},
                 {128,128,100,0.5},
                 {128,128,1000,0.2},
-                {128,128,10000,0.1},
-                {128,128,100000,0.1},
-                {128,128,1000000,0.1},
+                {128,128,10000,1},
+                {128,128,100000,1},
+                {128,128,1000000,1},
                 };
         } else {
             image_sizes = {
                 {32,32,1,0.0},
                 {32,32,10,1},
                 {32,32,100,0.5},
-                {32,32,1000,0.2},
-                {32,32,10000,0.1},
+                {32,32,1000,1},
+                {32,32,10000,1},
                 };
         }
 
@@ -254,21 +255,22 @@ int main(int argc, char *argv[]) {
 
 
 
-    const std::string testsum=writeTestSummary(test_results);
-    std::cout<<"\n\n\n\n";
-    std::cout<<"tinytiffreader_speedtest:"<<std::endl;
-    if (quicktest!=TINYTIFF_FALSE) std::cout<<"  - quick test with --simple"<<std::endl;
+    std::ostringstream testsum;
+    testsum<<"\n\n\n\n";
+    testsum<<"tinytiffreader_speedtest:"<<std::endl;
+    if (quicktest!=TINYTIFF_FALSE) testsum<<"  - quick test with --simple"<<std::endl;
 #ifdef TINYTIFF_TEST_LIBTIFF
-    std::cout<<"  - cheching against LibTIFF"<<std::endl;
+    testsum<<"  - cheching against LibTIFF"<<std::endl;
 #endif
-    std::cout<<"  - TinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\n  - TinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n";
+    testsum<<"  - TinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\n  - TinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n";
 #ifdef TINYTIFF_TEST_LIBTIFF
-    std::cout<<"  - libTIFF Version: "<<TIFFGetVersion()<<"\n";
+    testsum<<"  - libTIFF Version: "<<TIFFGetVersion()<<"\n";
 #endif
-    std::cout<<"\n"<<testsum<<std::endl;
-    std::ofstream file;
-    file.open("tintytiffwriter_speedtest_result.txt");
-    file<<testsum;
+    testsum<<"\n"<<writeTestSummary(test_results)<<std::endl;
+    std::cout<<testsum.str();
+    std::ofstream file("tintytiffreader_test_result.txt", std::ofstream::out | std::ofstream::trunc);
+    file<<testsum.str();
+    file.close();
 
 
     return 0;
