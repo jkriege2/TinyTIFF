@@ -16,7 +16,27 @@
 
 using namespace std;
 
+int quicktest=TINYTIFF_FALSE;
 
+
+void saveTestSummary(const std::string& filename, const std::vector<TestResult> &test_results, bool print) {
+    std::ostringstream testsum;
+    testsum<<"\n\n\n\n";
+    testsum<<"tinytiffreader_speedtest:"<<std::endl;
+    if (quicktest!=TINYTIFF_FALSE) testsum<<"  - quick test with --simple"<<std::endl;
+#ifdef TINYTIFF_TEST_LIBTIFF
+    testsum<<"  - cheching against LibTIFF"<<std::endl;
+#endif
+    testsum<<"  - TinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\n  - TinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n";
+#ifdef TINYTIFF_TEST_LIBTIFF
+    testsum<<"  - libTIFF Version: "<<TIFFGetVersion()<<"\n";
+#endif
+    testsum<<"\n"<<writeTestSummary(test_results)<<std::endl;
+    if (print)std::cout<<testsum.str();
+    std::ofstream file(filename, std::ofstream::out | std::ofstream::trunc);
+    file<<testsum.str();
+    file.close();
+}
 
 template <class T>
 void performTinyTIFFWriteTest(const std::string& name, const char* filename, const T* imagedata, size_t WIDTH, size_t HEIGHT, size_t SAMPLES, size_t FRAMES, TinyTIFFWriterSampleInterpretation interpret, std::vector<TestResult>& test_results, const float SPEEDTEST_REMOVESLOWEST_PERCENT = 0.1, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky, TinyTIFFSampleLayout outputOrg=TinyTIFF_Chunky) {
@@ -75,7 +95,7 @@ void performRAWWriteTest(const std::string& name, const char* filename, const T*
         runtimes.reserve(FRAMES);
         for (size_t f=0; f<FRAMES; f++) {
             timer1.start();
-            fwrite(imagedata, WIDTH*HEIGHT*SAMPLES*sizeof(T), 1, fraw);
+            fwrite(imagedata, 1, sizeof(T)*WIDTH*HEIGHT*SAMPLES, fraw);
             runtimes.push_back(timer1.get_time());
         }
         fclose(fraw);
@@ -168,22 +188,26 @@ void performTest(const std::vector<TestConfig>& image_sizes, std::vector<TestRes
             write1ChannelTestData(images[i].data(), c.WIDTH, c.HEIGHT, PATTERNSIZE, 1);
         }
         performTinyTIFFWriteTest("TinyTIFFWriter-Test", std::string("tinytiff_speedtest_"+std::to_string(c.WIDTH)+"x"+std::to_string(c.HEIGHT)+"_uint"+std::to_string(sizeof(T)*8)+"_tinytiffwriter.tif").c_str(), images.at(i).data(), c.WIDTH, c.HEIGHT, 1, c.SPEEDTEST_SIZE, TinyTIFFWriter_AutodetectSampleInterpetation, test_results, c.SPEEDTEST_REMOVESLOWEST_PERCENT);
+        saveTestSummary("tintytiffwriter_speedtest_result.txt", test_results, false);
         i++;
     }
     i=0;
     for (auto& c: image_sizes) {
         performRAWWriteTest("RAW-Test", std::string("tinytiff_speedtest_"+std::to_string(c.WIDTH)+"x"+std::to_string(c.HEIGHT)+"_uint"+std::to_string(sizeof(T)*8)+"_raw.raw").c_str(), images.at(i).data(), c.WIDTH, c.HEIGHT, 1, c.SPEEDTEST_SIZE, test_results, c.SPEEDTEST_REMOVESLOWEST_PERCENT);
+        saveTestSummary("tintytiffwriter_speedtest_result.txt", test_results, false);
         i++;
     }
     i=0;
     for (auto& c: image_sizes) {
         performLibTIFFWriteTest("LibTIFF-Test", std::string("tinytiff_speedtest_"+std::to_string(c.WIDTH)+"x"+std::to_string(c.HEIGHT)+"_uint"+std::to_string(sizeof(T)*8)+"_libtiff.tif").c_str(), images.at(i).data(), c.WIDTH, c.HEIGHT, 1, c.SPEEDTEST_SIZE, test_results, c.SPEEDTEST_REMOVESLOWEST_PERCENT);
+        saveTestSummary("tintytiffwriter_speedtest_result.txt", test_results, false);
         i++;
     }
 }
 
+
+
 int main(int argc, char *argv[]) {
-    int quicktest=TINYTIFF_FALSE;
     if (argc>1 && std::string(argv[1])=="--simple")  quicktest=TINYTIFF_TRUE;
 
     std::cout<<"tinytiffwriter_speedtest:"<<std::endl;
@@ -201,12 +225,14 @@ int main(int argc, char *argv[]) {
         std::vector<TestConfig> image_sizes;
         if (quicktest==TINYTIFF_FALSE) {
             image_sizes = {
-                {128,128,10000,0.5},
-                {256,256,1000,0.2},
-                {512,512,1000,0.1},
-                {1024,1024,10,1.0},
-                {2048,2048,10,1.0},
-                {4096,4096,10,1.0}
+                {32,32,10000,1},
+                {64,64,10000,1},
+                {128,128,10000,1},
+                {256,256,5000,1},
+                {512,512,1000,1},
+                {1024,1024,500,1.0},
+                {2048,2048,200,1.0},
+                {4096,4096,50,1.0}
             };
         } else {
             image_sizes = {
@@ -229,13 +255,13 @@ int main(int argc, char *argv[]) {
         std::vector<TestConfig> image_sizes ;
         if (quicktest==TINYTIFF_FALSE) {
             image_sizes = {
-                {128,128,1,0.0},
-                {128,128,10,1},
-                {128,128,100,0.5},
-                {128,128,1000,0.2},
-                {128,128,10000,1},
-                {128,128,100000,1},
-                {128,128,1000000,1},
+                {64,64,1,0.0},
+                {64,64,10,10},
+                {64,64,100,1},
+                {64,64,1000,1},
+                {64,64,10000,1},
+                {64,64,100000,1},
+                {64,64,1000000,1},
                 };
         } else {
             image_sizes = {
@@ -255,22 +281,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    std::ostringstream testsum;
-    testsum<<"\n\n\n\n";
-    testsum<<"tinytiffreader_speedtest:"<<std::endl;
-    if (quicktest!=TINYTIFF_FALSE) testsum<<"  - quick test with --simple"<<std::endl;
-#ifdef TINYTIFF_TEST_LIBTIFF
-    testsum<<"  - cheching against LibTIFF"<<std::endl;
-#endif
-    testsum<<"  - TinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\n  - TinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n";
-#ifdef TINYTIFF_TEST_LIBTIFF
-    testsum<<"  - libTIFF Version: "<<TIFFGetVersion()<<"\n";
-#endif
-    testsum<<"\n"<<writeTestSummary(test_results)<<std::endl;
-    std::cout<<testsum.str();
-    std::ofstream file("tintytiffwriter_speedtest_result.txt", std::ofstream::out | std::ofstream::trunc);
-    file<<testsum.str();
-    file.close();
+    saveTestSummary("tintytiffwriter_speedtest_result.txt", test_results, true);
 
 
     return 0;

@@ -40,8 +40,15 @@
    \see \ref mainpagetinytiff_writer for details on how this library works
  */
 
+
+/*! \defgroup tinytiffwriter_C TinyTIFFWriter: C-Interface
+   \ingroup tinytiffwriter
+
+*/
+
+
 /** \brief struct used to describe a TIFF file
-  * \ingroup tinytiffwriter
+  * \ingroup tinytiffwriter_C
   */
 typedef struct TinyTIFFWriterFile TinyTIFFWriterFile; // forward
 
@@ -57,12 +64,12 @@ extern "C" {
     TINYTIFF_EXPORT const char* TinyTIFFWriter_getVersion();
 
     /** \brief maximum size of the imageDescription field in the first frame (including trailing \c 0, which has to be present!)
-      * \ingroup tinytiffwriter
+      * \ingroup tinytiffwriter_C
       */
     TINYTIFF_EXPORT int TinyTIFFWriter_getMaxDescriptionTextSize();
 
     /*! \brief returns a pointer to the last error message
-        \ingroup tinytiffwriter
+        \ingroup tinytiffwriter_C
 
         \param tiff TIFF file
 
@@ -71,7 +78,7 @@ extern "C" {
     TINYTIFF_EXPORT const char* TinyTIFFWriter_getLastError(TinyTIFFWriterFile* tiff);
 
     /*! \brief returns TRUE (non-zero) when there was an error in the last function call, or FALSE (zero) if there was no error
-        \ingroup tinytiffwriter
+        \ingroup tinytiffwriter_C
 
         \param tiff TIFF file
 
@@ -79,7 +86,7 @@ extern "C" {
     TINYTIFF_EXPORT int TinyTIFFWriter_wasError(TinyTIFFWriterFile* tiff);
 
     /*! \brief returns TINYTIFF_TRUE (non-zero) when there was no error in the last function call, or TINYTIFF_FALSE if there was an error
-        \ingroup tinytiffwriter
+        \ingroup tinytiffwriter_C
 
         \param tiff TIFF file
 
@@ -87,7 +94,7 @@ extern "C" {
     TINYTIFF_EXPORT int TinyTIFFWriter_success(TinyTIFFWriterFile* tiff);
 
     /** \brief allows to specify in TinyTIFFWriter_open() how to interpret the image channels
-     *  \ingroup tinytiffwriter
+     *  \ingroup tinytiffwriter_C
      *
      *  \see TinyTIFFWriter_open()
      */
@@ -100,7 +107,7 @@ extern "C" {
     };
 
     /** \brief allows to specify in TinyTIFFWriter_open() the type of the data
-     *  \ingroup tinytiffwriter
+     *  \ingroup tinytiffwriter_C
      *
      *  \see TinyTIFFWriter_open()
      */
@@ -111,7 +118,7 @@ extern "C" {
     };
 
     /*! \brief create a new TIFF file
-        \ingroup tinytiffwriter
+        \ingroup tinytiffwriter_C
 
         \param filename name of the new TIFF file
         \param number of samples per pixel (e.g. 3 for RGB images)
@@ -135,9 +142,13 @@ extern "C" {
 
 
     /** \brief write a new image to the give TIFF file. the image ist stored in separate planes or planar configuration, dependeing on \a outputOrganization and
-     *         the data is possibly reorganized, if \a outputOrganization does not match inputOrganisation. Note that such a reorganization requires additional
-     *         time and memory!
-     *  \ingroup tinytiffwriter
+     *         the data is possibly reorganized
+     *  \ingroup tinytiffwriter_C
+     *
+     *  \note if \a outputOrganization does not match \a inputOrganisation. Note that such a reorganization requires additional
+     *        time and memory! This can be seen in the following image comparing the performance of non-reordered writing (left)
+     *        and writing with reordering
+     *        \image html tinytiffwriter_performance_rgb.png
      *
      *  \param tiff TIFF file to write to
      *  \param data points to the image in row-major ordering with the right bit-depth,
@@ -152,7 +163,7 @@ extern "C" {
 
     /*! \brief write a new image to the give TIFF file, in planar configuration, i.e. the image data is reorganized from RGBRGBRGB to RRR...GGG...BBB... before writing.
                This operation requires additional memory and time! Use TinyTIFFWriter_writeImage() for speed
-        \ingroup tinytiffwriter
+        \ingroup tinytiffwriter_C
 
         This is equivalent to calling
         \code
@@ -166,13 +177,19 @@ extern "C" {
                     be \c R1G1B1|R2G2B2|R3G3B3|R4G4B4|...
         \return TINYTIFF_TRUE on success and TINYTIFF_FALSE on failure.
                 An error description can be obtained by calling TinyTIFFWriter_getLastError().
+
+
+       \note Note that the reorganization from chunky to planar requires additional
+             time and memory! This can be seen in the following image comparing the performance of non-reordered writing (left)
+             and writing with reordering
+             \image html tinytiffwriter_performance_rgb.png
     */
     TINYTIFF_EXPORT int TinyTIFFWriter_writeImagePlanarReorder(TinyTIFFWriterFile* tiff, const void* data);
 
 
     /*! \brief write a new image to the give TIFF file, in planar configuration, i.e. the image data is reorganized from RGBRGBRGB to RRR...GGG...BBB... before writing.
                This operation requires additional memory and time! Use TinyTIFFWriter_writeImage() for speed
-        \ingroup tinytiffwriter
+        \ingroup tinytiffwriter_C
 
         This is equivalent to calling
         \code
@@ -186,6 +203,11 @@ extern "C" {
                 be \c R1R2R3R4...G1G2G3G4...B1B2B3B4...
         \return TINYTIFF_TRUE on success and TINYTIFF_FALSE on failure.
                 An error description can be obtained by calling TinyTIFFWriter_getLastError().
+
+        \note Note that the reorganization from planar to chunky requires additional
+              time and memory! This can be seen in the following image comparing the performance of non-reordered writing (left)
+              and writing with reordering
+              \image html tinytiffwriter_performance_rgb.png
     */
     TINYTIFF_EXPORT int TinyTIFFWriter_writeImageChunkyReorder(TinyTIFFWriterFile* tiff, const void* data);
 
@@ -193,7 +215,7 @@ extern "C" {
     /*! \brief Write a new image to the give TIFF file, in chunky configuration, expects the data to be chunky too.
                This method is here for compatibility with older version on TinyTIFFWriter an for simple semantics for
                1-sample data, where the organization does not play any role!
-        \ingroup tinytiffwriter
+        \ingroup tinytiffwriter_C
 
         This is equivalent to calling
         \code
@@ -211,7 +233,7 @@ extern "C" {
     TINYTIFF_EXPORT int TinyTIFFWriter_writeImage(TinyTIFFWriterFile* tiff, const void* data);
 
     /*! \brief close a given TIFF file
-        \ingroup tinytiffwriter
+        \ingroup tinytiffwriter_C
 
         \param tiff TIFF file to close
         \param pixel_width pixel width in nanometers
@@ -219,7 +241,7 @@ extern "C" {
         \param deltaz in a multi-frame-TIFF distance between image planes in nanometers
         \param frametime in a multi-frame-TIFF frametime in seconds
 
-            This functions writes some additional data into the ImageDescription field of the first frame, if it is proved (!=0!!!).
+        This functions writes some additional data into the ImageDescription field of the first frame, if it is proved (!=0!!!).
         It also writes the image count there. The ImageDescription finally has the form:
     \verbatim
         TinyTIFFWriter_version=1.1
@@ -235,7 +257,7 @@ extern "C" {
     TINYTIFF_EXPORT void TinyTIFFWriter_close_withmetadatadescription(TinyTIFFWriterFile* tiff, double pixel_width, double pixel_height, double frametime, double deltaz);
 
     /*! \brief close a given TIFF file
-        \ingroup tinytiffwriter
+        \ingroup tinytiffwriter_C
 
         \param tiff TIFF file to close
 
@@ -246,7 +268,7 @@ extern "C" {
 
 
     /*! \brief close a given TIFF file and write the given string into the IMageDescription tag of the first frame in the file.
-        \ingroup tinytiffwriter
+        \ingroup tinytiffwriter_C
 
         \param tiff TIFF file to close
         \param imageDescription ImageDescription tag contents (max. size: TINYTIFFWRITER_DESCRIPTION_SIZE, including trailing 0!!!)

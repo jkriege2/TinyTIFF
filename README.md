@@ -155,29 +155,22 @@ Internally this library works like this: TinyTIFFWriter_open() will basically on
 ```
 The free space, indicated as SOME_FREE_SPACE is used to store contents of extended fields, like RATIONAL or ARRAY fields. Every image in the file will have this size and unused bytes are set to 0x00. TinyTIFFWriter_writeImage() then works like this: The image description data is first assembled in memory, then the complete image description data and the complete image data is written to the file all together. This reduces the number of file access operations and writes the data in two reltively large chunks which allows the operating system to properly optimize file access. Finally this method will save the position of the  NEXT_IFD_OFFSET field in the image header. The  NEXT_IFD_OFFSET field is filled with the adress of the next potential image. Finally the method TinyTIFFWriter_close() will write  0x00000000 into the NEXT_IFD_OFFSET of the last image (as saved above) which ends the list of images in the file. This ansatz for writing TIFF files is only about a factor of 2 slower than directly writing binary data into a file. In addition the time needed to write an image stays equal also when writing many images, which is NOT the case for libtiff. 
 
-Here are some example benchmark data acquired using MinGW on a rather old CentrinoDuo notebook:
-```
-TIFF SPEED TEST, 8-Bit 1000 images 32x32 pixels
-  average time to write one image: 17.1907 usecs    range: [7.82222..274.895] usecs
-  average image rate: 58.1709 kHz
-RAW SPEED TEST, 8-Bit 1000 images 32x32 pixels
-  average time to write one image: 21.8469 usecs    range: [2.23492..299.2] usecs
-  average image rate: 45.7731 kHz
-TIFF SPEED TEST, 16-Bit 1000 images 32x32 pixels
-  average time to write one image: 15.2676 usecs    range: [5.5873..262.044] usecs
-  average image rate: 65.4983 kHz
-RAW SPEED TEST, 16-Bit 1000 images 32x32 pixels
-  average time to write one image: 27.5138 usecs    range: [3.63175..296.406] usecs
-  average image rate: 36.3454 kHz
-LIBTIFF SPEED TEST, 8-Bit 1000 images 32x32 pixels
-  average time to write one image: 3024.75 usecs    range: [113.143..7161.52] usecs
-  average image rate: 0.330606 kHz
-LIBTIFF SPEED TEST, 16-Bit 1000 images 32x32 pixels
-  average time to write one image: 3028.42 usecs    range: [120.965..10426.7] usecs
-  average image rate: 0.330205 kHz
-```
-So this library is about a factor of 2.2 slower than direct binary output (raw) and about a factor of 500 faster than libTIFF. Note however the wide range of per-image write speeds which stems from the time the operating systems takes for file access. But the average rates are very good, so if your image creation is synchronous, you will need to use a FIFO to save images intermediately to account for the write speed jitter.
-   
+## PErformance Measurement
+
+The library was developed due to a problem with libTIFF, when a lot (>1000) frames are written into a TIFF-file. LibTIFF does not need constant time per frame (i.e. the time to write a multi-frame TIFF grows linearly with the number of frames), but the time to write a frame increases with the number of frames.
+The following performance measurement shows this. It was acquired using `tinytiffwriter_speedtest` from this repository and shows the average time required to write one frame (64x64x pixels, 16-bit integer) out of a number (10, 100, 1000, ...) of frames. It compares the performance of libTIFF, TinyTIFFWriter and simply writing the dtaa using `fwrite()` ("RAW"). It was acquired on an Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk (not a SSD)
+
+![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_numimages.png)
+
+For a microscope developed during my PhD thesis, it was necessary to write 100000 frames and more with acceptable duration. Therefore libTIFF was unusable and TinyTIFFWriter was developed.
+As can be seen in the graph above. The performance of TinyTIFFWriter and `fwrite()`/RAW is comparable, whereas the performance of LibTIFF falls off towards large files.
+
+
+The following image shows another performance measurement, this time for different frame sizes (64x64-4096x4096, acquired on an Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk (not a SSD)):
+
+![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_imagesizes.png)
+
+This suggests that the performance of TinyTIFFWriter and `fwrite()` are comparable for all image sizes. For larger images, also the performance of libTIFF is in the same range, whereas for small images, libTIFF falls off somewhat.  
 
 # Documentation
 

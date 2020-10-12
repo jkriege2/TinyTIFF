@@ -94,6 +94,7 @@ Statistics evaluateRuntimes(std::vector<double> runtimes, double remove_slowest_
     if (remove_slowest_percent>0 && remove_slowest_percent/100.0*runtimes.size()>0) {
         removed_records=static_cast<size_t>(remove_slowest_percent/100.0*runtimes.size());
         runtimes.erase(runtimes.end()-removed_records, runtimes.end());
+        runtimes.erase(runtimes.begin(), runtimes.begin()+removed_records);
     }
     double sum=0, sum2=0, mmin=0, mmax=0;
 
