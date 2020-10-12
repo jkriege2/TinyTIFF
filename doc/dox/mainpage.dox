@@ -5,21 +5,21 @@
 This is a lightweight C++ library that allows to read and write TIFF files. It only implements limited support for the features of TIFF. It was developed as a replacement for [libTIFF](https://en.wikipedia.org/wiki/Libtiff) for some very specific cases, where performance in writing (and reading) is much more important than full feature support. TinyTIFF e.g. does not support compression. Also the multi-frame TIFF-support is taylored (actually that is one of the main reasons for this library) to writing sequence of equally dimensioned images fast. The currently supported features are:
   - for WRITING (TinyTIFFWriter):
     - TIFF-only (no BigTIFF), i.e. max. 4GB
-	- multiple frames per file (actually this is the scope of this lib, to write such multi-page files fast), but with the limitation that all frames have the same dimension, data-type and number of samples. The latter allows for the desired speed optimizations!
+    - multiple frames per file (actually this is the scope of this lib, to write such multi-page files fast), but with the limitation that all frames have the same dimension, data-type and number of samples. The latter allows for the desired speed optimizations!
     - uncompressed frames
     - one, or more samples per frame
     - data types: UINT, INT, FLOAT, 8-64-bit
-	- photometric interpretations: Greyscale, RGB, including ALPHA information
-	- planar (R1R2R3...G1G2G3...B1B2B3...) or chunky (R1G1B1R2G2B2R3G3B3...) data organization for multi-sample data
-	- writes stripped TIFFs only, no tiled TIFFs
+    - photometric interpretations: Greyscale, RGB, including ALPHA information
+    - planar (R1R2R3...G1G2G3...B1B2B3...) or chunky (R1G1B1R2G2B2R3G3B3...) data organization for multi-sample data
+    - writes stripped TIFFs only, no tiled TIFFs
   - for READING (TinyTIFFReader):
     - TIFF-only (no BigTIFF), i.e. max. 4GB
     - uncompressed frames
     - one, or more samples per frame
     - data types: UINT, INT, FLOAT, 8-64bit
-	- planar and chunky data organization, for multi-sample data
-	- no suppoer for palleted images
-	- stripped TIFFs only, tiling is not supported
+    - planar and chunky data organization, for multi-sample data
+    - no suppoer for palleted images
+    - stripped TIFFs only, tiling is not supported
 .
 
 This software is licensed under the term of the GNU Lesser General Public License 3.0 
@@ -102,6 +102,8 @@ This suggests that the performance of TinyTIFFWriter and `fwrite()` are comparab
 
 \section mainpagetinytiff_reader TinyTIFFReader
 
+\section mainpagetinytiff_reader_usage TinyTIFFReader: Usage
+
 The following example code reads all frames in a TIFF:
 \code
    TinyTIFFReaderFile* tiffr=NULL;
@@ -109,55 +111,80 @@ The following example code reads all frames in a TIFF:
     if (!tiffr) { 
         std::cout<<"    ERROR reading (not existent, not accessible or no TIFF file)\n"; 
     } else { 
-        if (TinyTIFFReader_wasError(tiffr)) std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; 
-        std::cout<<"    ImageDescription:\n"<< TinyTIFFReader_getImageDescription(tiffr) <<"\n"; 
-        uint32_t frames=TinyTIFFReader_countFrames(tiffr); 
-        std::cout<<"    frames: "<<frames<<"\n"; 
-        if (TinyTIFFReader_wasError(tiffr)) std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; 
-        uint32_t frame=0; 
-        do { 
-            uint32_t width=TinyTIFFReader_getWidth(tiffr); 
-            uint32_t height=TinyTIFFReader_getHeight(tiffr); 
-			bool ok=true;
-            if (width>0 && height>0) std::cout<<"    size of frame "<<frame<<": "<<width<<"x"<<height<<"\n"; 
-            else { std::cout<<"    ERROR IN FRAME "<<frame<<": size too small "<<width<<"x"<<height<<"\n"; ok=false; } 
-            if (ok) { 
-                frame++; 
-                uint16_t* image=(uint16_t*)calloc(width*height, sizeof(uint16_t));  
-                TinyTIFFReader_getSampleData(tiffr, image, 0); 
-                if (TinyTIFFReader_wasError(tiffr)) { ok=false; std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; } 
-				
-                ///////////////////////////////////////////////////////////////////
-				// HERE WE CAN DO SOMETHING WITH THE IMAGE IN image (ROW-MAJOR!)
-                ///////////////////////////////////////////////////////////////////
-				
-                free(image); 
-            } 
-        } while (TinyTIFFReader_readNext(tiffr)); // iterate over all frames
-        std::cout<<"    read "<<frame<<" frames\n"; 
-    } 
+        if (TinyTIFFReader_wasError(tiffr)) {
+          std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; 
+        } else {
+            std::cout<<"    ImageDescription:\n"<< TinyTIFFReader_getImageDescription(tiffr) <<"\n"; 
+            uint32_t frames=TinyTIFFReader_countFrames(tiffr); 
+            std::cout<<"    frames: "<<frames<<"\n"; 
+            uint32_t frame=0; 
+            if (TinyTIFFReader_wasError(tiffr)) {
+              std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; 
+            } else {
+                do { 
+                    const uint32_t width=TinyTIFFReader_getWidth(tiffr); 
+                    const uint32_t height=TinyTIFFReader_getHeight(tiffr); 
+                    const uint16_t samples=TinyTIFFReader_getSamplesPerPixel(tiff);
+					const uint16_t bitspersample=TinyTIFFReader_getBitsPerSample(tiff, 0);
+                    bool ok=true;
+                    std::cout<<"    size of frame "<<frame<<": "<<width<<"x"<<height<<"\n"; 
+                    std::cout<<"    each pixel has "<<samples<<" samples with "<<bitspersample<<" bits each"\n"; 
+                    if (ok) { 
+                        frame++; 
+						// allocate memory for 1 sample from the image
+                        uint8_t* image=(uint8_t*)calloc(width*height, bitspersample/8);  
+						
+						for (uint16_t sample=0; sample<samples; sample++) {
+							// read the sample
+							TinyTIFFReader_getSampleData(tiffr, image, sample); 
+							if (TinyTIFFReader_wasError(tiffr)) { ok=false; std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; break; } 
+                        
+							///////////////////////////////////////////////////////////////////
+							// HERE WE CAN DO SOMETHING WITH THE SAMPLE FROM THE IMAGE 
+							// IN image (ROW-MAJOR!)
+							// Note: That you may have to typecast the array image to the
+							// datatype used in the TIFF-file. You can get the size of each
+							// sample in bits by calling TinyTIFFReader_getBitsPerSample() and
+							// the datatype by calling TinyTIFFReader_getSampleFormat().
+							///////////////////////////////////////////////////////////////////
+							
+						}
+                        
+                        free(image); 
+                    } 
+                } while (TinyTIFFReader_readNext(tiffr)); // iterate over all frames
+                std::cout<<"    read "<<frame<<" frames\n"; 
+            }
+        }
+    }   
     TinyTIFFReader_close(tiffr); 
 \endcode
 
 
-This example reads the first frame in a TIFF file:
+This simplified example reads the first sample from the first frame in a TIFF file:
 \code
    TinyTIFFReaderFile* tiffr=NULL;
    tiffr=TinyTIFFReader_open(filename); 
    if (!tiffr) { 
         std::cout<<"    ERROR reading (not existent, not accessible or no TIFF file)\n"; 
    } else { 
-		uint32_t width=TinyTIFFReader_getWidth(tiffr); 
-        uint32_t height=TinyTIFFReader_getHeight(tiffr); 
-		uint16_t* image=(uint16_t*)calloc(width*height, sizeof(uint16_t));  
+        const uint32_t width=TinyTIFFReader_getWidth(tiffr); 
+        const uint32_t height=TinyTIFFReader_getHeight(tiffr);
+        const uint16_t bitspersample=TinyTIFFReader_getBitsPerSample(tiff, 0);		
+        uint8_t* image=(uint8_t*)calloc(width*height, bitspersample/8);  
         TinyTIFFReader_getSampleData(tiffr, image, 0); 
-				
-                ///////////////////////////////////////////////////////////////////
-				// HERE WE CAN DO SOMETHING WITH THE IMAGE IN image (ROW-MAJOR!)
-                ///////////////////////////////////////////////////////////////////
-				
-		free(image); 
-	} 
+                
+							///////////////////////////////////////////////////////////////////
+							// HERE WE CAN DO SOMETHING WITH THE SAMPLE FROM THE IMAGE 
+							// IN image (ROW-MAJOR!)
+							// Note: That you may have to typecast the array image to the
+							// datatype used in the TIFF-file. You can get the size of each
+							// sample in bits by calling TinyTIFFReader_getBitsPerSample() and
+							// the datatype by calling TinyTIFFReader_getSampleFormat().
+							///////////////////////////////////////////////////////////////////
+                
+        free(image); 
+    } 
     TinyTIFFReader_close(tiffr); 
 \endcode
 
