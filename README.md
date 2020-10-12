@@ -31,7 +31,8 @@ This library currently support TIFF files, which meet the following criteria:
 * uncompressed frames
 * one, or more samples per frame
 * data types: UINT, INT, FLOAT, 8-64bit
-* planar data organization only, for multi-sample data
+* planar and chunky data organization, for multi-sample data
+* no suppoer for palleted images
 * stripped TIFFs only, tiling is not supported
 
 ## Usage
