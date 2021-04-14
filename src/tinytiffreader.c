@@ -710,8 +710,8 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                 //                                   |
                 //                                   outputimageidx_bytes: points to where to start writing in output array
 
-                const unsigned long sample_image_size_bytes=tiff->currentFrame.width*tiff->currentFrame.height*tiff->currentFrame.bitspersample/8;
-                const unsigned long sample_start_bytes=sample*sample_image_size_bytes;
+                const unsigned long sample_image_size_bytes=(size_t)tiff->currentFrame.width*tiff->currentFrame.height*tiff->currentFrame.bitspersample/8;
+                const unsigned long sample_start_bytes=(size_t)sample*sample_image_size_bytes;
                 const unsigned long sample_end_bytes=sample_start_bytes+sample_image_size_bytes;
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                 printf("    - sample_image_size_bytes=%lu\n", (unsigned long)sample_image_size_bytes);
