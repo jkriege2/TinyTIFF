@@ -61,7 +61,7 @@ This example reads all frames from a TIFF file:
 					const uint16_t bitspersample=TinyTIFFReader_getBitsPerSample(tiff, 0);
                     bool ok=true;
                     std::cout<<"    size of frame "<<frame<<": "<<width<<"x"<<height<<"\n"; 
-                    std::cout<<"    each pixel has "<<samples<<" samples with "<<bitspersample<<" bits each"\n"; 
+                    std::cout<<"    each pixel has "<<samples<<" samples with "<<bitspersample<<" bits each\n"; 
                     if (ok) { 
                         frame++; 
 						// allocate memory for 1 sample from the image
