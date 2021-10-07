@@ -994,6 +994,7 @@ uint16_t TinyTIFFReader_getSamplesPerPixel(TinyTIFFReaderFile* tiff) {
 }
 
 
+
 uint32_t TinyTIFFReader_countFrames(TinyTIFFReaderFile* tiff) {
 
     if (tiff) {
