@@ -100,6 +100,10 @@ typedef struct TinyTIFFReaderFrame {
     uint8_t fillorder;
     uint32_t photometric_interpretation;
     uint8_t isTiled;
+
+    float xresolution;
+    float yresolution;
+    uint16_t resolutionunit;
 	
 	char* description;
 } TinyTIFFReaderFrame;
@@ -612,6 +616,11 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                 case TIFF_FIELD_TILE_WIDTH :
                     tiff->currentFrame.isTiled=TINYTIFF_TRUE;
                     break;
+                case TIFF_FIELD_XRESOLUTION:{
+                    tiff->currentFrame.xresolution= ((float)ifd.value)/((float) ifd.value2);
+                } break;
+                case TIFF_FIELD_YRESOLUTION: tiff->currentFrame.yresolution = ((float)ifd.value)/((float) ifd.value2);break;
+                case TIFF_FIELD_RESOLUTIONUNIT: tiff->currentFrame.resolutionunit = ifd.value;break;
                 default:
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                     printf("      --> unhandled FIELD %d\n", (int)ifd.tag);
@@ -985,6 +994,7 @@ uint16_t TinyTIFFReader_getSamplesPerPixel(TinyTIFFReaderFile* tiff) {
 }
 
 
+
 uint32_t TinyTIFFReader_countFrames(TinyTIFFReaderFile* tiff) {
 
     if (tiff) {
@@ -1013,9 +1023,30 @@ uint32_t TinyTIFFReader_countFrames(TinyTIFFReaderFile* tiff) {
     }
     return 0;
 }
+float TinyTIFFReader_getXResolution(TinyTIFFReaderFile* tiff){
+    if(tiff){
+        return tiff->currentFrame.xresolution;
+    }
+    return 0.0f;
+}
+
+float TinyTIFFReader_getYResolution(TinyTIFFReaderFile* tiff){
+    if(tiff){
+        return tiff->currentFrame.yresolution;
+    }
+    return 0.0f;
+}
+
+uint16_t TinyTIFFReader_GetResolutionUnit(TinyTIFFReaderFile* tiff){
+    if(tiff){
+        return tiff->currentFrame.resolutionunit;
+    }
+    return TIFF_RESOLUTION_UNIT_INCH;// default
+}
 
 const char *TinyTIFFReader_getVersion()
 {
     static char tmp[]=TINYTIFF_FULLVERSION;
     return tmp;
 }
+
