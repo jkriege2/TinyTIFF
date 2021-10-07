@@ -192,10 +192,10 @@ extern "C" {
 
     /*! \brief return the base unit for resolution
         \ingroup tinytiffreader_C
-
         \param tiff TIFF file
+        \return TIFF_RESOLUTION_UNIT_NONE, TIFF_RESOLUTION_UNIT_INCH or TIFF_RESOLUTION_UNIT_CENTIMETER
     */
-    TINYTIFF_EXPORT uint16_t TinyTIFFReader_GetResolutionUnit(TinyTIFFReaderFile* tiff);
+    TINYTIFF_EXPORT uint16_t TinyTIFFReader_getResolutionUnit(TinyTIFFReaderFile* tiff);
 
 
 /*! \brief read the given sample from the current frame into the given buffer,

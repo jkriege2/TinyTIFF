@@ -127,6 +127,9 @@ static TinyTIFFReaderFrame TinyTIFFReader_getEmptyFrame() {
     d.fillorder=TIFF_FILLORDER_DEFAULT;
     d.photometric_interpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
     d.isTiled=TINYTIFF_FALSE;
+    d.xresolution=1.0;
+    d.yresolution=1.0;
+    d.resolutionunit=1;
     return d;
 }
 
@@ -1037,7 +1040,7 @@ float TinyTIFFReader_getYResolution(TinyTIFFReaderFile* tiff){
     return 0.0f;
 }
 
-uint16_t TinyTIFFReader_GetResolutionUnit(TinyTIFFReaderFile* tiff){
+uint16_t TinyTIFFReader_getResolutionUnit(TinyTIFFReaderFile* tiff){
     if(tiff){
         return tiff->currentFrame.resolutionunit;
     }
