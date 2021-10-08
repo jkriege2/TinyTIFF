@@ -174,7 +174,31 @@ extern "C" {
      */
     TINYTIFF_EXPORT uint16_t TinyTIFFReader_getSamplesPerPixel(TinyTIFFReaderFile* tiff);
 
-    /*! \brief read the given sample from the current frame into the given buffer,
+    /*! \brief return the pixels per basic resolution unit in image width direction
+        \ingroup tinytiffreader_C
+
+        \param tiff TIFF file
+    */
+    TINYTIFF_EXPORT float TinyTIFFReader_getXResolution(TinyTIFFReaderFile* tiff);
+
+
+    /*! \brief return the pixels per basic resolution unit in image height direction
+        \ingroup tinytiffreader_C
+
+        \param tiff TIFF file
+    */
+    TINYTIFF_EXPORT float TinyTIFFReader_getYResolution(TinyTIFFReaderFile* tiff);
+
+
+    /*! \brief return the base unit for resolution
+        \ingroup tinytiffreader_C
+        \param tiff TIFF file
+        \return TIFF_RESOLUTION_UNIT_NONE, TIFF_RESOLUTION_UNIT_INCH or TIFF_RESOLUTION_UNIT_CENTIMETER
+    */
+    TINYTIFF_EXPORT uint16_t TinyTIFFReader_getResolutionUnit(TinyTIFFReaderFile* tiff);
+
+
+/*! \brief read the given sample from the current frame into the given buffer,
                the byteorder is transformed to the byteorder of the system!
         \ingroup tinytiffreader_C
 
