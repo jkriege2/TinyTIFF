@@ -238,6 +238,7 @@ static int TinyTIFFWriter_fseek_set(TinyTIFFWriterFile* tiff, size_t offset) {
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
+#ifdef TinyTIFFWriter_fseek_cur // Silence "unused" warning
 /*! \brief wrapper around fseek(..., FILE_CURRENT)
     \ingroup tinytiffwriter_internal
     \internal
@@ -255,7 +256,7 @@ static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
     return fseek(tiff->file, (long)offset, SEEK_CUR);
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
-
+#endif
 
 /*! \brief calculates the number of channels, covered by the photometric interpretation. If samples is larger than this, the difference are extraSamples!
     \ingroup tinytiffwriter_internal
@@ -454,6 +455,7 @@ static void TinyTIFFWriter_endIFD(TinyTIFFWriterFile* tiff, int hsize) {
     //tiff->lastHeader=NULL;
 }
 
+#ifdef ENABLE_UNUSED_TinyTIFFWriter_writeIFDEntry // Silence "unused" warning
 /*! \brief write an arbitrary IFD entry
     \ingroup tinytiffwriter_internal
     \internal
@@ -470,7 +472,9 @@ static void TinyTIFFWriter_writeIFDEntry(TinyTIFFWriterFile* tiff, uint16_t tag,
         WRITEH32DIRECT(tiff, data);
     }
 }
+#endif
 
+#ifdef ENABLE_UNUSED_TinyTIFFWriter_writeIFDEntryBYTE // Silence "unused" warning
 /*! \brief write an 8-bit word IFD entry
     \ingroup tinytiffwriter_internal
     \internal
@@ -489,6 +493,7 @@ static void TinyTIFFWriter_writeIFDEntry(TinyTIFFWriterFile* tiff, uint16_t tag,
         WRITEH16(tiff, 0);
     }
 }
+#endif
 
 /*! \brief write an 16-bit word IFD entry
     \ingroup tinytiffwriter_internal
@@ -587,7 +592,7 @@ static void TinyTIFFWriter_writeIFDEntrySHORTARRAY(TinyTIFFWriterFile* tiff, uin
     }
 }
 
-
+#ifdef ENABLE_UNUSED_TinyTIFFWriter_writeIFDEntrySHORTARRAY_allsame // Silence "unused" warning
 /*! \brief write an array of 16-bit words as IFD entry, where every entry has the same value
     \ingroup tinytiffwriter_internal
     \internal
@@ -601,6 +606,7 @@ static void TinyTIFFWriter_writeIFDEntrySHORTARRAY_allsame(TinyTIFFWriterFile* t
     TinyTIFFWriter_writeIFDEntrySHORTARRAY(tiff, tag, tmp, N);
     free(tmp);
 }
+#endif
 
 /*! \brief write an array of 32-bit words as IFD entry, where every entry has the same value
     \ingroup tinytiffwriter_internal
@@ -852,7 +858,9 @@ void TinyTIFFWriter_close_withmetadatadescription(TinyTIFFWriterFile* tiff, doub
     if (tiff) {
       char description[TINYTIFFWRITER_DESCRIPTION_SIZE+1];
       memset(description, 0, TINYTIFFWRITER_DESCRIPTION_SIZE+1);
+#ifdef HAVE_SPRINTF_S
       const int spwlen=256;
+#endif
       char spw[256];
 #ifdef HAVE_SPRINTF_S
       sprintf_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, "TinyTIFFWriter_version=1.1\nimages=%lu", (unsigned long int)tiff->frames);
