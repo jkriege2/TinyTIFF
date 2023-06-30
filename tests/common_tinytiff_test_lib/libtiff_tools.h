@@ -304,7 +304,7 @@ bool TIFFWrite(TIFF* tif, const T* image, uint16_t width, uint16_t height);
 
     \param tif the TIFF file to write to
 */
-uint32 TIFFCountDirectories(TIFF* tif);
+uint32_t TIFFCountDirectories(TIFF* tif);
 
 
 /*! \brief read a uint16_t image from the TIFF file
@@ -363,7 +363,7 @@ inline bool TIFFLoadNontiled(tout* data_out, TIFF *const tif, const uint32_t wid
     if (planarconfig==PLANARCONFIG_SEPARATE) { // sample order RRR...GGG...BBB...
         t *const buf = (t*)_TIFFmalloc(TIFFStripSize(tif));
         if (buf && data_out) {
-            uint32_t row, rowsperstrip = (uint32)-1;
+            uint32_t row, rowsperstrip = (uint32_t)-1;
             TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rowsperstrip);
             for (row = 0; row<height; row+= rowsperstrip) {
                 uint32_t nrow = (row+rowsperstrip>height?height-row:rowsperstrip);
@@ -385,7 +385,7 @@ inline bool TIFFLoadNontiled(tout* data_out, TIFF *const tif, const uint32_t wid
     } else if (planarconfig==PLANARCONFIG_CONTIG) { // sample order RGBRGBRGB...
         t *const buf = (t*)_TIFFmalloc(TIFFStripSize(tif));
         if (buf && data_out) {
-            uint32_t row, rowsperstrip = (uint32)-1;
+            uint32_t row, rowsperstrip = (uint32_t)-1;
             TIFFGetField(tif,TIFFTAG_ROWSPERSTRIP,&rowsperstrip);
             for (row = 0; row<height; row+= rowsperstrip) {
                 uint32_t nrow = (row+rowsperstrip>height?height-row:rowsperstrip);
@@ -609,7 +609,7 @@ inline bool TIFFReadRGB(TIFF* tif, T* data, uint32_t nx, uint32_t ny, uint16_t c
     TIFFGetField(tif,TIFFTAG_SAMPLESPERPIXEL,&samplesperpixel);
     TIFFGetField(tif,TIFFTAG_BITSPERSAMPLE,&bitspersample);
     if (photo>=3 && sampleformat==SAMPLEFORMAT_UINT && bitspersample==8 && (samplesperpixel==3 || samplesperpixel==4)) {
-        uint32_t *const raster = (uint32_t*)_TIFFmalloc(nx*ny*sizeof(uint32));
+        uint32_t *const raster = (uint32_t*)_TIFFmalloc(nx*ny*sizeof(uint32_t));
         if (!raster) {
             return false;
         }
@@ -617,8 +617,8 @@ inline bool TIFFReadRGB(TIFF* tif, T* data, uint32_t nx, uint32_t ny, uint16_t c
         switch (samplesperpixel) {
             case 1 : {
                 if (channel==0) {
-                    for (uint32 y=0; y<ny; y++) {
-                        for (uint32 x=0; x<nx; x++) {
+                    for (uint32_t y=0; y<ny; y++) {
+                        for (uint32_t x=0; x<nx; x++) {
                             data[y*nx+x]=TIFFGetR(raster[nx*(ny-1-y)+x]);
                         }
                     }
@@ -629,20 +629,20 @@ inline bool TIFFReadRGB(TIFF* tif, T* data, uint32_t nx, uint32_t ny, uint16_t c
             } break;
             case 3 : {
                 if (channel==0) {
-                    for (uint32 y=0; y<ny; y++) {
-                        for (uint32 x=0; x<nx; x++) {
+                    for (uint32_t y=0; y<ny; y++) {
+                        for (uint32_t x=0; x<nx; x++) {
                             data[y*nx+x]=TIFFGetR(raster[nx*(ny-1-y)+x]);
                         }
                     }
                 } else if (channel==1) {
-                    for (uint32 y=0; y<ny; y++) {
-                        for (uint32 x=0; x<nx; x++) {
+                    for (uint32_t y=0; y<ny; y++) {
+                        for (uint32_t x=0; x<nx; x++) {
                             data[y*nx+x]=TIFFGetG(raster[nx*(ny-1-y)+x]);
                         }
                     }
                 } else if (channel==2) {
-                    for (uint32 y=0; y<ny; y++) {
-                        for (uint32 x=0; x<nx; x++) {
+                    for (uint32_t y=0; y<ny; y++) {
+                        for (uint32_t x=0; x<nx; x++) {
                             data[y*nx+x]=TIFFGetB(raster[nx*(ny-1-y)+x]);
                         }
                     }
@@ -653,26 +653,26 @@ inline bool TIFFReadRGB(TIFF* tif, T* data, uint32_t nx, uint32_t ny, uint16_t c
             } break;
             case 4 : {
                 if (channel==0) {
-                    for (uint32 y=0; y<ny; y++) {
-                        for (uint32 x=0; x<nx; x++) {
+                    for (uint32_t y=0; y<ny; y++) {
+                        for (uint32_t x=0; x<nx; x++) {
                             data[y*nx+x]=TIFFGetR(raster[nx*(ny-1-y)+x]);
                         }
                     }
                 } else if (channel==1) {
-                    for (uint32 y=0; y<ny; y++) {
-                        for (uint32 x=0; x<nx; x++) {
+                    for (uint32_t y=0; y<ny; y++) {
+                        for (uint32_t x=0; x<nx; x++) {
                             data[y*nx+x]=TIFFGetG(raster[nx*(ny-1-y)+x]);
                         }
                     }
                 } else if (channel==2) {
-                    for (uint32 y=0; y<ny; y++) {
-                        for (uint32 x=0; x<nx; x++) {
+                    for (uint32_t y=0; y<ny; y++) {
+                        for (uint32_t x=0; x<nx; x++) {
                             data[y*nx+x]=TIFFGetB(raster[nx*(ny-1-y)+x]);
                         }
                     }
                 } else if (channel==3) {
-                    for (uint32 y=0; y<ny; y++) {
-                        for (uint32 x=0; x<nx; x++) {
+                    for (uint32_t y=0; y<ny; y++) {
+                        for (uint32_t x=0; x<nx; x++) {
                             data[y*nx+x]=TIFFGetA(raster[nx*(ny-1-y)+x]);
                         }
                     }

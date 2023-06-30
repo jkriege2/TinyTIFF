@@ -44,7 +44,7 @@ bool libtiffTestRead(const char* filename, const T* writteneven, const T* writte
                         const T* written=writteneven;
                         if (writtenodd && frame%2==1) written=writtenodd;
                         if (inputOrg==TinyTIFF_Chunky) {
-                            for (uint32 i=0; i<width*height; i++) {
+                            for (uint32_t i=0; i<width*height; i++) {
                                 if (data[i]!=written[i*samples+samp]) {
                                     ok=false;
                                     errcnt++;
@@ -55,7 +55,7 @@ bool libtiffTestRead(const char* filename, const T* writteneven, const T* writte
                                 }
                             }
                         } else {
-                            for (uint32 i=0; i<width*height; i++) {
+                            for (uint32_t i=0; i<width*height; i++) {
                                 if (data[i]!=written[i+samp*width*height]) {
                                     ok=false;
                                     errcnt++;

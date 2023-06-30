@@ -283,7 +283,7 @@ unsigned long TinyTIFFReader_fread(void * ptr, unsigned long ptrsize, unsigned l
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
-
+#ifdef ENABLE_UNUSED_TinyTIFFReader_ftell // Silence "unused" warning
 static long int TinyTIFFReader_ftell ( TinyTIFFReaderFile * tiff ) {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
 DWORD dwPtr = SetFilePointer( tiff->hFile,
@@ -295,6 +295,7 @@ DWORD dwPtr = SetFilePointer( tiff->hFile,
     return ftell(tiff->file);
 #endif
 }
+#endif
 
 int TinyTIFFReader_fgetpos(TinyTIFFReaderFile* tiff, TinyTIFFReader_POSTYPE* pos) {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
