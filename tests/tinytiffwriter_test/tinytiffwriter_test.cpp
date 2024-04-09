@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
     std::cout<<"tinytiffwriter_test:"<<std::endl;
     if (quicktest!=TINYTIFF_FALSE) std::cout<<"  - quick test with --simple"<<std::endl;
 #ifdef TINYTIFF_TEST_LIBTIFF
-    std::cout<<"  - cheching against LibTIFF "<<TIFFGetVersion()<<std::endl;
+    std::cout<<"  - checking against LibTIFF "<<TIFFGetVersion()<<std::endl;
     TIFFSetErrorHandler(errorhandler);
     TIFFSetWarningHandler(warninghandler);
 #endif
@@ -328,7 +328,7 @@ int main(int argc, char *argv[]) {
     testsum<<"tinytiffwriter_test:"<<std::endl;
     if (quicktest!=TINYTIFF_FALSE) testsum<<"  - quick test with --simple"<<std::endl;
 #ifdef TINYTIFF_TEST_LIBTIFF
-    testsum<<"  - cheching against LibTIFF"<<std::endl;
+    testsum<<"  - checking against LibTIFF"<<std::endl;
 #endif
     testsum<<"  - TinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\n  - TinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n";
 #ifdef TINYTIFF_TEST_LIBTIFF
