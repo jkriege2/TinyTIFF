@@ -583,7 +583,8 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
 
                      } break;
                 case TIFF_FIELD_COMPRESSION: tiff->currentFrame.compression=ifd.value; break;
-                case TIFF_FIELD_STRIPOFFSETS: {
+                case TIFF_FIELD_STRIPOFFSETS:
+                    if (ifd.count && ifd.pvalue) { // max U32
                         tiff->currentFrame.stripcount=ifd.count;
                         tiff->currentFrame.stripoffsets=(uint32_t*)calloc(ifd.count, sizeof(uint32_t));
                         TinyTIFFReader_memcpy_s(tiff->currentFrame.stripoffsets, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
@@ -592,19 +593,21 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                 case TIFF_FIELD_ROWSPERSTRIP: tiff->currentFrame.rowsperstrip=ifd.value; break;
                 case TIFF_FIELD_SAMPLEFORMAT: tiff->currentFrame.sampleformat=ifd.value; break;
                 case TIFF_FIELD_IMAGEDESCRIPTION: {
-                        //printf("TIFF_FIELD_IMAGEDESCRIPTION: (tag: %u, type: %u, count: %u)\n", ifd.tag, ifd.type, ifd.count);
-				        if (ifd.count>0) {
-				            if (tiff->currentFrame.description) free(tiff->currentFrame.description);
-							tiff->currentFrame.description=(char*)calloc(ifd.count+1, sizeof(char));
-                            memset(tiff->currentFrame.description, 0, ifd.count+1);
-							for (uint32_t ji=0; ji<ifd.count; ji++) {
-							    tiff->currentFrame.description[ji]=(char)ifd.pvalue[ji];
-								//printf(" %d[%d]", int(tiff->currentFrame.description[ji]), int(ifd.pvalue[ji]));
-							}
-							//printf("\n  %s\n", tiff->currentFrame.description);
-					    }
+                    //printf("TIFF_FIELD_IMAGEDESCRIPTION: (tag: %u, type: %u, count: %u)\n", ifd.tag, ifd.type, ifd.count);
+                    if (ifd.count>0) {
+                        if (tiff->currentFrame.description) free(tiff->currentFrame.description);
+                        tiff->currentFrame.description=(char*)calloc(ifd.count+1, sizeof(char));
+                        //memset(tiff->currentFrame.description, 0, ifd.count+1);
+                        for (uint32_t ji=0; ji<ifd.count; ji++) {
+                            tiff->currentFrame.description[ji]=(char)ifd.pvalue[ji];
+                            //printf(" %d[%d]", int(tiff->currentFrame.description[ji]), int(ifd.pvalue[ji]));
+                        }
+                        tiff->currentFrame.description[ifd.count]='\0';
+                        //printf("\n  %s\n", tiff->currentFrame.description);
+                    }
                     } break;
-                case TIFF_FIELD_STRIPBYTECOUNTS: {
+                case TIFF_FIELD_STRIPBYTECOUNTS:
+                    if (ifd.count && ifd.pvalue) {
                         tiff->currentFrame.stripcount=ifd.count;
                         tiff->currentFrame.stripbytecounts=(uint32_t*)calloc(ifd.count, sizeof(uint32_t));
                         TinyTIFFReader_memcpy_s(tiff->currentFrame.stripbytecounts, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));

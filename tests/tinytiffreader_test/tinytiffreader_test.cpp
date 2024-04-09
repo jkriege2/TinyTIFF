@@ -507,7 +507,7 @@ int main(int argc, char *argv[]) {
     std::cout<<"tinytiffreader_test:"<<std::endl;
     if (quicktest!=TINYTIFF_FALSE) std::cout<<"  - quick test with --simple"<<std::endl;
 #ifdef TINYTIFF_TEST_LIBTIFF
-    std::cout<<"  - cheching against LibTIFF "<<TIFFGetVersion()<<std::endl;
+    std::cout<<"  - checking against LibTIFF "<<TIFFGetVersion()<<std::endl;
     TIFFSetErrorHandler(errorhandler);
     TIFFSetWarningHandler(warninghandler);
 #endif
@@ -695,6 +695,7 @@ int main(int argc, char *argv[]) {
     TEST_AGAINST_LIBTIFF<uint8_t>("corel_photopaint_rgb.tif",  test_results);
     TEST_AGAINST_LIBTIFF<uint16_t>("corel_photopaint_rgb48.tif",  test_results);
     TEST_AGAINST_LIBTIFF<uint8_t>("corel_photopaint_rgba.tif",  test_results);
+    TEST_AGAINST_LIBTIFF<uint8_t>("gh19-id8.tif",  test_results);
 #else
     //TEST_SIMPLE<uint16_t>("2K_source_Stack.tif",  test_results);
     //TEST_SIMPLE<uint16_t>("2K_tiff_image.tif",  test_results);
@@ -716,15 +717,15 @@ int main(int argc, char *argv[]) {
     TEST_SIMPLE<uint16_t>("corel_photopaint_rgb48.tif",  test_results);
     TEST_SIMPLE<uint8_t>("corel_photopaint_rgba.tif",  test_results);
 
-
 #endif
+    TEST_SIMPLE<uint8_t>("gh19-id8.tif",  test_results);
 
     std::ostringstream testsum;
     testsum<<"\n\n\n\n";
     testsum<<"tinytiffreader_test:"<<std::endl;
     if (quicktest!=TINYTIFF_FALSE) testsum<<"  - quick test with --simple"<<std::endl;
 #ifdef TINYTIFF_TEST_LIBTIFF
-    testsum<<"  - cheching against LibTIFF"<<std::endl;
+    testsum<<"  - checking against LibTIFF"<<std::endl;
 #endif
     testsum<<"  - TinyTIFFReader Version: "<<TinyTIFFReader_getVersion()<<"\n  - TinyTIFFWriter Version: "<<TinyTIFFWriter_getVersion()<<"\n";
 #ifdef TINYTIFF_TEST_LIBTIFF
