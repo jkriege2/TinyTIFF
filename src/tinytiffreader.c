@@ -138,8 +138,8 @@ static void TinyTIFFReader_freeEmptyFrame(TinyTIFFReaderFrame f) {
     f.stripoffsets=NULL;
     if (f.stripbytecounts) free(f.stripbytecounts);
     f.stripbytecounts=NULL;
-	if (f.description) free(f.description);
-	f.description=NULL;
+    if (f.description) free(f.description);
+    f.description=NULL;
 }
 
 
@@ -904,6 +904,7 @@ TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename) {
         if (tiffid[0]=='I' && tiffid[1]=='I') tiff->filebyteorder=TIFF_ORDER_LITTLEENDIAN;
         else if (tiffid[0]=='M' && tiffid[1]=='M') tiff->filebyteorder=TIFF_ORDER_BIGENDIAN;
         else {
+            TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
             free(tiff);
             return NULL;
         }
@@ -912,6 +913,7 @@ TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename) {
         printf("      - magic=%u\n", magic);
 #endif
         if (magic!=42) {
+            TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
             free(tiff);
             return NULL;
         }
@@ -923,6 +925,7 @@ TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename) {
 #endif
         TinyTIFFReader_readNextFrame(tiff);
     } else {
+        TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
         free(tiff);
         return NULL;
     }
