@@ -24,6 +24,7 @@
 #include "highrestimer.h"
 #endif
 
+#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -58,6 +59,22 @@
 #  define TinyTIFFReader_POSTYPE fpos_t
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 
+/* BOS checks */
+#define BOS_UNKNOWN ((size_t)-1)
+#define _BOS_KNOWN(dest) ((size_t)BOS(dest) != BOS_UNKNOWN)
+#if defined __has_builtin
+#  if __has_builtin (__builtin_object_size)
+#    if defined(_FORTIFY_SOURCE) && _FORTIFY_SOURCE > 1
+#      define BOS(dest) __builtin_object_size((dest), 1)
+#    else
+#      define BOS(dest) __builtin_object_size((dest), 0)
+#    endif
+#  else
+#    define BOS(dest) BOS_UNKNOWN
+#  endif
+#else
+#  define BOS(dest) BOS_UNKNOWN
+#endif
 
 
 /** \brief maximum length of error messages in bytes \internal */
@@ -193,7 +210,13 @@ int TinyTIFFReader_memcpy_s( void * dest, unsigned long destsz, const void * src
 #ifdef HAVE_MEMCPY_S
     return memcpy_s(dest, destsz, src, count);
 #else
-    memcpy(dest,  src, count);
+    if ((!dest || !src) && count)
+        assert(0 && "memcpy_s: NULL dest or src");
+    if (_BOS_KNOWN(dest) && (BOS(dest) < destsz || BOS(dest) < count))
+        assert(0 && "memcpy_s: dest not big enough");
+    if (_BOS_KNOWN(src) && BOS(src) < count)
+        assert(0 && "memcpy_s: src not big enough");
+    memcpy(dest, src, count);
     return 0;
 #endif
 }
