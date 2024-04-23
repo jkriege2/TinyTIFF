@@ -10,15 +10,24 @@ This software is licensed under the term of the [GNU Lesser General Public Licen
 (LGPL 3.0)](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/LICENSE). 
 
 
-![Language](https://img.shields.io/github/languages/top/jkriege2/TinyTIFF)
 [![Lates Release](https://img.shields.io/github/v/release/jkriege2/TinyTIFF)](https://github.com/jkriege2/TinyTIFF/releases)
-[![Documentation](https://img.shields.io/badge/documentation-online-blue)](http://jkriege2.github.io/TinyTIFF/)
 
+![Language](https://img.shields.io/github/languages/top/jkriege2/TinyTIFF)
 
-[![CI: Windows Build](https://img.shields.io/appveyor/ci/jkriege2/TinyTIFF/master?label=CI%20Windows%20Build)](https://ci.appveyor.com/project/jkriege2/TinyTIFF/branch/master) 
-[![CI: Documentation/Linux/MacOX Build](https://img.shields.io/travis/jkriege2/TinyTIFF/master?label=CI%3A%20Documentation%2FLinux%2FMacOX%20Build)](https://travis-ci.org/jkriege2/TinyTIFF)
+[![Documentation](https://img.shields.io/badge/documentation-online-blue)](http://jkriege2.github.io/TinyTIFF/index.html)
 
-[![Code Quality](https://www.code-inspector.com/project/12238/score/svg) ![Code Grade](https://www.code-inspector.com/project/12238/status/svg)](https://frontend.code-inspector.com/public/project/12238/TinyTIFF/dashboard)
+[![Last Commit](https://img.shields.io/github/last-commit/jkriege2/TinyTIFF)](https://github.com/jkriege2/TinyTIFF/pulse)
+[![Contributors](https://img.shields.io/github/contributors/jkriege2/TinyTIFF)](https://github.com/jkriege2/TinyTIFF/graphs/contributors)
+
+[![Open Issues](https://img.shields.io/github/issues/jkriege2/TinyTIFF)](https://github.com/jkriege2/TinyTIFF/issues)
+[![Closed Issues](https://img.shields.io/github/issues-closed/jkriege2/TinyTIFF)](https://github.com/jkriege2/TinyTIFF/issues?q=is%3Aissue+is%3Aclosed)
+
+[![Open PRs](https://img.shields.io/github/issues-pr/jkriege2/TinyTIFF)](https://github.com/jkriege2/TinyTIFF/pulls)
+[![Closed PRs](https://img.shields.io/github/issues-pr-closed/jkriege2/TinyTIFF)](https://github.com/jkriege2/TinyTIFF/pulls?q=is%3Apr+is%3Aclosed)
+
+[![MSVC-Build Status](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_msvc.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/build-msvc.yml)
+[![MSVC-CodeAnalysis](https://github.com/jkriege2/TinyTIFF/actions/workflows/msvc-codeanalysis.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/msvc-codeanalysis.yml)
+
 
 # TinyTIFFReader
 
