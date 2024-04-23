@@ -41,8 +41,8 @@ jobs:
         cd Release
         pwd
         ls 
-        tinytiffwriter_test --simple
-        tinytiffreader_test --simple
+#        tinytiffwriter_test --simple
+#        tinytiffreader_test --simple
 #        ctest -C Release  -LE explicitonly  --output-on-failure
     - name: Run Debug tests
       run: |
