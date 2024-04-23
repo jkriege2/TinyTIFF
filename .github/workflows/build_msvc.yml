@@ -33,6 +33,7 @@ jobs:
     - name: Install
       run: |
         cmake --install build --config Release
+        cd install
         ls -R
     - name: Run Release tests
       run: |
