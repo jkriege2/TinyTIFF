@@ -1,4 +1,4 @@
-asname: BUILD-MSVC-CI
+name: BUILD-MSVC-CI
 
 on: [push, pull_request]
 
@@ -30,6 +30,10 @@ jobs:
     - name: Build Release
       run: |
            cmake --build build --config Release --verbose           
+    - name: Install
+      run: |
+        cmake --install build --config Release
+        ls -R
     - name: Run Release tests
       run: |
         cd build
@@ -37,8 +41,8 @@ jobs:
         cd Release
         pwd
         ls 
-        ./tinytiffwriter_test --simple
-        ./tinytiffreader_test --simple
+        tinytiffwriter_test --simple
+        tinytiffreader_test --simple
 #        ctest -C Release  -LE explicitonly  --output-on-failure
     - name: Run Debug tests
       run: |
@@ -47,10 +51,7 @@ jobs:
         cd Debug
         pwd
         ls 
-        ./tinytiffwriter_test.exe --simple
-        ./tinytiffreader_test.exe --simple
+        tinytiffwriter_test.exe --simple
+        tinytiffreader_test.exe --simple
 #        ctest -C Debug  -LE explicitonly  --output-on-failure
-    - name: Install
-      run: |
-        cmake --install build --config Release
-        ls -R
+
