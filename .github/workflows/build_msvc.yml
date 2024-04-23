@@ -34,7 +34,7 @@ jobs:
       run: |
            cmake --build build --config Release --verbose           
            cd build
-          ls -R
+           ls -R
            cd ..
 #    - name: Run Release tests
 #      run: |
