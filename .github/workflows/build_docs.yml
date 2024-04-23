@@ -52,11 +52,14 @@ jobs:
           pwd
           ls
           $GITHUB_WORKSPACE/doxygen/bin/doxygen 
+          pwd
           ls
           ls -R
       
-      - name: Create .nojekyll (ensures pages with underscores work on gh pages)
-        run: touch JKQtPlotter/doc/html/.nojekyll
+      - name: Create .nojekyll (ensures pages with underscores work on gh pages)      
+        run: |
+            pwd
+            touch TinyTIFF/doc/html/.nojekyll
         shell: bash
 
       - name: Deploy to GitHub Pages
