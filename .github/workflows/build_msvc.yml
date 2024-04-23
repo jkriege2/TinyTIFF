@@ -27,21 +27,15 @@ jobs:
     - name: Build Debug
       run: |
           cmake --build build --config Debug --verbose
-          cd build
-          ls -R
-          cd ..
     - name: Build Release
       run: |
            cmake --build build --config Release --verbose           
-           cd build
-           ls -R
-           cd ..
     - name: Run Release tests
       run: |
         cd build
         cd output
         cd Release
-        ls -R
+        ls 
         tinytiffwriter_test --simple
         tinytiffreader_test --simple
 #        ctest -C Release  -LE explicitonly  --output-on-failure
@@ -50,10 +44,11 @@ jobs:
         cd build
         cd output
         cd Debug
-        ls -R
+        ls 
         tinytiffwriter_test --simple
         tinytiffreader_test --simple
 #        ctest -C Debug  -LE explicitonly  --output-on-failure
     - name: Install
       run: |
         cmake --install build --config Release
+        ls -R
