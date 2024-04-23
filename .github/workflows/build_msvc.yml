@@ -36,18 +36,18 @@ jobs:
            cd build
            ls -R
            cd ..
-#    - name: Run Release tests
-#      run: |
-#        cd build
+    - name: Run Release tests
+      run: |
+        cd build/Debug
+        tinytiffwriter_test --simple
+        tinytiffreader_test --simple
 #        ctest -C Release  -LE explicitonly  --output-on-failure
-#    - name: Run Debug tests
-#      run: |
-#        cd build
+    - name: Run Debug tests
+      run: |
+        cd build/Release
+        tinytiffwriter_test --simple
+        tinytiffreader_test --simple
 #        ctest -C Debug  -LE explicitonly  --output-on-failure
-#    - name: Install
-#      run: |
-#        cmake --install build --config Release
-#    - name: Test Installation
-#      run: |
-#        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}}  -B build_install_test tests/installation_tests/find
-#        cmake --build build_install_test --config Release
+    - name: Install
+      run: |
+        cmake --install build --config Release
