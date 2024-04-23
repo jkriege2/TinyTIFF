@@ -28,15 +28,13 @@ jobs:
       run: |
           cmake --build build --config Debug --verbose
           cd build
-          dir /s
-          dir /s /b
+          ls -R
           cd ..
     - name: Build Release
       run: |
            cmake --build build --config Release --verbose           
            cd build
-           dir /s
-           dir /s /b
+          ls -R
            cd ..
 #    - name: Run Release tests
 #      run: |
