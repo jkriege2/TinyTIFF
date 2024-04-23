@@ -1,5 +1,4 @@
-tinytiffreader.d
-tinytiffreader.o
-tinytiffwriter.d
-tinytiffwriter.o
+*.d
+*.o
 /*.user
+/tests/build-*
