@@ -36,8 +36,8 @@ jobs:
         cd output
         cd Release
         ls 
-        tinytiffwriter_test --simple
-        tinytiffreader_test --simple
+        tinytiffwriter_test.exe --simple
+        tinytiffreader_test.exe --simple
 #        ctest -C Release  -LE explicitonly  --output-on-failure
     - name: Run Debug tests
       run: |
@@ -45,8 +45,8 @@ jobs:
         cd output
         cd Debug
         ls 
-        tinytiffwriter_test --simple
-        tinytiffreader_test --simple
+        tinytiffwriter_test.exe --simple
+        tinytiffreader_test.exe --simple
 #        ctest -C Debug  -LE explicitonly  --output-on-failure
     - name: Install
       run: |
