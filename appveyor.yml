@@ -1,14 +1,27 @@
 version: 0.{build}-{branch}
 
 image:
-    - Visual Studio 2017
+    - Visual Studio 2019
+# don't build tags
+skip_tags: true
+
+# exclude gh-pages branch
+branches:
+  except:
+  - gh-pages
+
+shallow_clone: true
+
+# auto-build VSProject: OFF
+build: false
+
+
+#configurations to build
+configuration:
+  - Release
 
 environment:
   global:
-    QTVER: 5.11
-    JOMDIR: C:\Qt\Tools\QtCreator\bin
-    MINGWDIR: C:\Qt\Tools\mingw530_32
-    VSVER: 0
 
   matrix:
     - QTABI: mingw53_32

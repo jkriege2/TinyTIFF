@@ -1,0 +1,55 @@
+name: BUILD-MSVC-CI
+
+on: [push, pull_request]
+
+jobs:
+  ci:
+    if: >-
+      ! contains(toJSON(github.event.commits.*.message), '[skip ci]') &&
+      ! contains(toJSON(github.event.commits.*.message), '[skip github]')
+    name: MSVC 2022
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {gen: Visual Studio 17 2022, arch: Win32, shared: ON, static: OFF}
+          - {gen: Visual Studio 17 2022, arch: Win32, shared: OFF, static: ON}
+          - {gen: Visual Studio 17 2022, arch: x64, shared: ON, static: OFF}
+          - {gen: Visual Studio 17 2022, arch: x64, shared: OFF, static: ON}
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+    - name: Configure
+      run: |
+        mkdir install
+        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} -DTinyTIFF_BUILD_SHARED_LIBS=${{matrix.shared}} -DTinyTIFF_BUILD_STATIC_LIBS=${{matrix.static}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -DCMAKE_INSTALL_PREFIX=./install -B build
+    - name: Build Debug
+      run: |
+          cmake --build build --config Debug --verbose
+          cd build
+          dir /s
+          dir /s /b
+          cd ..
+    - name: Build Release
+      run: |
+           cmake --build build --config Release --verbose           
+           cd build
+           dir /s
+           dir /s /b
+           cd ..
+#    - name: Run Release tests
+#      run: |
+#        cd build
+#        ctest -C Release  -LE explicitonly  --output-on-failure
+#    - name: Run Debug tests
+#      run: |
+#        cd build
+#        ctest -C Debug  -LE explicitonly  --output-on-failure
+#    - name: Install
+#      run: |
+#        cmake --install build --config Release
+#    - name: Test Installation
+#      run: |
+#        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}}  -B build_install_test tests/installation_tests/find
+#        cmake --build build_install_test --config Release
