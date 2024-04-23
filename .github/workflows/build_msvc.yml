@@ -23,7 +23,7 @@ jobs:
     - name: Configure
       run: |
         mkdir install
-        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} -DTinyTIFF_BUILD_SHARED_LIBS=${{matrix.shared}} -DTinyTIFF_BUILD_STATIC_LIBS=${{matrix.static}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -DCMAKE_INSTALL_PREFIX=./install -B build
+        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} -DTinyTIFF_BUILD_SHARED_LIBS=${{matrix.shared}} -DTinyTIFF_BUILD_STATIC_LIBS=${{matrix.static}} -DBUILD_SHARED_LIBS=${{matrix.shared}} "-DCMAKE_INSTALL_PREFIX=./install" -B build
     - name: Build Debug
       run: |
           cmake --build build --config Debug --verbose
