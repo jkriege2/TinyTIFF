@@ -38,13 +38,13 @@ jobs:
            cd ..
     - name: Run Release tests
       run: |
-        cd build/Debug
+        cd build/output/Debug
         tinytiffwriter_test --simple
         tinytiffreader_test --simple
 #        ctest -C Release  -LE explicitonly  --output-on-failure
     - name: Run Debug tests
       run: |
-        cd build/Release
+        cd build/output/Release
         tinytiffwriter_test --simple
         tinytiffreader_test --simple
 #        ctest -C Debug  -LE explicitonly  --output-on-failure
