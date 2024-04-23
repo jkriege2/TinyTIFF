@@ -59,7 +59,7 @@ static bool TIFFMakeImageDescription(char* description, double pixel_width, doub
 bool TIFFTWriteFloat(TIFF* tif, const float* image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
     uint16_t frame_width=width;
     uint16_t frame_height=height;
-    uint32_t rowsperstrip = (uint32)-1;
+    uint32_t rowsperstrip = (uint32_t)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -109,7 +109,7 @@ bool TIFFTWriteFloat(TIFF* tif, const float* image, uint16_t width, uint16_t hei
 bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
     uint16_t frame_width=width;
     uint16_t frame_height=height;
-    uint32_t rowsperstrip = (uint32)-1;
+    uint32_t rowsperstrip = (uint32_t)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -158,7 +158,7 @@ bool TIFFTWriteDoubleAsFloat(TIFF* tif, const double* image, uint16_t width, uin
 bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t *image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
     uint16_t frame_width=width;
     uint16_t frame_height=height;
-    uint32_t rowsperstrip = (uint32)-1;
+    uint32_t rowsperstrip = (uint32_t)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -207,7 +207,7 @@ bool TIFFTWriteFloatfrom32(TIFF* tif, const uint32_t *image, uint16_t width, uin
 bool TIFFTWriteUint16(TIFF* tif, const uint16_t* image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
     uint16_t frame_width=width;
     uint16_t frame_height=height;
-    uint32_t rowsperstrip = (uint32)-1;
+    uint32_t rowsperstrip = (uint32_t)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -242,10 +242,10 @@ bool TIFFTWriteUint16(TIFF* tif, const uint16_t* image, uint16_t width, uint16_t
         // go through the fraem row-wise
         for (unsigned int rr = 0; rr<nrow; ++rr) {
             for (unsigned int cc = 0; cc<frame_width; ++cc) { // go through all pixels in the current row
-                buf[bi++] = (uint16)image[cc+(row + rr)*frame_width];
+                buf[bi++] = (uint16_t)image[cc+(row + rr)*frame_width];
             }
         }
-        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint16))<0) {
+        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint16_t))<0) {
             return false;
         }
     }
@@ -257,7 +257,7 @@ bool TIFFTWriteUint16(TIFF* tif, const uint16_t* image, uint16_t width, uint16_t
 bool TIFFTWriteUint32(TIFF* tif, const uint32_t *image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
     uint16_t frame_width=width;
     uint16_t frame_height=height;
-    uint32_t rowsperstrip = (uint32)-1;
+    uint32_t rowsperstrip = (uint32_t)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -292,10 +292,10 @@ bool TIFFTWriteUint32(TIFF* tif, const uint32_t *image, uint16_t width, uint16_t
         // go through the fraem row-wise
         for (unsigned int rr = 0; rr<nrow; ++rr) {
             for (unsigned int cc = 0; cc<frame_width; ++cc) { // go through all pixels in the current row
-                buf[bi++] = (uint32)image[cc+(row + rr)*frame_width];
+                buf[bi++] = (uint32_t)image[cc+(row + rr)*frame_width];
             }
         }
-        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint32))<0) {
+        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint32_t))<0) {
             return false;
         }
     }
@@ -308,7 +308,7 @@ bool TIFFTWriteUint32(TIFF* tif, const uint32_t *image, uint16_t width, uint16_t
 bool TIFFTWriteUint64(TIFF *tif, const uint64_t *image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double frametime, uint32_t compression) {
     uint16_t frame_width=width;
     uint16_t frame_height=height;
-    uint32_t rowsperstrip = (uint32)-1;
+    uint32_t rowsperstrip = (uint32_t)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -357,7 +357,7 @@ bool TIFFTWriteUint64(TIFF *tif, const uint64_t *image, uint16_t width, uint16_t
 bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16_t width, uint16_t height, bool scaled, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
     uint16_t frame_width=width;
     uint16_t frame_height=height;
-    uint32_t rowsperstrip = (uint32)-1;
+    uint32_t rowsperstrip = (uint32_t)-1;
 
     uint32_t imin=image[0];
     uint32_t imax=image[0];
@@ -421,7 +421,7 @@ bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16_t width, ui
                 }
             }
         }
-        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint16))<0) {
+        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint16_t))<0) {
             return false;
         }
     }
@@ -432,7 +432,7 @@ bool TIFFTWriteUint16from32(TIFF* tif, const uint32_t* image, uint16_t width, ui
 bool TIFFTWriteUint8(TIFF* tif, const uint8_t* image, uint16_t width, uint16_t height, double pixel_width, double pixel_height, double deltaz, double timestep, uint32_t compression) {
     uint16_t frame_width=width;
     uint16_t frame_height=height;
-    uint32_t rowsperstrip = (uint32)-1;
+    uint32_t rowsperstrip = (uint32_t)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -467,10 +467,10 @@ bool TIFFTWriteUint8(TIFF* tif, const uint8_t* image, uint16_t width, uint16_t h
         // go through the fraem row-wise
         for (unsigned int rr = 0; rr<nrow; ++rr) {
             for (unsigned int cc = 0; cc<frame_width; ++cc) { // go through all pixels in the current row
-                buf[bi++] = (uint8)image[cc+(row + rr)*frame_width];
+                buf[bi++] = (uint8_t)image[cc+(row + rr)*frame_width];
             }
         }
-        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint8))<0) {
+        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint8_t))<0) {
             return false;
         }
     }
@@ -510,14 +510,14 @@ bool TIFFTReadUInt16(TIFF* tif, uint16_t** image, uint16_t* width, uint16_t* hei
     }
 
     if ((*image==NULL)||(nx!=*width)||(ny!=*height)) {
-        *image=(uint16_t*)realloc(*image, nx*ny*sizeof(uint16));
+        *image=(uint16_t*)realloc(*image, nx*ny*sizeof(uint16_t));
         *width=nx;
         *height=ny;
     }
 
     imagebuf=*image;
     if (imagebuf==NULL) {
-        if (errormessage) sprintf(errormessage, "error allocating memory (%.1f kBytes)", (float)(nx*ny*sizeof(uint16))/1024.0);
+        if (errormessage) sprintf(errormessage, "error allocating memory (%.1f kBytes)", (float)(nx*ny*sizeof(uint16_t))/1024.0);
         return false;
     }
 
@@ -538,7 +538,7 @@ bool TIFFTReadUInt16(TIFF* tif, uint16_t** image, uint16_t* width, uint16_t* hei
             int iii=0;
             for (rr = 0;rr<nrow; ++rr) {
                 for (cc = 0; cc<nx; ++cc) {
-                    uint16_t t=(uint16)*(ptr++);
+                    uint16_t t=(uint16_t)*(ptr++);
                     iii++;
                     imagebuf[cc+(row+rr)*nx]=t;
                 }
@@ -553,7 +553,7 @@ bool TIFFTReadUInt16(TIFF* tif, uint16_t** image, uint16_t* width, uint16_t* hei
     return ok;
 }
 
-uint32 TIFFCountDirectories(TIFF* tif) {
+uint32_t TIFFCountDirectories(TIFF* tif) {
     TIFFSetDirectory(tif,0);
     uint32_t n_images =0;
     do ++n_images; while (TIFFReadDirectory(tif));
@@ -584,7 +584,7 @@ bool TIFFTWriteDouble(TIFF *tif, const double *image, uint16_t width, uint16_t h
 {
     uint16_t frame_width=width;
     uint16_t frame_height=height;
-    uint32_t rowsperstrip = (uint32)-1;
+    uint32_t rowsperstrip = (uint32_t)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -634,7 +634,7 @@ bool TIFFTWriteBoolAsUint8(TIFF *tif, const bool *image, uint16_t width, uint16_
 {
     uint16_t frame_width=width;
     uint16_t frame_height=height;
-    uint32_t rowsperstrip = (uint32)-1;
+    uint32_t rowsperstrip = (uint32_t)-1;
 
     TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, frame_width);
     TIFFSetField(tif, TIFFTAG_IMAGELENGTH, frame_height);
@@ -669,10 +669,10 @@ bool TIFFTWriteBoolAsUint8(TIFF *tif, const bool *image, uint16_t width, uint16_
         // go through the fraem row-wise
         for (unsigned int rr = 0; rr<nrow; ++rr) {
             for (unsigned int cc = 0; cc<frame_width; ++cc) { // go through all pixels in the current row
-                buf[bi++] = (uint8)(image[cc+(row + rr)*frame_width]?1:0);
+                buf[bi++] = (uint8_t)(image[cc+(row + rr)*frame_width]?1:0);
             }
         }
-        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint8))<0) {
+        if (TIFFWriteEncodedStrip(tif,strip,buf,bi*sizeof(uint8_t))<0) {
             return false;
         }
     }
