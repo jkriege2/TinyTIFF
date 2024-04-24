@@ -21,9 +21,8 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-        with: 
-          path: TinyTIFF
+      - name: checkout
+        uses: actions/checkout@v4
             
       - name: Install dependencies
         run: |
@@ -47,7 +46,6 @@ jobs:
       - name: Run Doxygen
         run: |
           $GITHUB_WORKSPACE/doxygen/bin/doxygen --version
-          cd TinyTIFF
           cd doc
           pwd
           ls
@@ -59,7 +57,7 @@ jobs:
       - name: Create .nojekyll (ensures pages with underscores work on gh pages)      
         run: |
             pwd
-            touch TinyTIFF/doc/html/.nojekyll
+            touch doc/html/.nojekyll
         shell: bash
 
       - name: 🚀 Deploy to Github-Pages
@@ -68,5 +66,5 @@ jobs:
           #github_token: ${{ secrets.GH_PAGES_SECRET }}
           ssh-key: ${{ secrets.TINYTIFF_DEPLOY_KEY }}
           branch: gh-pages
-          folder: TinyTIFF/doc/html
+          folder: doc/html
           
