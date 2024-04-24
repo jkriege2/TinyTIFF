@@ -62,8 +62,8 @@ jobs:
             touch TinyTIFF/doc/html/.nojekyll
         shell: bash
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4
+      - name: 🚀 Deploy to Github-Pages
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           #github_token: ${{ secrets.GH_PAGES_SECRET }}
           ssh-key: ${{ secrets.TINYTIFF_DEPLOY_KEY }}
