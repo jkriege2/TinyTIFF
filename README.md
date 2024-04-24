@@ -27,6 +27,7 @@ This software is licensed under the term of the [GNU Lesser General Public Licen
 
 [![MSVC-Build Status](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_msvc.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_msvc.yml)
 [![MSVC-CodeAnalysis](https://github.com/jkriege2/TinyTIFF/actions/workflows/msvc-codeanalysis.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/msvc-codeanalysis.yml)
+[![Docu-Build](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_docs.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_docs.yml)
 
 
 # TinyTIFFReader
