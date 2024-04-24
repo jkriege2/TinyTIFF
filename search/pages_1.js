@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['licensing_20terms_20for_20tinytiff_190',['Licensing Terms for TinyTIFF',['../licensepage.html',1,'']]]
+  ['build_20instructions_0',['Build Instructions',['../page_buildinstructions.html',1,'']]]
 ];

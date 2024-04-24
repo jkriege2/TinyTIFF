@@ -25,16 +25,7 @@
 var NAVTREE =
 [
   [ "TinyTIFF", "index.html", [
-    [ "TinyTIFF - A lightweight C++ library for Writing and Reading TIFF-files", "index.html", [
-      [ "TinyTIFFWriter", "index.html#mainpagetinytiff_writer", [
-        [ "TinyTIFFWriter: Usage", "index.html#mainpagetinytiff_writer_usage", null ],
-        [ "TinyTIFFWriter: Multi-Sample Images (e.g. RGB)", "index.html#mainpagetinytiff_writer_multisample", null ],
-        [ "TinyTIFFWriter: How it Works", "index.html#mainpagetinytiff_writer_howitworks", null ],
-        [ "TinyTIFFWriter: Benchmarks", "index.html#mainpagetinytiff_writer_benchmarks", null ]
-      ] ],
-      [ "TinyTIFFReader", "index.html#mainpagetinytiff_reader", null ],
-      [ "TinyTIFFReader: Usage", "index.html#mainpagetinytiff_reader_usage", null ]
-    ] ],
+    [ "TinyTIFF - A lightweight C++ library for Writing and Reading TIFF-files", "index.html", "index" ],
     [ "Build Instructions", "page_buildinstructions.html", [
       [ "Build using CMake", "page_buildinstructions.html#page_buildinstructions_CMAKE", [
         [ "Running a Build with CMake", "page_buildinstructions.html#page_buildinstructions_CMAKE_RUN", [
@@ -50,7 +41,7 @@ var NAVTREE =
     [ "Usage/Linking Instructions", "page_useinstructions.html", [
       [ "Use TinyTIFF without CMake", "page_useinstructions.html#page_buildinstructions_NOCMAKE", null ]
     ] ],
-    [ "Modules", "modules.html", "modules" ],
+    [ "Topics", "topics.html", "topics" ],
     [ "Data Structures", "annotated.html", [
       [ "Data Structures", "annotated.html", "annotated_dup" ],
       [ "Data Structure Index", "classes.html", null ],
