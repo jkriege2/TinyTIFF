@@ -63,9 +63,10 @@ jobs:
         shell: bash
 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        uses: JamesIves/github-pages-deploy-action@4
         with:
-          github_token: ${{ secrets.GH_PAGES_SECRET }}
+          #github_token: ${{ secrets.GH_PAGES_SECRET }}
+          ssh-key: ${{ secrets.TINYTIFF_DEPLOY_KEY }}
           branch: gh-pages
           folder: TinyTIFF/doc/html
           
