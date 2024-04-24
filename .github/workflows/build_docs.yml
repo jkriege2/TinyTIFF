@@ -67,5 +67,5 @@ jobs:
         with:
           github_token: ${{ secrets.GH_PAGES_PUSH_SECRET }}
           branch: gh-pages
-          folder: JKQtPlotter/doc/html
+          folder: TinyTIFF/doc/html
           
