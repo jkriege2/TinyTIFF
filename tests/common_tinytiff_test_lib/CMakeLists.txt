@@ -25,6 +25,12 @@ if (NOT TARGET TIFF::TIFF)
     add_library(TIFF::TIFF INTERFACE IMPORTED GLOBAL)
     target_link_libraries(TIFF::TIFF INTERFACE tiffxx)
     set(TIFF_FOUND TRUE)
+    install(TARGETS tiffxx tiff
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
 endif()
 
 add_library(common_tinytiff_test_lib STATIC )
@@ -51,6 +57,7 @@ if (TIFF_FOUND)
 	target_compile_definitions(common_tinytiff_test_lib PUBLIC TINYTIFF_TEST_LIBTIFF)
         target_link_libraries(common_tinytiff_test_lib PUBLIC TIFF::TIFF)
 	target_include_directories(common_tinytiff_test_lib PUBLIC ${TIFF_INCLUDE_DIRS})
+
 endif()
 
 
