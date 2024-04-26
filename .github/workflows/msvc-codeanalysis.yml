@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
           
       - name: Configure CMake
-        run: cmake -B ${{ env.build }} -DCMAKE_BUILD_TYPE=${{ env.config }} "-DTinyTIFF_BUILD_SHARED_LIBS:BOOL=OON" "-DTinyTIFF_BUILD_STATIC_LIBS:BOOL=ON" "-DBUILD_SHARED_LIBS:BOOL=ON"
+        run: cmake -B ${{ env.build }} -DCMAKE_BUILD_TYPE=${{ env.config }} "-DTinyTIFF_BUILD_SHARED_LIBS:BOOL=OON" "-DTinyTIFF_BUILD_STATIC_LIBS:BOOL=ON" "-DBUILD_SHARED_LIBS:BOOL=ON" "-DTinyTIFF_BUILD_TESTS:BOOL=OFF"
 
       - name: Build CMake
         run: cmake --build ${{ env.build }} --config ${{ env.config }}
