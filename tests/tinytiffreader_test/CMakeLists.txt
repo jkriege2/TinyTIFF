@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 
 set(EXAMPLE_NAME tinytiffreader_test)
 
@@ -13,6 +13,11 @@ endif()
 target_link_libraries(${EXAMPLE_NAME} common_tinytiff_test_lib)
 
 add_test(NAME ${EXAMPLE_NAME} COMMAND ${EXAMPLE_NAME} WORKING_DIRECTORY ${CMAKE_INSTALL_BINDIR})
+
+message(STATUS "*** RUNTIME_OUTPUT_DIRECTORY=${RUNTIME_OUTPUT_DIRECTORY}")
+message(STATUS "*** CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
+message(STATUS "*** EXECUTABLE_OUTPUT_PATH=${EXECUTABLE_OUTPUT_PATH}")
+message(STATUS "*** CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 
 # Installation
 install(TARGETS ${EXAMPLE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
