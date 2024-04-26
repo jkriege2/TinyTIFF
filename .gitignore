@@ -1,4 +1,7 @@
 *.d
 *.o
-/*.user
+*.user
 /tests/build-*
+*.bak
+/build/*
+/install/*
