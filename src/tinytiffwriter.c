@@ -601,10 +601,12 @@ static void TinyTIFFWriter_writeIFDEntrySHORTARRAY(TinyTIFFWriterFile* tiff, uin
   */
 static void TinyTIFFWriter_writeIFDEntrySHORTARRAY_allsame(TinyTIFFWriterFile* tiff, uint16_t tag, uint16_t data, uint32_t N) {
     uint16_t* tmp=(uint16_t*)malloc(N*sizeof(uint16_t));
-    uint16_t i;
-    for(i=0; i<N; i++) tmp[i]=data;
-    TinyTIFFWriter_writeIFDEntrySHORTARRAY(tiff, tag, tmp, N);
-    free(tmp);
+    if (tmp) {
+        uint16_t i;
+        for(i=0; i<N; i++) tmp[i]=data;
+        TinyTIFFWriter_writeIFDEntrySHORTARRAY(tiff, tag, tmp, N);
+        free(tmp);
+    }
 }
 #endif
 
@@ -616,10 +618,12 @@ static void TinyTIFFWriter_writeIFDEntrySHORTARRAY_allsame(TinyTIFFWriterFile* t
    */
 static void TinyTIFFWriter_writeIFDEntryLONGARRAY_allsame(TinyTIFFWriterFile* tiff, uint16_t tag, uint32_t data, uint16_t N) {
     uint32_t* tmp=(uint32_t*)malloc(N*sizeof(uint32_t));
-    uint16_t i;
-    for(i=0; i<N; i++) tmp[i]=data;
-    TinyTIFFWriter_writeIFDEntryLONGARRAY(tiff, tag, tmp, N);
-    free(tmp);
+    if (tmp) {
+        uint16_t i;
+        for(i=0; i<N; i++) tmp[i]=data;
+        TinyTIFFWriter_writeIFDEntryLONGARRAY(tiff, tag, tmp, N);
+        free(tmp);
+    }
 }
 
 /*! \brief write an array of characters (ASCII TEXT) as IFD entry
@@ -692,7 +696,7 @@ static void TinyTIFFWriter_writeIFDEntryRATIONAL(TinyTIFFWriterFile* tiff, uint1
 
 TinyTIFFWriterFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSample, enum TinyTIFFWriterSampleFormat sampleFormat, uint16_t samples, uint32_t width, uint32_t height, enum TinyTIFFWriterSampleInterpretation sampleInterpretation) {
     TinyTIFFWriterFile* tiff=(TinyTIFFWriterFile*)malloc(sizeof(TinyTIFFWriterFile));
-
+    if (!tiff) return NULL;
     //tiff->file=fopen(filename, "wb");
     TinyTIFFWriter_fopen(tiff, filename);
     memset(tiff->lastError, 0, TIFF_LAST_ERROR_SIZE);
@@ -988,13 +992,15 @@ int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *d
 
     if (outputOrganization==TinyTIFF_Separate) {
         uint32_t* stripoffset=(uint32_t*)malloc(tiff->samples*sizeof(uint32_t));
-        stripoffset[0]=pos+2+hsize;
-        uint32_t i;
-        for (i=1; i<tiff->samples; i++) {
-            stripoffset[i]=stripoffset[i-1]+tiff->width*tiff->height*(tiff->bitspersample/8);
+        if (stripoffset) {
+            stripoffset[0]=pos+2+hsize;
+            uint32_t i;
+            for (i=1; i<tiff->samples; i++) {
+                stripoffset[i]=stripoffset[i-1]+tiff->width*tiff->height*(tiff->bitspersample/8);
+            }
+            TinyTIFFWriter_writeIFDEntryLONGARRAY(tiff, TIFF_FIELD_STRIPOFFSETS, stripoffset, tiff->samples);
+            free(stripoffset);
         }
-        TinyTIFFWriter_writeIFDEntryLONGARRAY(tiff, TIFF_FIELD_STRIPOFFSETS, stripoffset, tiff->samples);
-        free(stripoffset);
     } else {
         TinyTIFFWriter_writeIFDEntryLONG(tiff, TIFF_FIELD_STRIPOFFSETS, pos+2+hsize);
     }
@@ -1017,15 +1023,17 @@ int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *d
     if (tiff->samples>photoChannels) {
         const uint16_t NExtraSamples=tiff->samples-photoChannels;
         uint16_t* extraSamples=(uint16_t*)malloc(NExtraSamples*sizeof(uint16_t));
-        extraSamples[0]=tiff->firstExtraChannelType;
-        if (NExtraSamples>1) {
-            uint16_t i=0;
-            for (i=1; i<NExtraSamples; i++) {
-                extraSamples[i]=tiff->secondaryExtraChannelType;
+        if (extraSamples) {
+            extraSamples[0]=tiff->firstExtraChannelType;
+            if (NExtraSamples>1) {
+                uint16_t i=0;
+                for (i=1; i<NExtraSamples; i++) {
+                    extraSamples[i]=tiff->secondaryExtraChannelType;
+                }
             }
+            TinyTIFFWriter_writeIFDEntrySHORTARRAY(tiff, TIFF_FIELD_EXTRASAMPLES, extraSamples, NExtraSamples);
+            free(extraSamples);
         }
-        TinyTIFFWriter_writeIFDEntrySHORTARRAY(tiff, TIFF_FIELD_EXTRASAMPLES, extraSamples, NExtraSamples);
-        free(extraSamples);
     }
     TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_SAMPLEFORMAT, tiff->sampleformat);
     TinyTIFFWriter_endIFD(tiff, hsize);
@@ -1033,33 +1041,37 @@ int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *d
         TinyTIFFWriter_fwrite(data, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);
     } else if (inputOrganisation==TinyTIFF_Interleaved && outputOrganization==TinyTIFF_Separate) {
         uint8_t* tmp=(uint8_t*)malloc(tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8));
-        uint32_t pix;
-        uint32_t sampidx=0;
-        for (pix=0; pix<tiff->width*tiff->height; pix++) {
-            uint32_t sample=0;
-            for (sample=0; sample<tiff->samples; sample++) {
-                const size_t bytecount=tiff->bitspersample/8;
-                const size_t tmpidx=(sample*tiff->width*tiff->height+pix)*bytecount;
-                memcpy(&(tmp[tmpidx]), &(((uint8_t*)data)[sampidx]), bytecount);
-                sampidx++;
+        if (tmp) {
+            uint32_t pix;
+            uint32_t sampidx=0;
+            for (pix=0; pix<tiff->width*tiff->height; pix++) {
+                uint32_t sample=0;
+                for (sample=0; sample<tiff->samples; sample++) {
+                    const size_t bytecount=tiff->bitspersample/8;
+                    const size_t tmpidx=(sample*tiff->width*tiff->height+pix)*bytecount;
+                    memcpy(&(tmp[tmpidx]), &(((uint8_t*)data)[sampidx]), bytecount);
+                    sampidx++;
+                }
             }
+            TinyTIFFWriter_fwrite(tmp, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);
+            free(tmp);
         }
-        TinyTIFFWriter_fwrite(tmp, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);
-        free(tmp);
     } else if (inputOrganisation==TinyTIFF_Separate && outputOrganization==TinyTIFF_Interleaved) {
         uint8_t* tmp=(uint8_t*)malloc(tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8));
-        uint32_t sample;
-        for (sample=0; sample<tiff->samples; sample++) {
-            uint32_t pix;
-            for (pix=0; pix<tiff->width*tiff->height; pix++) {
-                const size_t bytecount=tiff->bitspersample/8;
-                const size_t tmpidx=(pix*tiff->samples+sample)*bytecount;
-                const size_t sampidx=(sample*tiff->width*tiff->height+pix)*bytecount;
-                memcpy(&(tmp[tmpidx]), &(((uint8_t*)data)[sampidx]), bytecount);
+        if (tmp) {
+            uint32_t sample;
+            for (sample=0; sample<tiff->samples; sample++) {
+                uint32_t pix;
+                for (pix=0; pix<tiff->width*tiff->height; pix++) {
+                    const size_t bytecount=tiff->bitspersample/8;
+                    const size_t tmpidx=(pix*tiff->samples+sample)*bytecount;
+                    const size_t sampidx=(sample*tiff->width*tiff->height+pix)*bytecount;
+                    memcpy(&(tmp[tmpidx]), &(((uint8_t*)data)[sampidx]), bytecount);
+                }
             }
+            TinyTIFFWriter_fwrite(tmp, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);
+            free(tmp);
         }
-        TinyTIFFWriter_fwrite(tmp, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);
-        free(tmp);
     }
     tiff->frames=tiff->frames+1;
 

@@ -721,7 +721,7 @@ int main(int argc, char *argv[]) {
     TEST_SIMPLE<uint16_t>("corel_photopaint_rgb48.tif",  test_results);
     TEST_SIMPLE<uint8_t>("corel_photopaint_rgba.tif",  test_results);
     //TEST_SIMPLE<uint8_t>("gh19-id8.tif",  test_results);
-endif
+#endif
 
     std::ostringstream testsum;
     testsum<<"\n\n\n\n";
