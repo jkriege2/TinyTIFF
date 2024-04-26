@@ -25,9 +25,10 @@
 #include <cmath>
 
 struct TestResult {
-    inline TestResult(): name(""), success(false), duration_ms(-1), durationerror_ms(0), perframe_duration_ms(-1), perframe_durationerror_ms(0), numImages(0) {};
+    inline TestResult(): name(""), success(false), message(""), duration_ms(-1), durationerror_ms(0), perframe_duration_ms(-1), perframe_durationerror_ms(0), numImages(0) {};
     std::string name;
     bool success;
+    std::string message;
     double duration_ms;
     double durationerror_ms;
     double perframe_duration_ms;
@@ -37,7 +38,7 @@ struct TestResult {
 
 std::string writeTestSummary(const std::vector<TestResult>& test_results);
 
-
+void writeJUnit(const std::string& filename, const std::string& testsuitename, const std::vector<TestResult> &test_results);
 
 
 

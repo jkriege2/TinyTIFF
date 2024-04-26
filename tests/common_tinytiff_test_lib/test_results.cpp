@@ -18,10 +18,38 @@
 #include "test_results.h"
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <cmath>
 
+void writeJUnit(const std::string& filename, const std::string& testsuitename, const std::vector<TestResult> &test_results) {
+    std::ofstream junit(filename);
+    if (junit.is_open())
+    {
+        int failures=0;
+        for (const auto& r: test_results) {
+            if (!r.success) failures++;
+        }
+        junit<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        junit<<"<testsuites>\n";
+        junit<<"  <testsuite name=\""<<testsuitename<<"\""
+              <<" tests=\""<<test_results.size()<<"\""
+              <<" failures=\""<<failures<<"\""
+             <<">\n";
+        for (const auto& r: test_results) {
+            junit<<"    <testcase name=\""<<r.name<<"\">\n";
+            if (!r.success) {
+                junit<<"      <failure message=\""<<r.message<<"\">\n";
+                junit<<"      </testcase>\n";
+            }
+            junit<<"    </testcase>\n";
+        }
+        junit<<"  </testsuite>\n";
+        junit<<"</testsuites>\n";
+        junit.close();
+    }
+}
 
 std::string writeTestSummary(const std::vector<TestResult> &test_results) {
     std::ostringstream str;

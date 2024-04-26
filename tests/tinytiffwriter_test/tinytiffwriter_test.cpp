@@ -14,6 +14,7 @@
 
 using namespace std;
 
+#define TESTFAIL(msg, res) { std::stringstream str; str<<msg; std::cout<<str.str()<<"\n"; res.success=false; res.message=str.str();}
 
 
 template <class T>
@@ -119,20 +120,20 @@ void performWriteTest(const std::string& name, const char* filename, const T* im
         res=TinyTIFFWriter_writeImageMultiSample(tiff, imagedata, inputOrg, outputOrg);
         if (res!=TINYTIFF_TRUE) {
             test_results.back().success=false;
-            std::cout<<"ERROR: error writing image data into '"<<filename<<"'! MESSAGE: "<<TinyTIFFWriter_getLastError(tiff)<<"\n";
+            TESTFAIL("error writing image data into '"<<filename<<"'! MESSAGE: "<<TinyTIFFWriter_getLastError(tiff)<<"", test_results.back())
         }
         TinyTIFFWriter_close(tiff);
         test_results.back().duration_ms=timer.get_time()/1e3;
         test_results.back().numImages=1;
         if ((get_filesize(filename)<=0)) {
             test_results.back().success=false;
-            std::cout<<"ERROR: file '"<<filename<<"' has no contents!\n";
+            TESTFAIL("file '"<<filename<<"' has no contents!", test_results.back())
         } else if (!libtiffTestRead<T>(filename, imagedata, nullptr, WIDTH, HEIGHT, SAMPLES, 1, inputOrg)) {
             test_results.back().success=false;
-            std::cout<<"ERROR: reading '"<<filename<<"' with libTIFF failed!\n";
+            TESTFAIL("reading '"<<filename<<"' with libTIFF failed!", test_results.back())
         }
     } else {
-        std::cout<<"ERROR: could not open '"<<filename<<"' for writing!\n";
+        TESTFAIL("could not open '"<<filename<<"' for writing!", test_results.back())
         test_results.back().success=false;
     }
     if (test_results.back().success) {
@@ -165,7 +166,7 @@ void performMultiFrameWriteTest(const std::string& name, const char* filename, c
             else res=TinyTIFFWriter_writeImageMultiSample(tiff, imagedatai, inputOrg, outputOrg);
             if (res!=TINYTIFF_TRUE) {
                 test_results.back().success=false;
-                std::cout<<"ERROR: error writing image data into '"<<filename<<"'! MESSAGE: "<<TinyTIFFWriter_getLastError(tiff)<<"\n";
+                TESTFAIL("error writing image data into '"<<filename<<"'! MESSAGE: "<<TinyTIFFWriter_getLastError(tiff)<<"", test_results.back())
             }
 
         }
@@ -174,13 +175,13 @@ void performMultiFrameWriteTest(const std::string& name, const char* filename, c
         test_results.back().numImages=FRAMES;
         if ((get_filesize(filename)<=0)) {
             test_results.back().success=false;
-            std::cout<<"ERROR: file '"<<filename<<"' has no contents!\n";
+            TESTFAIL("file '"<<filename<<"' has no contents!", test_results.back())
         } else if (!libtiffTestRead<T>(filename, imagedata, imagedatai, WIDTH, HEIGHT, SAMPLES, FRAMES, inputOrg)) {
             test_results.back().success=false;
-            std::cout<<"ERROR: reading '"<<filename<<"' with libTIFF failes!\n";
+            TESTFAIL("reading '"<<filename<<"' with libTIFF failes!", test_results.back())
         }
     } else {
-        std::cout<<"ERROR: could not open '"<<filename<<"' for writing!\n";
+        TESTFAIL("could not open '"<<filename<<"' for writing!", test_results.back())
         test_results.back().success=false;
     }
     if (test_results.back().success) {
@@ -340,6 +341,7 @@ int main(int argc, char *argv[]) {
     file<<testsum.str();
     file.close();
 
+    writeJUnit("tintytiffwriter_test_result.xml", "tinytiffwriter_test", test_results);
 
     return 0;
 }
