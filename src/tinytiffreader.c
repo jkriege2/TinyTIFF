@@ -104,8 +104,8 @@ typedef struct TinyTIFFReaderFrame {
     float xresolution;
     float yresolution;
     uint16_t resolutionunit;
-	
-	char* description;
+
+    char* description;
 } TinyTIFFReaderFrame;
 
 static TinyTIFFReaderFrame TinyTIFFReader_getEmptyFrame() {
@@ -122,7 +122,7 @@ static TinyTIFFReaderFrame TinyTIFFReader_getEmptyFrame() {
     d.planarconfiguration=TIFF_PLANARCONFIG_CHUNKY;
     d.sampleformat=TINYTIFF_SAMPLEFORMAT_UINT;
     d.imagelength=0;
-	d.description=0;
+    d.description=0;
     d.orientation=TIFF_ORIENTATION_STANDARD;
     d.fillorder=TIFF_FILLORDER_DEFAULT;
     d.photometric_interpretation=TIFF_PHOTOMETRICINTERPRETATION_BLACKISZERO;
@@ -138,8 +138,8 @@ static void TinyTIFFReader_freeEmptyFrame(TinyTIFFReaderFrame f) {
     f.stripoffsets=NULL;
     if (f.stripbytecounts) free(f.stripbytecounts);
     f.stripbytecounts=NULL;
-	if (f.description) free(f.description);
-	f.description=NULL;
+    if (f.description) free(f.description);
+    f.description=NULL;
 }
 
 
@@ -160,7 +160,7 @@ struct TinyTIFFReaderFile {
     uint32_t nextifd_offset;
 
     uint64_t filesize;
-	
+
     TinyTIFFReaderFrame currentFrame;
 };
 
@@ -585,7 +585,7 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                      } break;
                 case TIFF_FIELD_COMPRESSION: tiff->currentFrame.compression=ifd.value; break;
                 case TIFF_FIELD_STRIPOFFSETS:
-                    if (ifd.count && ifd.pvalue) { // max U32
+                    if (ifd.count>0 && ifd.pvalue) { // max U32
                         tiff->currentFrame.stripcount=ifd.count;
                         tiff->currentFrame.stripoffsets=(uint32_t*)calloc(ifd.count, sizeof(uint32_t));
                         TinyTIFFReader_memcpy_s(tiff->currentFrame.stripoffsets, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
@@ -905,6 +905,7 @@ TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename) {
         if (tiffid[0]=='I' && tiffid[1]=='I') tiff->filebyteorder=TIFF_ORDER_LITTLEENDIAN;
         else if (tiffid[0]=='M' && tiffid[1]=='M') tiff->filebyteorder=TIFF_ORDER_BIGENDIAN;
         else {
+            TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
             free(tiff);
             return NULL;
         }
@@ -913,6 +914,7 @@ TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename) {
         printf("      - magic=%u\n", magic);
 #endif
         if (magic!=42) {
+            TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
             free(tiff);
             return NULL;
         }
@@ -924,6 +926,7 @@ TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename) {
 #endif
         TinyTIFFReader_readNextFrame(tiff);
     } else {
+        TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
         free(tiff);
         return NULL;
     }
