@@ -28,14 +28,14 @@
 class HighResTimer {
   protected:
 
-	public:
-		/** \brief class constructor. */
-		HighResTimer();
-		/** \brief class destructor */
-		~HighResTimer();
-		/** \brief start the timer */
-		void start();
-		/** \brief get the time since the last call of start() in microseconds */
+    public:
+        /** \brief class constructor. */
+        HighResTimer();
+        /** \brief class destructor */
+        ~HighResTimer();
+        /** \brief start the timer */
+        void start();
+        /** \brief get the time since the last call of start() in microseconds */
         double get_time();
     private:
         struct D;

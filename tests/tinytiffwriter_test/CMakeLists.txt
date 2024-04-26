@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 set(EXAMPLE_NAME tinytiffwriter_test)
 
 add_executable(${EXAMPLE_NAME}
-	tinytiffwriter_test.cpp
+    tinytiffwriter_test.cpp
 )
 if(TinyTIFF_BUILD_STATIC_LIBS)
     target_link_libraries(${EXAMPLE_NAME} TinyTIFF)

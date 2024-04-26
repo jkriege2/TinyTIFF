@@ -177,17 +177,17 @@ if(TinyTIFF_BUILD_SHARED_LIBS)
                                      VERSION ${PROJECT_VERSION}
                                      COMPATIBILITY AnyNewerVersion )
         install(TARGETS ${libsh_name} EXPORT ${libsh_name}_TARGETS
-		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-	)
-	install(EXPORT ${libsh_name}_TARGETS
-		FILE ${libsh_name}Config.cmake 
-		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${libsh_name}
-	)
-	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${libsh_name}Version.cmake" 
-			DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${libsh_name}  )
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+    install(EXPORT ${libsh_name}_TARGETS
+        FILE ${libsh_name}Config.cmake 
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${libsh_name}
+    )
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${libsh_name}Version.cmake" 
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${libsh_name}  )
 
 endif(TinyTIFF_BUILD_SHARED_LIBS)
 
@@ -196,17 +196,17 @@ if(TinyTIFF_BUILD_STATIC_LIBS)
                                      VERSION ${PROJECT_VERSION}
                                      COMPATIBILITY AnyNewerVersion )
         install(TARGETS ${lib_name} EXPORT ${lib_name}_TARGETS
-		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-	)
-	install(EXPORT ${lib_name}_TARGETS
-		FILE ${lib_name}Config.cmake 
-		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${lib_name}
-	)
-	install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${lib_name}Version.cmake" 
-			DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${lib_name}  )
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+    install(EXPORT ${lib_name}_TARGETS
+        FILE ${lib_name}Config.cmake 
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${lib_name}
+    )
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${lib_name}Version.cmake" 
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${lib_name}  )
 
 endif(TinyTIFF_BUILD_STATIC_LIBS)
 

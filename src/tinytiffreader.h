@@ -32,7 +32,7 @@
 /*! \defgroup tinytiffreader Tiny TIFF reader library
    \ingroup tinytiff_maingroup
 
-   The methods in this file allow to read TIFF files with limited capabilites.	 
+   The methods in this file allow to read TIFF files with limited capabilites.     
    
    \see \ref mainpagetinytiff_reader for details on how this library works
 

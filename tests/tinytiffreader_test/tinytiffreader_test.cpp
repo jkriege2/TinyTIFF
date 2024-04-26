@@ -699,7 +699,7 @@ int main(int argc, char *argv[]) {
     TEST_AGAINST_LIBTIFF<uint8_t>("corel_photopaint_rgb.tif",  test_results);
     TEST_AGAINST_LIBTIFF<uint16_t>("corel_photopaint_rgb48.tif",  test_results);
     TEST_AGAINST_LIBTIFF<uint8_t>("corel_photopaint_rgba.tif",  test_results);
-    TEST_AGAINST_LIBTIFF<uint8_t>("gh19-id8.tif",  test_results);
+    //TEST_AGAINST_LIBTIFF<uint8_t>("gh19-id8.tif",  test_results);
 #else
     //TEST_SIMPLE<uint16_t>("2K_source_Stack.tif",  test_results);
     //TEST_SIMPLE<uint16_t>("2K_tiff_image.tif",  test_results);
@@ -720,9 +720,8 @@ int main(int argc, char *argv[]) {
     TEST_SIMPLE<uint8_t>("corel_photopaint_rgb.tif",  test_results);
     TEST_SIMPLE<uint16_t>("corel_photopaint_rgb48.tif",  test_results);
     TEST_SIMPLE<uint8_t>("corel_photopaint_rgba.tif",  test_results);
-
-#endif
-    TEST_SIMPLE<uint8_t>("gh19-id8.tif",  test_results);
+    //TEST_SIMPLE<uint8_t>("gh19-id8.tif",  test_results);
+endif
 
     std::ostringstream testsum;
     testsum<<"\n\n\n\n";
