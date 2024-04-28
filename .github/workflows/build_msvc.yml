@@ -41,7 +41,7 @@ jobs:
         cd extcmake_tinytiff_test
         mkdir build
         cd build
-        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} -DTinyTIFF_DIR=../../../install/ -B . -S ..
+        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} "-DTinyTIFF_DIR=../../../install/" -B . -S ..
         cmake --build build --config Release --verbose  
     - name: Run Release tests
       run: |
