@@ -103,6 +103,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga84f6f53744a800ffe02de90da9b2f799"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame</a> (<a class="el" href="struct_tiny_t_i_f_f_reader_file.html">TinyTIFFReaderFile</a> *tif, Tout *buffer, uint16_t sample=0)</td></tr>
 <tr class="memdesc:ga84f6f53744a800ffe02de90da9b2f799"><td class="mdescLeft">&#160;</td><td class="mdescRight">template function that internally calls <a class="el" href="group__tinytiffreader___c.html#ga7884d41742aa1b3052fce596a68498a5" title="read the given sample from the current frame into the given buffer, the byteorder is transformed to t...">TinyTIFFReader_getSampleData()</a> and copies the data into the specified output buffer  <br /></td></tr>
 <tr class="separator:ga84f6f53744a800ffe02de90da9b2f799"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6772888f8909bdbe84dd5e73cfce9e93" id="r_ga6772888f8909bdbe84dd5e73cfce9e93"><td class="memTemplParams" colspan="2">template&lt;class Tin , class Tout &gt; </td></tr>
+<tr class="memitem:ga6772888f8909bdbe84dd5e73cfce9e93"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__tinytiffreader___c_x_x.html#ga6772888f8909bdbe84dd5e73cfce9e93">TinyTIFFReader_readFrame_s</a> (<a class="el" href="struct_tiny_t_i_f_f_reader_file.html">TinyTIFFReaderFile</a> *tif, Tout *buffer, unsigned long buffer_size, uint16_t sample=0)</td></tr>
+<tr class="memdesc:ga6772888f8909bdbe84dd5e73cfce9e93"><td class="mdescLeft">&#160;</td><td class="mdescRight">template function that internally calls <a class="el" href="group__tinytiffreader___c.html#ga8d7566dd065816a9477586213def3093" title="read the given sample from the current frame into the given buffer, the byteorder is transformed to t...">TinyTIFFReader_getSampleData_s()</a> and copies the data into the specified output buffer  <br /></td></tr>
+<tr class="separator:ga6772888f8909bdbe84dd5e73cfce9e93"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>All functions in this group are extensions to the basic TinyTIFFReader libarary. They are all header-only (or templates), so no link library other than libTinyTIFF is required. </p>
@@ -175,34 +179,34 @@ template&lt;class Tin , class Tout &gt; </div>
 <div class="line">        uint16_t bits=<a class="code hl_function" href="group__tinytiffreader___c.html#ga1382e30a353f34e179894c51e4ab0c09">TinyTIFFReader_getBitsPerSample</a>(tif);</div>
 <div class="line"> </div>
 <div class="line">        <span class="keywordflow">if</span> (sformat==<a class="code hl_define" href="group__tinytiffreader.html#ga229cd7a259ba4aed581100693d566eb7">TINYTIFF_SAMPLEFORMAT_UINT</a>) {</div>
-<div class="line">            <span class="keywordflow">if</span> (bits==8) <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame&lt;uint8_t, float&gt;</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tif</a>, <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">data</a>);</div>
-<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">bits</a>==16) <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame&lt;uint16_t, float&gt;</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tif</a>, <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">data</a>);</div>
-<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">bits</a>==32) <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame&lt;uint32_t, float&gt;</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tif</a>, <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">data</a>);</div>
+<div class="line">            <span class="keywordflow">if</span> (bits==8) TinyTIFFReader_readFrame&lt;uint8_t, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (bits==16) TinyTIFFReader_readFrame&lt;uint16_t, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (bits==32) TinyTIFFReader_readFrame&lt;uint32_t, float&gt;(tif, data);</div>
 <div class="line">            <span class="keywordflow">else</span> {</div>
-<div class="line">                <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tinyTIFFErrorHandler</a>(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">frame</a>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">sformat</a>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">bits</a>));</div>
+<div class="line">                tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).arg(frame).arg(sformat).arg(bits));</div>
 <div class="line">                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line">            }</div>
-<div class="line">        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">sformat</a>==<a class="code hl_define" href="group__tinytiffreader.html#gad854d928a8628214fb3c69f2485ff567">TINYTIFF_SAMPLEFORMAT_INT</a>) {</div>
-<div class="line">            <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">bits</a>==8) <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame&lt;int8_t, float&gt;</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tif</a>, <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">data</a>);</div>
-<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">bits</a>==16) <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame&lt;int16_t, float&gt;</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tif</a>, <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">data</a>);</div>
-<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">bits</a>==32) <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame&lt;int32_t, float&gt;</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tif</a>, <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">data</a>);</div>
+<div class="line">        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (sformat==<a class="code hl_define" href="group__tinytiffreader.html#gad854d928a8628214fb3c69f2485ff567">TINYTIFF_SAMPLEFORMAT_INT</a>) {</div>
+<div class="line">            <span class="keywordflow">if</span> (bits==8) TinyTIFFReader_readFrame&lt;int8_t, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (bits==16) TinyTIFFReader_readFrame&lt;int16_t, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (bits==32) TinyTIFFReader_readFrame&lt;int32_t, float&gt;(tif, data);</div>
 <div class="line">            <span class="keywordflow">else</span> {</div>
-<div class="line">                <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tinyTIFFErrorHandler</a>(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">frame</a>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">sformat</a>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">bits</a>));</div>
+<div class="line">                tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).arg(frame).arg(sformat).arg(bits));</div>
 <div class="line">                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line">            }</div>
-<div class="line">        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">sformat</a>==<a class="code hl_define" href="group__tinytiffreader.html#gacb7b1d29e019b6ae790d308444cbcbc1">TINYTIFF_SAMPLEFORMAT_FLOAT</a>) {</div>
-<div class="line">            <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">bits</a>==32) <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame&lt;float, float&gt;</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tif</a>, <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">data</a>);</div>
+<div class="line">        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (sformat==<a class="code hl_define" href="group__tinytiffreader.html#gacb7b1d29e019b6ae790d308444cbcbc1">TINYTIFF_SAMPLEFORMAT_FLOAT</a>) {</div>
+<div class="line">            <span class="keywordflow">if</span> (bits==32) TinyTIFFReader_readFrame&lt;float, float&gt;(tif, data);</div>
 <div class="line">            <span class="keywordflow">else</span> {</div>
-<div class="line">                <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tinyTIFFErrorHandler</a>(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">frame</a>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">sformat</a>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">bits</a>));</div>
+<div class="line">                tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).arg(frame).arg(sformat).arg(bits));</div>
 <div class="line">                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line">            }</div>
 <div class="line">        } <span class="keywordflow">else</span> {</div>
-<div class="line">            <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tinyTIFFErrorHandler</a>(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">frame</a>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">sformat</a>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">bits</a>));</div>
+<div class="line">            tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).arg(frame).arg(sformat).arg(bits));</div>
 <div class="line">            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line">        }</div>
 <div class="line">    }</div>
-<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c.html#ga727c125b1285000f9efd1d438925f2a6">TinyTIFFReader_wasError</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tif</a>)) {</div>
-<div class="line">        <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tinyTIFFErrorHandler</a>(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;error reading frame %1: %2\n&quot;</span>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">frame</a>).<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">arg</a>(<a class="code hl_function" href="group__tinytiffreader___c.html#gad23c48c252bc868866ea780ed0085eac">TinyTIFFReader_getLastError</a>(<a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">tif</a>)));</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c.html#ga727c125b1285000f9efd1d438925f2a6">TinyTIFFReader_wasError</a>(tif)) {</div>
+<div class="line">        tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;error reading frame %1: %2\n&quot;</span>).arg(frame).arg(<a class="code hl_function" href="group__tinytiffreader___c.html#gad23c48c252bc868866ea780ed0085eac">TinyTIFFReader_getLastError</a>(tif)));</div>
 <div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line">    }</div>
 <div class="line"> </div>
@@ -214,10 +218,120 @@ template&lt;class Tin , class Tout &gt; </div>
 <div class="ttc" id="agroup__tinytiffreader___c_html_ga7f10c63a9414173c585d3c1e9a234e68"><div class="ttname"><a href="group__tinytiffreader___c.html#ga7f10c63a9414173c585d3c1e9a234e68">TinyTIFFReader_getWidth</a></div><div class="ttdeci">uint32_t TinyTIFFReader_getWidth(TinyTIFFReaderFile *tiff)</div><div class="ttdoc">return the width of the current frame</div><div class="ttdef"><b>Definition</b> tinytiffreader.c:1033</div></div>
 <div class="ttc" id="agroup__tinytiffreader___c_html_gad23c48c252bc868866ea780ed0085eac"><div class="ttname"><a href="group__tinytiffreader___c.html#gad23c48c252bc868866ea780ed0085eac">TinyTIFFReader_getLastError</a></div><div class="ttdeci">const char * TinyTIFFReader_getLastError(TinyTIFFReaderFile *tiff)</div><div class="ttdoc">returns a pointer to the last error message</div><div class="ttdef"><b>Definition</b> tinytiffreader.c:327</div></div>
 <div class="ttc" id="agroup__tinytiffreader___c_html_gaf633446099dec2640c474a9ffd317582"><div class="ttname"><a href="group__tinytiffreader___c.html#gaf633446099dec2640c474a9ffd317582">TinyTIFFReader_getHeight</a></div><div class="ttdeci">uint32_t TinyTIFFReader_getHeight(TinyTIFFReaderFile *tiff)</div><div class="ttdoc">return the height of the current frame</div><div class="ttdef"><b>Definition</b> tinytiffreader.c:1040</div></div>
-<div class="ttc" id="agroup__tinytiffreader___c_x_x_html_ga84f6f53744a800ffe02de90da9b2f799"><div class="ttname"><a href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame</a></div><div class="ttdeci">void TinyTIFFReader_readFrame(TinyTIFFReaderFile *tif, Tout *buffer, uint16_t sample=0)</div><div class="ttdoc">template function that internally calls TinyTIFFReader_getSampleData() and copies the data into the s...</div><div class="ttdef"><b>Definition</b> tinytiffreader.hxx:88</div></div>
 <div class="ttc" id="agroup__tinytiffreader_html_ga229cd7a259ba4aed581100693d566eb7"><div class="ttname"><a href="group__tinytiffreader.html#ga229cd7a259ba4aed581100693d566eb7">TINYTIFF_SAMPLEFORMAT_UINT</a></div><div class="ttdeci">#define TINYTIFF_SAMPLEFORMAT_UINT</div><div class="ttdoc">possible return value of TinyTIFFReader_getSampleFormat(), indicating unsigned integer data</div><div class="ttdef"><b>Definition</b> tinytiff_defs.h:45</div></div>
 <div class="ttc" id="agroup__tinytiffreader_html_gacb7b1d29e019b6ae790d308444cbcbc1"><div class="ttname"><a href="group__tinytiffreader.html#gacb7b1d29e019b6ae790d308444cbcbc1">TINYTIFF_SAMPLEFORMAT_FLOAT</a></div><div class="ttdeci">#define TINYTIFF_SAMPLEFORMAT_FLOAT</div><div class="ttdoc">possible return value of TinyTIFFReader_getSampleFormat(), indicating floating-point data</div><div class="ttdef"><b>Definition</b> tinytiff_defs.h:59</div></div>
 <div class="ttc" id="agroup__tinytiffreader_html_gad854d928a8628214fb3c69f2485ff567"><div class="ttname"><a href="group__tinytiffreader.html#gad854d928a8628214fb3c69f2485ff567">TINYTIFF_SAMPLEFORMAT_INT</a></div><div class="ttdeci">#define TINYTIFF_SAMPLEFORMAT_INT</div><div class="ttdoc">possible return value of TinyTIFFReader_getSampleFormat(), indicating integer data</div><div class="ttdef"><b>Definition</b> tinytiff_defs.h:52</div></div>
+</div><!-- fragment --> 
+</div>
+</div>
+<a id="ga6772888f8909bdbe84dd5e73cfce9e93" name="ga6772888f8909bdbe84dd5e73cfce9e93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6772888f8909bdbe84dd5e73cfce9e93">&#9670;&#160;</a></span>TinyTIFFReader_readFrame_s()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Tin , class Tout &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TinyTIFFReader_readFrame_s </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_tiny_t_i_f_f_reader_file.html">TinyTIFFReaderFile</a> *&#160;</td>
+          <td class="paramname"><em>tif</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Tout *&#160;</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long&#160;</td>
+          <td class="paramname"><em>buffer_size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>sample</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>template function that internally calls <a class="el" href="group__tinytiffreader___c.html#ga8d7566dd065816a9477586213def3093" title="read the given sample from the current frame into the given buffer, the byteorder is transformed to t...">TinyTIFFReader_getSampleData_s()</a> and copies the data into the specified output buffer </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Tin</td><td>datatype of the sample in the TIFF file </td></tr>
+    <tr><td class="paramname">Tout</td><td>datatype of <em>buffer</em> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tif</td><td>the TIFF file to read from </td></tr>
+    <tr><td class="paramname">buffer</td><td>the buffer to write into </td></tr>
+    <tr><td class="paramname">buffer_size</td><td>size of <em>buffer</em> (i.e. number of entries)</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This function may be used in reader code like this: </p><div class="fragment"><div class="line">    <span class="keywordtype">bool</span> intReadFrameFloat(<span class="keywordtype">float</span> *data) {</div>
+<div class="line">    <span class="keywordflow">if</span> (!tif) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"> </div>
+<div class="line">    uint32_t wwidth=<a class="code hl_function" href="group__tinytiffreader___c.html#ga7f10c63a9414173c585d3c1e9a234e68">TinyTIFFReader_getWidth</a>(tif);</div>
+<div class="line">    uint32_t hheight=<a class="code hl_function" href="group__tinytiffreader___c.html#gaf633446099dec2640c474a9ffd317582">TinyTIFFReader_getHeight</a>(tif);</div>
+<div class="line">    <span class="keywordflow">if</span> (!(wwidth&gt;0 &amp;&amp; hheight&gt;0)) tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;error in file &#39;%1&#39;: frame %2 is too small\n&quot;</span>).arg(filename).arg(frame));</div>
+<div class="line">    <span class="keywordflow">else</span> {</div>
+<div class="line">        uint16_t sformat=<a class="code hl_function" href="group__tinytiffreader___c.html#ga0882963ea3040fddf1741d381b31720d">TinyTIFFReader_getSampleFormat</a>(tif);</div>
+<div class="line">        uint16_t bits=<a class="code hl_function" href="group__tinytiffreader___c.html#ga1382e30a353f34e179894c51e4ab0c09">TinyTIFFReader_getBitsPerSample</a>(tif);</div>
+<div class="line"> </div>
+<div class="line">        <span class="keywordflow">if</span> (sformat==<a class="code hl_define" href="group__tinytiffreader.html#ga229cd7a259ba4aed581100693d566eb7">TINYTIFF_SAMPLEFORMAT_UINT</a>) {</div>
+<div class="line">            <span class="keywordflow">if</span> (bits==8) TinyTIFFReader_readFrame_s&lt;uint8_t, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (bits==16) TinyTIFFReader_readFrame_s&lt;uint16_t, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (bits==32) TinyTIFFReader_readFrame_s&lt;uint32_t, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> {</div>
+<div class="line">                tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).arg(frame).arg(sformat).arg(bits));</div>
+<div class="line">                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">            }</div>
+<div class="line">        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (sformat==<a class="code hl_define" href="group__tinytiffreader.html#gad854d928a8628214fb3c69f2485ff567">TINYTIFF_SAMPLEFORMAT_INT</a>) {</div>
+<div class="line">            <span class="keywordflow">if</span> (bits==8) TinyTIFFReader_readFrame_s&lt;int8_t, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (bits==16) TinyTIFFReader_readFrame_s&lt;int16_t, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (bits==32) TinyTIFFReader_readFrame_s&lt;int32_t, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> {</div>
+<div class="line">                tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).arg(frame).arg(sformat).arg(bits));</div>
+<div class="line">                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">            }</div>
+<div class="line">        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (sformat==<a class="code hl_define" href="group__tinytiffreader.html#gacb7b1d29e019b6ae790d308444cbcbc1">TINYTIFF_SAMPLEFORMAT_FLOAT</a>) {</div>
+<div class="line">            <span class="keywordflow">if</span> (bits==32) TinyTIFFReader_readFrame_s&lt;float, float&gt;(tif, data);</div>
+<div class="line">            <span class="keywordflow">else</span> {</div>
+<div class="line">                tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).arg(frame).arg(sformat).arg(bits));</div>
+<div class="line">                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">            }</div>
+<div class="line">        } <span class="keywordflow">else</span> {</div>
+<div class="line">            tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n&quot;</span>).arg(frame).arg(sformat).arg(bits));</div>
+<div class="line">            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code hl_function" href="group__tinytiffreader___c.html#ga727c125b1285000f9efd1d438925f2a6">TinyTIFFReader_wasError</a>(tif)) {</div>
+<div class="line">        tinyTIFFErrorHandler(<span class="stringliteral">&quot;QFImageReaderTinyTIFF&quot;</span>, QObject::tr(<span class="stringliteral">&quot;error reading frame %1: %2\n&quot;</span>).arg(frame).arg(<a class="code hl_function" href="group__tinytiffreader___c.html#gad23c48c252bc868866ea780ed0085eac">TinyTIFFReader_getLastError</a>(tif)));</div>
+<div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line">}</div>
 </div><!-- fragment --> 
 </div>
 </div>
@@ -226,7 +340,7 @@ template&lt;class Tin , class Tout &gt; </div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Apr 28 2024 20:52:41 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Sun Apr 28 2024 21:04:22 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

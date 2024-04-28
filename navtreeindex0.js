@@ -38,6 +38,7 @@ var NAVTREEINDEX0 =
 "group__tinytiffreader___c.html#gaf4053e4b34c53a6fa5c3e23ac6350f40":[4,0,0,0,13],
 "group__tinytiffreader___c.html#gaf633446099dec2640c474a9ffd317582":[4,0,0,0,3],
 "group__tinytiffreader___c_x_x.html":[4,0,0,2],
+"group__tinytiffreader___c_x_x.html#ga6772888f8909bdbe84dd5e73cfce9e93":[4,0,0,2,1],
 "group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799":[4,0,0,2,0],
 "group__tinytiffreader__internal.html":[4,0,0,1],
 "group__tinytiffwriter.html":[4,0,1],

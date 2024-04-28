@@ -405,7 +405,7 @@ TINYTIFF_EXPORT const char *&#160;</td><td class="memItemRight" valign="bottom">
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><code>TINYTIFF_TRUE</code> (non-zero) on success, if an error occured <code>TINYTIFF_FALSE</code> is returned and the error message can be retrieved with <a class="el" href="group__tinytiffreader___c.html#gad23c48c252bc868866ea780ed0085eac" title="returns a pointer to the last error message">TinyTIFFReader_getLastError()</a></dd></dl>
-<dl class="section note"><dt>Note</dt><dd>The user is responsible for providing the correct buffer size (taking width, height and bitsPerSample into account). </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>The user is responsible for providing the correct buffer size (taking width, height and bitsPerSample into account). BUT: There is a security-hardened version <a class="el" href="group__tinytiffreader___c.html#ga8d7566dd065816a9477586213def3093" title="read the given sample from the current frame into the given buffer, the byteorder is transformed to t...">TinyTIFFReader_getSampleData_s()</a> of this function! </dd></dl>
 
 </div>
 </div>
@@ -457,8 +457,7 @@ TINYTIFF_EXPORT const char *&#160;</td><td class="memItemRight" valign="bottom">
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>TINYTIFF_TRUE</code> (non-zero) on success, if an error occured <code>TINYTIFF_FALSE</code> is returned and the error message can be retrieved with <a class="el" href="group__tinytiffreader___c.html#gad23c48c252bc868866ea780ed0085eac" title="returns a pointer to the last error message">TinyTIFFReader_getLastError()</a></dd></dl>
-<dl class="section note"><dt>Note</dt><dd>The user is responsible for providing the correct buffer size (taking width, height and bitsPerSample into account). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><code>TINYTIFF_TRUE</code> (non-zero) on success, if an error occured <code>TINYTIFF_FALSE</code> is returned and the error message can be retrieved with <a class="el" href="group__tinytiffreader___c.html#gad23c48c252bc868866ea780ed0085eac" title="returns a pointer to the last error message">TinyTIFFReader_getLastError()</a> </dd></dl>
 
 </div>
 </div>
@@ -729,7 +728,7 @@ TINYTIFF_EXPORT const char *&#160;</td><td class="memItemRight" valign="bottom">
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Apr 28 2024 20:52:41 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Sun Apr 28 2024 21:04:22 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

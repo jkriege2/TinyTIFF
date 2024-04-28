@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('tinytiffreader_8hxx_source.html',''); 
 </div><!--header-->
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">    Copyright (c) 2008-2020 Jan W. Krieger (&lt;jan@jkrieger.de&gt;), German Cancer Research Center (DKFZ) &amp; IWR, University of Heidelberg</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">    Copyright (c) 2008-2024 Jan W. Krieger (&lt;jan@jkrieger.de&gt;), German Cancer Research Center (DKFZ) &amp; IWR, University of Heidelberg</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"></span> </div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">    This software is free software: you can redistribute it and/or modify</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">    it under the terms of the GNU Lesser General Public License (LGPL) as published by</span></div>
@@ -125,29 +125,45 @@ $(document).ready(function(){initNavTree('tinytiffreader_8hxx_source.html',''); 
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">    #include &quot;tinytiffreader.h&quot;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>}</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;stdexcept&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> Tin, <span class="keyword">class</span> Tout&gt;</div>
-<div class="foldopen" id="foldopen00088" data-start="{" data-end="}">
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">   88</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame</a>(<a class="code hl_struct" href="struct_tiny_t_i_f_f_reader_file.html">TinyTIFFReaderFile</a>* tif, Tout* buffer, uint16_t sample=0) {</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    uint32_t wwidth=<a class="code hl_function" href="group__tinytiffreader___c.html#ga7f10c63a9414173c585d3c1e9a234e68">TinyTIFFReader_getWidth</a>(tif);</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    uint32_t hheight=<a class="code hl_function" href="group__tinytiffreader___c.html#gaf633446099dec2640c474a9ffd317582">TinyTIFFReader_getHeight</a>(tif);</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    Tin* tmp=(Tin*)calloc(wwidth*hheight, <span class="keyword">sizeof</span>(Tin));</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <a class="code hl_function" href="group__tinytiffreader___c.html#ga7884d41742aa1b3052fce596a68498a5">TinyTIFFReader_getSampleData</a>(tif, tmp, sample);</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordflow">for</span> (uint32_t i=0; i&lt;wwidth*hheight; i++) {</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        buffer[i]=tmp[i];</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    }</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    free(tmp);</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>}</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> Tin, <span class="keyword">class</span> Tout&gt;</div>
+<div class="foldopen" id="foldopen00089" data-start="{" data-end="}">
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">   89</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame</a>(<a class="code hl_struct" href="struct_tiny_t_i_f_f_reader_file.html">TinyTIFFReaderFile</a>* tif, Tout* buffer, uint16_t sample=0) {</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    uint32_t wwidth=<a class="code hl_function" href="group__tinytiffreader___c.html#ga7f10c63a9414173c585d3c1e9a234e68">TinyTIFFReader_getWidth</a>(tif);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    uint32_t hheight=<a class="code hl_function" href="group__tinytiffreader___c.html#gaf633446099dec2640c474a9ffd317582">TinyTIFFReader_getHeight</a>(tif);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    std::vector&lt;Tin&gt; tmp;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    tmp.resize(wwidth*hheight);</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <a class="code hl_function" href="group__tinytiffreader___c.html#ga8d7566dd065816a9477586213def3093">TinyTIFFReader_getSampleData_s</a>(tif, tmp.data(), tmp.size()*<span class="keyword">sizeof</span>(Tin), sample);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">for</span> (uint32_t i=0; i&lt;wwidth*hheight; i++) {</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        buffer[i]=<span class="keyword">static_cast&lt;</span>Tout<span class="keyword">&gt;</span>(tmp[i]);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    }</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>}</div>
 </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">#endif </span><span class="comment">// TINYTIFFREADER_HXX</span></div>
-<div class="ttc" id="agroup__tinytiffreader___c_html_ga7884d41742aa1b3052fce596a68498a5"><div class="ttname"><a href="group__tinytiffreader___c.html#ga7884d41742aa1b3052fce596a68498a5">TinyTIFFReader_getSampleData</a></div><div class="ttdeci">int TinyTIFFReader_getSampleData(TinyTIFFReaderFile *tiff, void *buffer, uint16_t sample)</div><div class="ttdoc">read the given sample from the current frame into the given buffer, the byteorder is transformed to t...</div><div class="ttdef"><b>Definition</b> tinytiffreader.c:924</div></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> Tin, <span class="keyword">class</span> Tout&gt;</div>
+<div class="foldopen" id="foldopen00158" data-start="{" data-end="}">
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno"><a class="line" href="group__tinytiffreader___c_x_x.html#ga6772888f8909bdbe84dd5e73cfce9e93">  158</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="group__tinytiffreader___c_x_x.html#ga6772888f8909bdbe84dd5e73cfce9e93">TinyTIFFReader_readFrame_s</a>(<a class="code hl_struct" href="struct_tiny_t_i_f_f_reader_file.html">TinyTIFFReaderFile</a>* tif, Tout* buffer, <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> buffer_size, uint16_t sample=0) {</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    uint32_t wwidth=<a class="code hl_function" href="group__tinytiffreader___c.html#ga7f10c63a9414173c585d3c1e9a234e68">TinyTIFFReader_getWidth</a>(tif);</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    uint32_t hheight=<a class="code hl_function" href="group__tinytiffreader___c.html#gaf633446099dec2640c474a9ffd317582">TinyTIFFReader_getHeight</a>(tif);</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="keywordflow">if</span> (buffer_size&lt;wwidth*hheight) <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;output buffer too small!&quot;</span>);</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    std::vector&lt;Tin&gt; tmp;</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    tmp.resize(wwidth*hheight);</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <a class="code hl_function" href="group__tinytiffreader___c.html#ga8d7566dd065816a9477586213def3093">TinyTIFFReader_getSampleData_s</a>(tif, tmp.data(), tmp.size()*<span class="keyword">sizeof</span>(Tin), sample);</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="keywordflow">for</span> (uint32_t i=0; i&lt;wwidth*hheight; i++) {</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        buffer[i]=<span class="keyword">static_cast&lt;</span>Tout<span class="keyword">&gt;</span>(tmp[i]);</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    }</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>}</div>
+</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span><span class="preprocessor">#endif </span><span class="comment">// TINYTIFFREADER_HXX</span></div>
 <div class="ttc" id="agroup__tinytiffreader___c_html_ga7f10c63a9414173c585d3c1e9a234e68"><div class="ttname"><a href="group__tinytiffreader___c.html#ga7f10c63a9414173c585d3c1e9a234e68">TinyTIFFReader_getWidth</a></div><div class="ttdeci">uint32_t TinyTIFFReader_getWidth(TinyTIFFReaderFile *tiff)</div><div class="ttdoc">return the width of the current frame</div><div class="ttdef"><b>Definition</b> tinytiffreader.c:1033</div></div>
+<div class="ttc" id="agroup__tinytiffreader___c_html_ga8d7566dd065816a9477586213def3093"><div class="ttname"><a href="group__tinytiffreader___c.html#ga8d7566dd065816a9477586213def3093">TinyTIFFReader_getSampleData_s</a></div><div class="ttdeci">int TinyTIFFReader_getSampleData_s(TinyTIFFReaderFile *tiff, void *buffer, unsigned long buffer_size, uint16_t sample)</div><div class="ttdoc">read the given sample from the current frame into the given buffer, the byteorder is transformed to t...</div><div class="ttdef"><b>Definition</b> tinytiffreader.c:928</div></div>
 <div class="ttc" id="agroup__tinytiffreader___c_html_gaf633446099dec2640c474a9ffd317582"><div class="ttname"><a href="group__tinytiffreader___c.html#gaf633446099dec2640c474a9ffd317582">TinyTIFFReader_getHeight</a></div><div class="ttdeci">uint32_t TinyTIFFReader_getHeight(TinyTIFFReaderFile *tiff)</div><div class="ttdoc">return the height of the current frame</div><div class="ttdef"><b>Definition</b> tinytiffreader.c:1040</div></div>
-<div class="ttc" id="agroup__tinytiffreader___c_x_x_html_ga84f6f53744a800ffe02de90da9b2f799"><div class="ttname"><a href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame</a></div><div class="ttdeci">void TinyTIFFReader_readFrame(TinyTIFFReaderFile *tif, Tout *buffer, uint16_t sample=0)</div><div class="ttdoc">template function that internally calls TinyTIFFReader_getSampleData() and copies the data into the s...</div><div class="ttdef"><b>Definition</b> tinytiffreader.hxx:88</div></div>
+<div class="ttc" id="agroup__tinytiffreader___c_x_x_html_ga6772888f8909bdbe84dd5e73cfce9e93"><div class="ttname"><a href="group__tinytiffreader___c_x_x.html#ga6772888f8909bdbe84dd5e73cfce9e93">TinyTIFFReader_readFrame_s</a></div><div class="ttdeci">void TinyTIFFReader_readFrame_s(TinyTIFFReaderFile *tif, Tout *buffer, unsigned long buffer_size, uint16_t sample=0)</div><div class="ttdoc">template function that internally calls TinyTIFFReader_getSampleData_s() and copies the data into the...</div><div class="ttdef"><b>Definition</b> tinytiffreader.hxx:158</div></div>
+<div class="ttc" id="agroup__tinytiffreader___c_x_x_html_ga84f6f53744a800ffe02de90da9b2f799"><div class="ttname"><a href="group__tinytiffreader___c_x_x.html#ga84f6f53744a800ffe02de90da9b2f799">TinyTIFFReader_readFrame</a></div><div class="ttdeci">void TinyTIFFReader_readFrame(TinyTIFFReaderFile *tif, Tout *buffer, uint16_t sample=0)</div><div class="ttdoc">template function that internally calls TinyTIFFReader_getSampleData() and copies the data into the s...</div><div class="ttdef"><b>Definition</b> tinytiffreader.hxx:89</div></div>
 <div class="ttc" id="astruct_tiny_t_i_f_f_reader_file_html"><div class="ttname"><a href="struct_tiny_t_i_f_f_reader_file.html">TinyTIFFReaderFile</a></div><div class="ttdef"><b>Definition</b> tinytiffreader.c:146</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -155,7 +171,7 @@ $(document).ready(function(){initNavTree('tinytiffreader_8hxx_source.html',''); 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>tinytiffreader.hxx</b></li>
-    <li class="footer">Generated on Sun Apr 28 2024 20:52:41 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Sun Apr 28 2024 21:04:22 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
