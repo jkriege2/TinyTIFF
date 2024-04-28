@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 ######################################################################################################
 # Project Name and Version
-project(libTinyTIFF VERSION 3.0.0.0)
+project(libTinyTIFF VERSION 3.1.0.0)
 
 # set search path for CMake files
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
