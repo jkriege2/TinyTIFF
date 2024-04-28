@@ -207,8 +207,8 @@ extern "C" {
         \param sample the sample to read [default: 0]
         \return \c TINYTIFF_TRUE (non-zero) on success, if an error occured \c TINYTIFF_FALSE is returned and the error message can be retrieved with TinyTIFFReader_getLastError()
 
-        \note The user is responsible for providing the correct buffer size
-              (taking width, height and bitsPerSample into account).
+        \warning The user is responsible for providing the correct buffer size
+              (taking width, height and bitsPerSample into account). BUT: There is a security-hardened version TinyTIFFReader_getSampleData_s() of this function!
 
      */
     TINYTIFF_EXPORT int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_t sample);
@@ -223,8 +223,7 @@ extern "C" {
         \param sample the sample to read [default: 0]
         \return \c TINYTIFF_TRUE (non-zero) on success, if an error occured \c TINYTIFF_FALSE is returned and the error message can be retrieved with TinyTIFFReader_getLastError()
 
-        \note The user is responsible for providing the correct buffer size
-              (taking width, height and bitsPerSample into account).
+
 
      */
     TINYTIFF_EXPORT int TinyTIFFReader_getSampleData_s(TinyTIFFReaderFile* tiff, void* buffer, unsigned long buffer_size, uint16_t sample);

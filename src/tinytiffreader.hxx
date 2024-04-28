@@ -24,7 +24,8 @@
 extern "C" {
     #include "tinytiffreader.h"
 }
-#include <string>
+#include <stdexcept>
+#include <vector>
 
 
 
@@ -88,12 +89,81 @@ template <class Tin, class Tout>
 inline void TinyTIFFReader_readFrame(TinyTIFFReaderFile* tif, Tout* buffer, uint16_t sample=0) {
     uint32_t wwidth=TinyTIFFReader_getWidth(tif);
     uint32_t hheight=TinyTIFFReader_getHeight(tif);
-    Tin* tmp=(Tin*)calloc(wwidth*hheight, sizeof(Tin));
-    TinyTIFFReader_getSampleData(tif, tmp, sample);
+    std::vector<Tin> tmp;
+    tmp.resize(wwidth*hheight);
+    TinyTIFFReader_getSampleData_s(tif, tmp.data(), tmp.size()*sizeof(Tin), sample);
     for (uint32_t i=0; i<wwidth*hheight; i++) {
-        buffer[i]=tmp[i];
+        buffer[i]=static_cast<Tout>(tmp[i]);
     }
-    free(tmp);
 }
 
+/*! \brief template function that internally calls TinyTIFFReader_getSampleData_s() and copies the data into the specified output buffer
+    \ingroup tinytiffreader_CXX
+
+\tparam Tin datatype of the sample in the TIFF file
+    \tparam Tout datatype of \a buffer
+    \param tif the TIFF file to read from
+    \param buffer the buffer to write into
+    \param buffer_size size of \a buffer (i.e. number of entries)
+
+    This function may be used in reader code like this:
+\code
+    bool intReadFrameFloat(float *data) {
+    if (!tif) return false;
+
+    uint32_t wwidth=TinyTIFFReader_getWidth(tif);
+    uint32_t hheight=TinyTIFFReader_getHeight(tif);
+    if (!(wwidth>0 && hheight>0)) tinyTIFFErrorHandler("QFImageReaderTinyTIFF", QObject::tr("error in file '%1': frame %2 is too small\n").arg(filename).arg(frame));
+    else {
+        uint16_t sformat=TinyTIFFReader_getSampleFormat(tif);
+        uint16_t bits=TinyTIFFReader_getBitsPerSample(tif);
+
+        if (sformat==TINYTIFF_SAMPLEFORMAT_UINT) {
+            if (bits==8) TinyTIFFReader_readFrame_s<uint8_t, float>(tif, data);
+            else if (bits==16) TinyTIFFReader_readFrame_s<uint16_t, float>(tif, data);
+            else if (bits==32) TinyTIFFReader_readFrame_s<uint32_t, float>(tif, data);
+            else {
+                tinyTIFFErrorHandler("QFImageReaderTinyTIFF", QObject::tr("frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n").arg(frame).arg(sformat).arg(bits));
+                return false;
+            }
+        } else if (sformat==TINYTIFF_SAMPLEFORMAT_INT) {
+            if (bits==8) TinyTIFFReader_readFrame_s<int8_t, float>(tif, data);
+            else if (bits==16) TinyTIFFReader_readFrame_s<int16_t, float>(tif, data);
+            else if (bits==32) TinyTIFFReader_readFrame_s<int32_t, float>(tif, data);
+            else {
+                tinyTIFFErrorHandler("QFImageReaderTinyTIFF", QObject::tr("frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n").arg(frame).arg(sformat).arg(bits));
+                return false;
+            }
+        } else if (sformat==TINYTIFF_SAMPLEFORMAT_FLOAT) {
+            if (bits==32) TinyTIFFReader_readFrame_s<float, float>(tif, data);
+            else {
+                tinyTIFFErrorHandler("QFImageReaderTinyTIFF", QObject::tr("frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n").arg(frame).arg(sformat).arg(bits));
+                return false;
+            }
+        } else {
+            tinyTIFFErrorHandler("QFImageReaderTinyTIFF", QObject::tr("frame %1 has a datatype not convertible to float (type=%2, bitspersample=%3)\n").arg(frame).arg(sformat).arg(bits));
+            return false;
+        }
+    }
+    if (TinyTIFFReader_wasError(tif)) {
+        tinyTIFFErrorHandler("QFImageReaderTinyTIFF", QObject::tr("error reading frame %1: %2\n").arg(frame).arg(TinyTIFFReader_getLastError(tif)));
+        return false;
+    }
+
+    return true;
+}
+\endcode
+    */
+template <class Tin, class Tout>
+inline void TinyTIFFReader_readFrame_s(TinyTIFFReaderFile* tif, Tout* buffer, unsigned long buffer_size, uint16_t sample=0) {
+    uint32_t wwidth=TinyTIFFReader_getWidth(tif);
+    uint32_t hheight=TinyTIFFReader_getHeight(tif);
+    if (buffer_size<wwidth*hheight) throw std::runtime_error("output buffer too small!");
+    std::vector<Tin> tmp;
+    tmp.resize(wwidth*hheight);
+    TinyTIFFReader_getSampleData_s(tif, tmp.data(), tmp.size()*sizeof(Tin), sample);
+    for (uint32_t i=0; i<wwidth*hheight; i++) {
+        buffer[i]=static_cast<Tout>(tmp[i]);
+    }
+}
 #endif // TINYTIFFREADER_HXX
