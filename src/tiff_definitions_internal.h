@@ -100,5 +100,10 @@
 #define TINYTIFF_SET_LAST_ERROR(tiff, message) strcpy(tiff->lastError, message);
 #endif
 
+#ifdef HAVE_SPRINTF_S
+#define TINYTIFF_SPRINTF_LAST_ERROR(tiff, message, ...) sprintf_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, message, __VA_ARGS__);
+#else
+#define TINYTIFF_SPRINTF_LAST_ERROR(tiff, message, ...) sprintf(tiff->lastError, message, __VA_ARGS__);
+#endif
 
 #endif // TIFF_DEFINITIONS_INTERNAL_H

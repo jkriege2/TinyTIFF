@@ -433,48 +433,58 @@ static TinyTIFFReader_IFD TinyTIFFReader_readIFD(TinyTIFFReaderFile* tiff) {
         case TIFF_TYPE_ASCII:
             if (d.count>0) {
               d.pvalue=(uint32_t*)calloc(d.count, sizeof(uint32_t));
-                if (d.count<=4) {
-                unsigned int i;
-                for (i=0; i<4; i++) {
-                  uint32_t v=TinyTIFFReader_readuint8(tiff);
-                  if (i<d.count) d.pvalue[i]=v;
-                }
-              } else {
-                changedpos=TINYTIFF_TRUE;
-                uint32_t offset=TinyTIFFReader_readuint32(tiff);
+                if (d.pvalue) {
+                  if (d.count<=4) {
+                    unsigned int i;
+                    for (i=0; i<4; i++) {
+                      uint32_t v=TinyTIFFReader_readuint8(tiff);
+                      if (i<d.count) d.pvalue[i]=v;
+                    }
+                  } else {
+                    changedpos=TINYTIFF_TRUE;
+                    uint32_t offset=TinyTIFFReader_readuint32(tiff);
 
-                if (offset+d.count*1<=tiff->filesize) {
-                  //fseek(tiff->file, offset, SEEK_SET);
-                  TinyTIFFReader_fseek_set(tiff, offset);
-                  unsigned int i;
-                  for (i=0; i<d.count; i++) {
-                    d.pvalue[i]=TinyTIFFReader_readuint8(tiff);
+                    if (offset+d.count*1<=tiff->filesize) {
+                      //fseek(tiff->file, offset, SEEK_SET);
+                      TinyTIFFReader_fseek_set(tiff, offset);
+                      unsigned int i;
+                      for (i=0; i<d.count; i++) {
+                        d.pvalue[i]=TinyTIFFReader_readuint8(tiff);
+                      }
+                    }
                   }
+                } else {
+                    tiff->wasError=TINYTIFF_TRUE;
+                    TINYTIFF_SET_LAST_ERROR(tiff, "unable to allocate memory\0");
                 }
-              }
             }
             d.pvalue2=NULL;
             //printf("    - BYTE/CHAR: tag=%d count=%u   val[0]=%u\n",d.tag,d.count, d.pvalue[0]);
             break;
         case TIFF_TYPE_SHORT:
             d.pvalue=(uint32_t*)calloc(d.count, sizeof(uint32_t));
-            if (d.count<=2) {
-                unsigned int i;
-                for (i=0; i<2; i++) {
-                    uint32_t v=TinyTIFFReader_readuint16(tiff);
-                    if (i<d.count) d.pvalue[i]=v;
-                }
-            } else {
-                changedpos=TINYTIFF_TRUE;
-                uint32_t offset=TinyTIFFReader_readuint32(tiff);
-                if (offset+d.count*2<=tiff->filesize) {
-                    //fseek(tiff->file, offset, SEEK_SET);
-                    TinyTIFFReader_fseek_set(tiff, offset);
+            if (d.pvalue) {
+                if (d.count<=2) {
                     unsigned int i;
-                    for (i=0; i<d.count; i++) {
-                        d.pvalue[i]=TinyTIFFReader_readuint16(tiff);
+                    for (i=0; i<2; i++) {
+                        uint32_t v=TinyTIFFReader_readuint16(tiff);
+                        if (i<d.count) d.pvalue[i]=v;
+                    }
+                } else {
+                    changedpos=TINYTIFF_TRUE;
+                    uint32_t offset=TinyTIFFReader_readuint32(tiff);
+                    if (offset+d.count*2<=tiff->filesize) {
+                        //fseek(tiff->file, offset, SEEK_SET);
+                        TinyTIFFReader_fseek_set(tiff, offset);
+                        unsigned int i;
+                        for (i=0; i<d.count; i++) {
+                            d.pvalue[i]=TinyTIFFReader_readuint16(tiff);
+                        }
                     }
                 }
+            } else {
+                tiff->wasError=TINYTIFF_TRUE;
+                TINYTIFF_SET_LAST_ERROR(tiff, "unable to allocate memory\0");
             }
             d.pvalue2=NULL;
             //printf("    - SHORT: tag=%d count=%u   val[0]=%u\n",d.tag,d.count, d.pvalue[0]);
@@ -482,39 +492,58 @@ static TinyTIFFReader_IFD TinyTIFFReader_readIFD(TinyTIFFReaderFile* tiff) {
 
         case TIFF_TYPE_LONG:
             d.pvalue=(uint32_t*)calloc(d.count, sizeof(uint32_t));
-            if (d.count<=1) {
-                d.pvalue[0]=TinyTIFFReader_readuint32(tiff);
-            } else {
-                changedpos=TINYTIFF_TRUE;
-                uint32_t offset=TinyTIFFReader_readuint32(tiff);
-                if (offset+d.count*4<=tiff->filesize) {
-                    //fseek(tiff->file, offset, SEEK_SET);
-                    TinyTIFFReader_fseek_set(tiff, offset);
-                    uint32_t i;
-                    for (i=0; i<d.count; i++) {
-                        d.pvalue[i]=TinyTIFFReader_readuint32(tiff);
+            if (d.pvalue) {
+                if (d.count<=1) {
+                    d.pvalue[0]=TinyTIFFReader_readuint32(tiff);
+                } else {
+                    changedpos=TINYTIFF_TRUE;
+                    uint32_t offset=TinyTIFFReader_readuint32(tiff);
+                    if (offset+d.count*4<=tiff->filesize) {
+                        //fseek(tiff->file, offset, SEEK_SET);
+                        TinyTIFFReader_fseek_set(tiff, offset);
+                        uint32_t i;
+                        for (i=0; i<d.count; i++) {
+                            d.pvalue[i]=TinyTIFFReader_readuint32(tiff);
+                        }
                     }
+                    //printf("    - LONG: pos=0x%X   offset=0x%X   tag=%d count=%u   val[0]=%u\n",pos, offset,d.tag,d.count, d.pvalue[0]);
                 }
-                //printf("    - LONG: pos=0x%X   offset=0x%X   tag=%d count=%u   val[0]=%u\n",pos, offset,d.tag,d.count, d.pvalue[0]);
+            } else {
+                tiff->wasError=TINYTIFF_TRUE;
+                TINYTIFF_SET_LAST_ERROR(tiff, "unable to allocate memory\0");
             }
+
             d.pvalue2=NULL;
             //printf("    - LONG: tag=%d count=%u   val[0]=%u\n",d.tag,d.count, d.pvalue[0]);
             break;
         case TIFF_TYPE_RATIONAL: {
             d.pvalue=(uint32_t*)calloc(d.count, sizeof(uint32_t));
-            d.pvalue2=(uint32_t*)calloc(d.count, sizeof(uint32_t));
+            if (d.pvalue) {
+                d.pvalue2=(uint32_t*)calloc(d.count, sizeof(uint32_t));
+                if (d.pvalue2) {
 
-            changedpos=TINYTIFF_TRUE;
-            uint32_t offset=TinyTIFFReader_readuint32(tiff);
-            if (offset+d.count*4<=tiff->filesize) {
-                //fseek(tiff->file, offset, SEEK_SET);
-                TinyTIFFReader_fseek_set(tiff, offset);
-                uint32_t i;
-                for (i=0; i<d.count; i++) {
-                    d.pvalue[i]=TinyTIFFReader_readuint32(tiff);
-                    d.pvalue2[i]=TinyTIFFReader_readuint32(tiff);
+                    changedpos=TINYTIFF_TRUE;
+                    uint32_t offset=TinyTIFFReader_readuint32(tiff);
+                    if (offset+d.count*4<=tiff->filesize) {
+                        //fseek(tiff->file, offset, SEEK_SET);
+                        TinyTIFFReader_fseek_set(tiff, offset);
+                        uint32_t i;
+                        for (i=0; i<d.count; i++) {
+                            d.pvalue[i]=TinyTIFFReader_readuint32(tiff);
+                            d.pvalue2[i]=TinyTIFFReader_readuint32(tiff);
+                        }
+                    }
+                } else {
+                    tiff->wasError=TINYTIFF_TRUE;
+                    TINYTIFF_SET_LAST_ERROR(tiff, "unable to allocate memory\0");
+                    free(d.pvalue);
+                    d.pvalue=NULL;
                 }
+            } else {
+                tiff->wasError=TINYTIFF_TRUE;
+                TINYTIFF_SET_LAST_ERROR(tiff, "unable to allocate memory\0");
             }
+
             //printf("    - RATIONAL: pos=0x%X   offset=0x%X   tag=%d count=%u   val[0]=%u/%u\n",pos, offset,d.tag,d.count, d.pvalue[0], d.pvalue[1]);
             } break;
 
@@ -567,7 +596,7 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                 case TIFF_FIELD_IMAGELENGTH: tiff->currentFrame.imagelength=ifd.value;  break;
                 case TIFF_FIELD_BITSPERSAMPLE: {
                         tiff->currentFrame.bitspersample=ifd.value;
-                        if (ifd.count>0) {
+                        if (ifd.count>0 && ifd.pvalue) {
                             tiff->currentFrame.bitspersample=ifd.pvalue[0];
                             int ok=TINYTIFF_TRUE;
                             uint32_t ii;
@@ -588,31 +617,47 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                     if (ifd.count>0 && ifd.pvalue) { // max U32
                         tiff->currentFrame.stripcount=ifd.count;
                         tiff->currentFrame.stripoffsets=(uint32_t*)calloc(ifd.count, sizeof(uint32_t));
-                        TinyTIFFReader_memcpy_s(tiff->currentFrame.stripoffsets, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
+                        if (tiff->currentFrame.stripoffsets) {
+                            TinyTIFFReader_memcpy_s(tiff->currentFrame.stripoffsets, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
+                        } else {
+                            tiff->wasError=TINYTIFF_TRUE;
+                            TINYTIFF_SET_LAST_ERROR(tiff, "unable to allocate memory\0");
+                        }
+                    } else {
+                        tiff->wasError=TINYTIFF_TRUE;
+                        TINYTIFF_SET_LAST_ERROR(tiff, "STRIPBYTECOUNTS has an invalid value (==0) or error reading data!\0");
                     } break;
                 case TIFF_FIELD_SAMPLESPERPIXEL: tiff->currentFrame.samplesperpixel=ifd.value; break;
                 case TIFF_FIELD_ROWSPERSTRIP: tiff->currentFrame.rowsperstrip=ifd.value; break;
                 case TIFF_FIELD_SAMPLEFORMAT: tiff->currentFrame.sampleformat=ifd.value; break;
                 case TIFF_FIELD_IMAGEDESCRIPTION: {
                     //printf("TIFF_FIELD_IMAGEDESCRIPTION: (tag: %u, type: %u, count: %u)\n", ifd.tag, ifd.type, ifd.count);
-                    if (ifd.count>0) {
-                        if (tiff->currentFrame.description) free(tiff->currentFrame.description);
-                        tiff->currentFrame.description=(char*)calloc(ifd.count+1, sizeof(char));
-                        //memset(tiff->currentFrame.description, 0, ifd.count+1);
-                        for (uint32_t ji=0; ji<ifd.count; ji++) {
-                            tiff->currentFrame.description[ji]=(char)ifd.pvalue[ji];
-                            //printf(" %d[%d]", int(tiff->currentFrame.description[ji]), int(ifd.pvalue[ji]));
+                    if (tiff->currentFrame.description) free(tiff->currentFrame.description);
+                    tiff->currentFrame.description=(char*)calloc(ifd.count+1, sizeof(char));
+                    if (tiff->currentFrame.description) {
+                        if (ifd.count>0 && ifd.pvalue) {
+                            for (uint32_t ji=0; ji<ifd.count; ji++) {
+                                tiff->currentFrame.description[ji]=(char)ifd.pvalue[ji];
+                                //printf(" %d[%d]", int(tiff->currentFrame.description[ji]), int(ifd.pvalue[ji]));
+                            }
+                            tiff->currentFrame.description[ifd.count]='\0';
                         }
-                        tiff->currentFrame.description[ifd.count]='\0';
-                        //printf("\n  %s\n", tiff->currentFrame.description);
+                    } else {
+                        tiff->wasError=TINYTIFF_TRUE;
+                        TINYTIFF_SET_LAST_ERROR(tiff, "Unable to allocate memory for frame's description!\0");
                     }
+                    //printf("\n  %s\n", tiff->currentFrame.description);
                     } break;
                 case TIFF_FIELD_STRIPBYTECOUNTS:
-                    if (ifd.count && ifd.pvalue) {
+                    if (ifd.count>0 && ifd.pvalue) {
                         tiff->currentFrame.stripcount=ifd.count;
                         tiff->currentFrame.stripbytecounts=(uint32_t*)calloc(ifd.count, sizeof(uint32_t));
                         TinyTIFFReader_memcpy_s(tiff->currentFrame.stripbytecounts, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
-                    } break;
+                    } else {
+                        tiff->wasError=TINYTIFF_TRUE;
+                        TINYTIFF_SET_LAST_ERROR(tiff, "STRIPBYTECOUNTS has an invalid value (==0) or error reading data!\0");
+                    }
+                    break;
                 case TIFF_FIELD_PLANARCONFIG: tiff->currentFrame.planarconfiguration=ifd.value; break;
                 case TIFF_FIELD_ORIENTATION: tiff->currentFrame.orientation=ifd.value; break;
                 case TIFF_FIELD_PHOTOMETRICINTERPRETATION: tiff->currentFrame.photometric_interpretation=ifd.value; break;
@@ -650,7 +695,8 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
     }
 }
 
-int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_t sample) {
+
+int TinyTIFFReader_getSampleData_s___internl(TinyTIFFReaderFile* tiff, void* buffer, unsigned long buffer_size, uint16_t sample, int doSizeChecks) {
     if (tiff) {
         if (tiff->currentFrame.compression!=TIFF_COMPRESSION_NONE) {
             tiff->wasError=TINYTIFF_TRUE;
@@ -727,6 +773,11 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                 //                                   outputimageidx_bytes: points to where to start writing in output array
 
                 const unsigned long sample_image_size_bytes=tiff->currentFrame.width*tiff->currentFrame.height*tiff->currentFrame.bitspersample/8;
+                if (doSizeChecks!=0 && buffer_size<sample_image_size_bytes) {
+                    tiff->wasError=TINYTIFF_TRUE;
+                    TINYTIFF_SET_LAST_ERROR(tiff, "sizeof input buffer was too small!\0");
+                    return TINYTIFF_FALSE;
+                }
                 const unsigned long sample_start_bytes=sample*sample_image_size_bytes;
                 const unsigned long sample_end_bytes=sample_start_bytes+sample_image_size_bytes;
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
@@ -780,6 +831,11 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     if (stripsize_bytes>last_stripsize_bytes) {
                         if (stripdata) free(stripdata);
                         stripdata=(uint8_t*)malloc(stripsize_bytes);
+                        if (!stripdata) {
+                            tiff->wasError=TINYTIFF_TRUE;
+                            TINYTIFF_SET_LAST_ERROR(tiff, "unable to allocate memory\0");
+                            return TINYTIFF_FALSE;
+                        }
                         last_stripsize_bytes=stripsize_bytes;
                     }
 
@@ -795,7 +851,8 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
                     }
                     unsigned long stripi=0;
                     for (stripi=sample*tiff->currentFrame.bitspersample/8; stripi<stripsize_bytes; stripi+=tiff->currentFrame.bitspersample/8*tiff->currentFrame.samplesperpixel) {
-                        memcpy(&(((uint8_t*)buffer)[outputimageidx_bytes]), &(stripdata[stripi]), tiff->currentFrame.bitspersample/8);
+                        if (doSizeChecks) TinyTIFFReader_memcpy_s(&(((uint8_t*)buffer)[outputimageidx_bytes]), buffer_size-outputimageidx_bytes, &(stripdata[stripi]), tiff->currentFrame.bitspersample/8);
+                        else memcpy(&(((uint8_t*)buffer)[outputimageidx_bytes]), &(stripdata[stripi]), tiff->currentFrame.bitspersample/8);
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                         if (stripi<sample*tiff->currentFrame.bitspersample/8+10*tiff->currentFrame.bitspersample/8*tiff->currentFrame.samplesperpixel) printf("      - memcpy(buffer[%8lu], stripdata[%8lu], %lu)\n", (unsigned long)outputimageidx_bytes, (unsigned long)stripi, (unsigned long)(tiff->currentFrame.bitspersample/8));
                         else if (stripi==sample*tiff->currentFrame.bitspersample/8+10*tiff->currentFrame.bitspersample/8*tiff->currentFrame.samplesperpixel) printf("      - memcpy(...)\n");
@@ -864,6 +921,13 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
 }
 
 
+int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_t sample) {
+    return TinyTIFFReader_getSampleData_s___internl(tiff, buffer, 0, sample, TINYTIFF_FALSE);
+}
+
+int TinyTIFFReader_getSampleData_s(TinyTIFFReaderFile* tiff, void* buffer, unsigned long buffer_size, uint16_t sample) {
+    return TinyTIFFReader_getSampleData_s___internl(tiff, buffer, buffer_size, sample, TINYTIFF_TRUE);
+}
 
 
 
@@ -880,55 +944,60 @@ int TinyTIFFReader_getSampleData(TinyTIFFReaderFile* tiff, void* buffer, uint16_
 
 TinyTIFFReaderFile* TinyTIFFReader_open(const char* filename) {
     TinyTIFFReaderFile* tiff=(TinyTIFFReaderFile*)malloc(sizeof(TinyTIFFReaderFile));
+    if (tiff) {
+        tiff->filesize=0;
+        struct stat file;
+        if(stat(filename,&file)==0) {
+             tiff->filesize=file.st_size;
+        }
+        tiff->currentFrame=TinyTIFFReader_getEmptyFrame();
 
-    tiff->filesize=0;
-    struct stat file;
-    if(stat(filename,&file)==0) {
-         tiff->filesize=file.st_size;
-    }
-    tiff->currentFrame=TinyTIFFReader_getEmptyFrame();
 
-
-    //tiff->file=v(filename, "rb");
-    TinyTIFFReader_fopen(tiff, filename);
-    tiff->systembyteorder=TIFFReader_get_byteorder();
-    memset(tiff->lastError, 0, TIFF_LAST_ERROR_SIZE);
-    tiff->wasError=TINYTIFF_FALSE;
-    if (TinyTIFFReader_fOK(tiff) && tiff->filesize>0) {
-        const unsigned long tiffidsize=3;
-        uint8_t tiffid[3]={0,0,0};
-        //fread(tiffid, 1,2,tiff->file);
-        TinyTIFFReader_fread(tiffid, tiffidsize, 1,2,tiff);
-#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
-        printf("      - head=%s\n", tiffid);
-#endif
-        if (tiffid[0]=='I' && tiffid[1]=='I') tiff->filebyteorder=TIFF_ORDER_LITTLEENDIAN;
-        else if (tiffid[0]=='M' && tiffid[1]=='M') tiff->filebyteorder=TIFF_ORDER_BIGENDIAN;
-        else {
+        //tiff->file=v(filename, "rb");
+        TinyTIFFReader_fopen(tiff, filename);
+        tiff->systembyteorder=TIFFReader_get_byteorder();
+        memset(tiff->lastError, 0, TIFF_LAST_ERROR_SIZE);
+        tiff->wasError=TINYTIFF_FALSE;
+        if (TinyTIFFReader_fOK(tiff) && tiff->filesize>0) {
+            const unsigned long tiffidsize=3;
+            uint8_t tiffid[3]={0,0,0};
+            //fread(tiffid, 1,2,tiff->file);
+            TinyTIFFReader_fread(tiffid, tiffidsize, 1,2,tiff);
+    #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+            printf("      - head=%s\n", tiffid);
+    #endif
+            if (tiffid[0]=='I' && tiffid[1]=='I') tiff->filebyteorder=TIFF_ORDER_LITTLEENDIAN;
+            else if (tiffid[0]=='M' && tiffid[1]=='M') tiff->filebyteorder=TIFF_ORDER_BIGENDIAN;
+            else {
+                TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
+                free(tiff);
+                return NULL;
+            }
+            uint16_t magic=TinyTIFFReader_readuint16(tiff);
+    #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+            printf("      - magic=%u\n", magic);
+    #endif
+            if (magic!=42) {
+                TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
+                free(tiff);
+                return NULL;
+            }
+            tiff->firstrecord_offset=TinyTIFFReader_readuint32(tiff);
+            tiff->nextifd_offset=tiff->firstrecord_offset;
+    #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+            printf("      - filesize=%lu\n", tiff->filesize);
+            printf("      - firstrecord_offset=%4X\n", tiff->firstrecord_offset);
+    #endif
+            TinyTIFFReader_readNextFrame(tiff);
+        } else {
             TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
             free(tiff);
             return NULL;
         }
-        uint16_t magic=TinyTIFFReader_readuint16(tiff);
-#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
-        printf("      - magic=%u\n", magic);
-#endif
-        if (magic!=42) {
-            TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
-            free(tiff);
-            return NULL;
-        }
-        tiff->firstrecord_offset=TinyTIFFReader_readuint32(tiff);
-        tiff->nextifd_offset=tiff->firstrecord_offset;
-#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
-        printf("      - filesize=%lu\n", tiff->filesize);
-        printf("      - firstrecord_offset=%4X\n", tiff->firstrecord_offset);
-#endif
-        TinyTIFFReader_readNextFrame(tiff);
     } else {
-        TinyTIFFReader_freeEmptyFrame(tiff->currentFrame);
-        free(tiff);
-        return NULL;
+#ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
+        printf("unable to allocate memory for TinyTIFFReaderFile object");
+#endif
     }
 
     return tiff;
@@ -953,6 +1022,7 @@ int TinyTIFFReader_hasNext(TinyTIFFReaderFile* tiff) {
 }
 
 int TinyTIFFReader_readNext(TinyTIFFReaderFile* tiff) {
+    if (!tiff) return TINYTIFF_FALSE;
     int hasNext=TinyTIFFReader_hasNext(tiff);
     if (hasNext) {
         TinyTIFFReader_readNextFrame(tiff);
