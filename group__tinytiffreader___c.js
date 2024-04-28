@@ -8,6 +8,7 @@ var group__tinytiffreader___c =
     [ "TinyTIFFReader_getLastError", "group__tinytiffreader___c.html#gad23c48c252bc868866ea780ed0085eac", null ],
     [ "TinyTIFFReader_getResolutionUnit", "group__tinytiffreader___c.html#ga7209f66f288783748667d76579dcf686", null ],
     [ "TinyTIFFReader_getSampleData", "group__tinytiffreader___c.html#ga7884d41742aa1b3052fce596a68498a5", null ],
+    [ "TinyTIFFReader_getSampleData_s", "group__tinytiffreader___c.html#ga8d7566dd065816a9477586213def3093", null ],
     [ "TinyTIFFReader_getSampleFormat", "group__tinytiffreader___c.html#ga0882963ea3040fddf1741d381b31720d", null ],
     [ "TinyTIFFReader_getSamplesPerPixel", "group__tinytiffreader___c.html#ga66c223345ce86b9a682546b4520b6c1c", null ],
     [ "TinyTIFFReader_getVersion", "group__tinytiffreader___c.html#ga9e228249335fd90ea765ea58790ed490", null ],
