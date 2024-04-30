@@ -43,6 +43,15 @@ jobs:
         cd build
         cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} "-DCMAKE_PREFIX_PATH=../../../install/lib" -B . -S ..
         cmake --build build --config Release --verbose  
+    - name: Test CMake-build against TinyTIFF, using FetchContent-API
+      run: |
+        cd tests
+        cd extcmake_fetchcontent_tinytiff_test
+        mkdir build 
+        cd build
+        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} -B . -S ..
+        cmake --build build --config Release --verbose  
+
     - name: Run Release tests
       run: |
         cd install
