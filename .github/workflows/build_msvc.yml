@@ -42,8 +42,8 @@ jobs:
         mkdir build
         cd build
         pwd
-        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} "-DCMAKE_MODULE_PATH=../../../install/lib" -B . -S ..
-        cmake --build build --config Release --verbose  
+        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} "-DCMAKE_MODULE_PATH=../../../install/lib/TinyTIFF" -B . -S ..
+        cmake --build . --config Release --verbose  
     - name: Test CMake-build against TinyTIFF, using FetchContent-API
       if: success() || failure() # always run even if the previous step fails
       run: |
@@ -52,7 +52,7 @@ jobs:
         mkdir build 
         cd build
         cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} -B . -S ..
-        cmake --build build --config Release --verbose  
+        cmake --build . --config Release --verbose  
 
     - name: Run Release tests
       run: |

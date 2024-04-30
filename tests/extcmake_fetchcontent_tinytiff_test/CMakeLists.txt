@@ -17,7 +17,7 @@ FetchContent_Declare(TinyTIFF
 FetchContent_MakeAvailable(TinyTIFF)
 
 add_executable(${PROJECT_NAME}
-	extcmake_tinytiff_test.cpp
+	extcmake_fetchcontent_tinytiff_test.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} TinyTIFF::TinyTIFF)
