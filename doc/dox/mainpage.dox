@@ -84,19 +84,37 @@ The free space, indicated as SOME_FREE_SPACE is used to store contents of extend
 \subsection mainpagetinytiff_writer_benchmarks TinyTIFFWriter: Benchmarks
 
 The library was developed due to a problem with libTIFF, when a lot (>1000) frames are written into a TIFF-file. LibTIFF does not need constant time per frame (i.e. the time to write a multi-frame TIFF grows linearly with the number of frames), but the time to write a frame increases with the number of frames.
-The following performance measurement shows this. It was acquired using `tinytiffwriter_speedtest` from this repository and shows the average time required to write one frame (64x64x pixels, 16-bit integer) out of a number (10, 100, 1000, ...) of frames. It compares the performance of libTIFF, TinyTIFFWriter and simply writing the dtaa using `fwrite()` ("RAW"). It was acquired on an Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk (not a SSD)
+The following performance measurement shows this. It was acquired using `tinytiffwriter_speedtest` from this repository and shows the average time required to write one frame (64x64x pixels, 16-bit integer) out of a number (10, 100, 1000, ...) of frames. It compares the performance of libTIFF, TinyTIFFWriter and simply writing the dtaa using `fwrite()` ("RAW"):
 
-\image html tinytiffwriter_libtiff_raw_comparison_numimages.png
+<table>
+  <tr>
+    <th> Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk, libTiff 3.8.2
+    <th> Ryzen 7 5800H, Win11, 64-bit Release-build, writing onto an SSD, libTiff 4.6.0
+  <tr>
+    <td> \image html tinytiffwriter_libtiff_raw_comparison_numimages.png
+    <td> \image html tinytiffwriter_libtiff_raw_comparison_numimages_ssd.png
+  </tr>
+</table>
+
 
 For a microscope developed during my PhD thesis, it was necessary to write 100000 frames and more with acceptable duration. Therefore libTIFF was unusable and TinyTIFFWriter was developed.
-As can be seen in the graph above. The performance of TinyTIFFWriter and `fwrite()`/RAW is comparable, whereas the performance of LibTIFF falls off towards large files.
+As can be seen in the graph above. The performance of TinyTIFFWriter and `fwrite()`/RAW is comparable, whereas the performance of LibTIFF falls off towards large files on harddisks. 
+On SSDs the performance of libTIFF does not show an increase with number of images, but is still significantly (1.5-3x, note the logarithmic y-axis) faster than libTIFF.
 
 
 The following image shows another performance measurement, this time for different frame sizes (64x64-4096x4096, acquired on an Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk (not a SSD)):
 
-\image html tinytiffwriter_libtiff_raw_comparison_imagesizes.png
+<table>
+  <tr>
+    <th> Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk, libTiff 3.8.2
+    <th> Ryzen 7 5800H, Win11, 64-bit Release-build, writing onto an SSD, libTiff 4.6.0
+  <tr>
+    <td> \image html tinytiffwriter_libtiff_raw_comparison_imagesizes.png
+    <td> \image html tinytiffwriter_libtiff_raw_comparison_imagesizes_ssd.png
+  </tr>
+</table>
 
-This suggests that the performance of TinyTIFFWriter and `fwrite()` are comparable for all image sizes. For larger images, also the performance of libTIFF is in the same range, whereas for small images, libTIFF falls off somewhat.
+This suggests that for harddisks the performance of TinyTIFFWriter and `fwrite()` are comparable for all image sizes. For larger images, also the performance of libTIFF is in the same range, whereas for small images, libTIFF falls off somewhat.   For SSDs, the libraries are closer together, but still TinyTIFFWriter is faster than libTIFF by a factor of 1.5-5x (again note the logarithmic scale on the y-axis!).
 
 
 

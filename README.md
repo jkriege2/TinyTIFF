@@ -68,30 +68,30 @@ This example reads all frames from a TIFF file:
                     const uint32_t width=TinyTIFFReader_getWidth(tiffr); 
                     const uint32_t height=TinyTIFFReader_getHeight(tiffr); 
                     const uint16_t samples=TinyTIFFReader_getSamplesPerPixel(tiff);
-					const uint16_t bitspersample=TinyTIFFReader_getBitsPerSample(tiff, 0);
+                    const uint16_t bitspersample=TinyTIFFReader_getBitsPerSample(tiff, 0);
                     bool ok=true;
                     std::cout<<"    size of frame "<<frame<<": "<<width<<"x"<<height<<"\n"; 
                     std::cout<<"    each pixel has "<<samples<<" samples with "<<bitspersample<<" bits each\n"; 
                     if (ok) { 
                         frame++; 
-						// allocate memory for 1 sample from the image
+                        // allocate memory for 1 sample from the image
                         uint8_t* image=(uint8_t*)calloc(width*height, bitspersample/8);  
 						
-						for (uint16_t sample=0; sample<samples; sample++) {
-							// read the sample
-							TinyTIFFReader_getSampleData(tiffr, image, sample); 
-							if (TinyTIFFReader_wasError(tiffr)) { ok=false; std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; break; } 
-                        
-							///////////////////////////////////////////////////////////////////
-							// HERE WE CAN DO SOMETHING WITH THE SAMPLE FROM THE IMAGE 
-							// IN image (ROW-MAJOR!)
-							// Note: That you may have to typecast the array image to the
-							// datatype used in the TIFF-file. You can get the size of each
-							// sample in bits by calling TinyTIFFReader_getBitsPerSample() and
-							// the datatype by calling TinyTIFFReader_getSampleFormat().
-							///////////////////////////////////////////////////////////////////
-							
-						}
+                        for (uint16_t sample=0; sample<samples; sample++) {
+                          // read the sample
+                          TinyTIFFReader_getSampleData(tiffr, image, sample); 
+                          if (TinyTIFFReader_wasError(tiffr)) { ok=false; std::cout<<"   ERROR:"<<TinyTIFFReader_getLastError(tiffr)<<"\n"; break; } 
+                                          
+                          ///////////////////////////////////////////////////////////////////
+                          // HERE WE CAN DO SOMETHING WITH THE SAMPLE FROM THE IMAGE 
+                          // IN image (ROW-MAJOR!)
+                          // Note: That you may have to typecast the array image to the
+                          // datatype used in the TIFF-file. You can get the size of each
+                          // sample in bits by calling TinyTIFFReader_getBitsPerSample() and
+                          // the datatype by calling TinyTIFFReader_getSampleFormat().
+                          ///////////////////////////////////////////////////////////////////
+                    
+                        }
                         
                         free(image); 
                     } 
@@ -116,14 +116,14 @@ This simplified example reads the first sample from the first frame in a TIFF fi
         uint8_t* image=(uint8_t*)calloc(width*height, bitspersample/8);  
         TinyTIFFReader_getSampleData(tiffr, image, 0); 
                 
-							///////////////////////////////////////////////////////////////////
-							// HERE WE CAN DO SOMETHING WITH THE SAMPLE FROM THE IMAGE 
-							// IN image (ROW-MAJOR!)
-							// Note: That you may have to typecast the array image to the
-							// datatype used in the TIFF-file. You can get the size of each
-							// sample in bits by calling TinyTIFFReader_getBitsPerSample() and
-							// the datatype by calling TinyTIFFReader_getSampleFormat().
-							///////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////
+        // HERE WE CAN DO SOMETHING WITH THE SAMPLE FROM THE IMAGE 
+        // IN image (ROW-MAJOR!)
+        // Note: That you may have to typecast the array image to the
+        // datatype used in the TIFF-file. You can get the size of each
+        // sample in bits by calling TinyTIFFReader_getBitsPerSample() and
+        // the datatype by calling TinyTIFFReader_getSampleFormat().
+        ///////////////////////////////////////////////////////////////////
                 
         free(image); 
     } 
@@ -196,17 +196,21 @@ The free space, indicated as SOME_FREE_SPACE is used to store contents of extend
 The library was developed due to a problem with libTIFF, when a lot (>1000) frames are written into a TIFF-file. LibTIFF does not need constant time per frame (i.e. the time to write a multi-frame TIFF grows linearly with the number of frames), but the time to write a frame increases with the number of frames.
 The following performance measurement shows this. It was acquired using `tinytiffwriter_speedtest` from this repository and shows the average time required to write one frame (64x64x pixels, 16-bit integer) out of a number (10, 100, 1000, ...) of frames. It compares the performance of libTIFF, TinyTIFFWriter and simply writing the dtaa using `fwrite()` ("RAW"). It was acquired on an Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk (not a SSD)
 
-![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_numimages.png)
+| Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk, libTiff 3.8.2  |  Ryzen 7 5800H, Win11, 64-bit Release-build, writing onto an SSD, libTiff 4.6.0 |
+:------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:
+![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_numimages.png)  |  ![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_numimages_ssd.png)
 
 For a microscope developed during my PhD thesis, it was necessary to write 100000 frames and more with acceptable duration. Therefore libTIFF was unusable and TinyTIFFWriter was developed.
-As can be seen in the graph above. The performance of TinyTIFFWriter and `fwrite()`/RAW is comparable, whereas the performance of LibTIFF falls off towards large files.
+As can be seen in the graph above. The performance of TinyTIFFWriter and `fwrite()`/RAW is comparable, whereas the performance of LibTIFF falls off towards large files on harddisks. On SSDs the performance of libTIFF does not show an increase with number of images, but is still significantly (1.5-3x, note the logarithmic y-axis) faster than libTIFF.
 
 
 The following image shows another performance measurement, this time for different frame sizes (64x64-4096x4096, acquired on an Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk (not a SSD)):
 
-![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_imagesizes.png)
+| Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk, libTiff 3.8.2  |  Ryzen 7 5800H, Win11, 64-bit Release-build, writing onto an SSD, libTiff 4.6.0 |
+:------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:
+![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_imagesizes.png)  |  ![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_imagesizes_ssd.png)
 
-This suggests that the performance of TinyTIFFWriter and `fwrite()` are comparable for all image sizes. For larger images, also the performance of libTIFF is in the same range, whereas for small images, libTIFF falls off somewhat.  
+This suggests that for harddisks the performance of TinyTIFFWriter and `fwrite()` are comparable for all image sizes. For larger images, also the performance of libTIFF is in the same range, whereas for small images, libTIFF falls off somewhat.   For SSDs, the libraries are closer together, but still TinyTIFFWriter is faster than libTIFF by a factor of 1.5-5x (again note the logarithmic scale on the y-axis!).
 
 # Documentation
 
