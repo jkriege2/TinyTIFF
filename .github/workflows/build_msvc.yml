@@ -41,9 +41,11 @@ jobs:
         cd extcmake_tinytiff_test
         mkdir build
         cd build
-        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} "-DCMAKE_PREFIX_PATH=../../../install/lib" -B . -S ..
+        pwd
+        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} "-DCMAKE_MODULE_PATH=../../../install/lib" -B . -S ..
         cmake --build build --config Release --verbose  
     - name: Test CMake-build against TinyTIFF, using FetchContent-API
+      if: success() || failure() # always run even if the previous step fails
       run: |
         cd tests
         cd extcmake_fetchcontent_tinytiff_test
