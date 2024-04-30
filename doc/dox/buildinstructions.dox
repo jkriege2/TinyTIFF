@@ -19,7 +19,7 @@ You can use (MinGW) Makefiles by calling:
 \code{.sh}
     $ mkdir build
     $ cd build
-    $ cmake .. -G "MinGW Makefiles" -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON
+    $ cmake .. -G "MinGW Makefiles" -DBUILD_SHARED_LIBS=ON
     $ cmake --build . --config "Debug"
     $ cmake --build . --config "Debug" --target install
 \endcode
@@ -47,15 +47,11 @@ Afterwards you can install the library by
 
 The CMake build system offers several configuration variables that you may set/change to modify the outcome of the build:
   - \c CMAKE_PREFIX_PATH : add the path to your Qt installatrion to this variable, so the \c find_package(Qt5...) commands find the libraries you want to use
-  - \c TinyTIFF_BUILD_SHARED_LIBS : Build as shared library (default: \c ON )
-  - \c TinyTIFF_BUILD_STATIC_LIBS : Build as static library (default: \c OFF )
+  - \c BUILD_SHARED_LIBS : Build as shared library (default: \c ON )
   - \c TinyTIFF_BUILD_DECORATE_LIBNAMES_WITH_BUILDTYPE : If set, the build-type is appended to the library name (default: \c ON )
   - \c TinyTIFF_BUILD_EXAMPLES : Build examples (default: \c ON )
   - \c CMAKE_INSTALL_PREFIX : Install directory for the library
 .
-
-
-
 
 
 */

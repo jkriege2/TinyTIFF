@@ -18,9 +18,10 @@
 */
 #define TINYTIFF_WRITE_COMMENTS
 
+#include "tinytiffwriter.h"
+
 #include <math.h>
 #include <float.h>
-#include "tinytiffwriter.h"
 #include "tiff_definitions_internal.h"
 #include "tinytiff_version.h"
 

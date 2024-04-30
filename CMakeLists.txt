@@ -13,11 +13,8 @@ include(tinytiff_build_type)
 
 ######################################################################################################
 # compile options:
-if(NOT DEFINED TinyTIFF_BUILD_SHARED_LIBS)
-    option(TinyTIFF_BUILD_SHARED_LIBS "Build as shared library" ON)
-endif()
-if(NOT DEFINED TinyTIFF_BUILD_STATIC_LIBS)
-    option(TinyTIFF_BUILD_STATIC_LIBS "Build as static library" OFF)
+if(NOT DEFINED BUILD_SHARED_LIBS)
+    option(BUILD_SHARED_LIBS "Build as shared library" ON)
 endif()
 if(NOT DEFINED TinyTIFF_USE_WINAPI_FOR_FILEIO)
     option(TinyTIFF_USE_WINAPI_FOR_FILEIO "Use WIN-API for File-IO" OFF)
@@ -33,6 +30,11 @@ if(NOT DEFINED TinyTIFF_BUILD_TESTS)
 endif()
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
     option(CMAKE_INSTALL_PREFIX "Install directory" ${CMAKE_CURRENT_SOURCE_DIR}/output)
+endif()
+if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    # We're in the root, define additional targets for developers.
+    # This prepares the library to be used with CMake's FetchContent
+    set(TinyTIFF_BUILD_TESTS OFF)
 endif()
 
 
@@ -66,6 +68,17 @@ else()
     set(TinyTIFF_LIBNAME_ADDITION )
 endif()
 
+set(tinytiff_default_build_type "Debug")
+get_property(TinyTIFF_isMultiConfigGenerator GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(NOT TinyTIFF_isMultiConfigGenerator)
+  if(NOT CMAKE_BUILD_TYPE)
+      message(WARNING "Setting build type to '${tinytiff_default_build_type}' as none was specified.")
+    set(CMAKE_BUILD_TYPE ${tinytiff_default_build_type} CACHE STRING "Choose the type of build." FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+  endif()
+endif()
+
+
 
 ######################################################################################################
 # check for dependency libs
@@ -74,8 +87,7 @@ endif()
 ######################################################################################################
 # Project Summary
 message("Building TinyTIFF With these features:")
-message("  TinyTIFF_BUILD_SHARED_LIBS                      = ${TinyTIFF_BUILD_SHARED_LIBS}")
-message("  TinyTIFF_BUILD_STATIC_LIBS                      = ${TinyTIFF_BUILD_STATIC_LIBS}")
+message("  BUILD_SHARED_LIBS                               = ${BUILD_SHARED_LIBS}")
 message("  TinyTIFF_USE_WINAPI_FOR_FILEIO                  = ${TinyTIFF_USE_WINAPI_FOR_FILEIO}")
 message("  TinyTIFF_BUILD_WITH_ADDITIONAL_DEBUG_OUTPUT     = ${TinyTIFF_BUILD_WITH_ADDITIONAL_DEBUG_OUTPUT}")
 message("  TinyTIFF_BUILD_DECORATE_LIBNAMES_WITH_BUILDTYPE = ${TinyTIFF_BUILD_DECORATE_LIBNAMES_WITH_BUILDTYPE}")
@@ -91,6 +103,5 @@ add_subdirectory(src)
 if(TinyTIFF_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
-
 
 
