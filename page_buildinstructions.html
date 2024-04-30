@@ -115,7 +115,7 @@ Building with MinGW/GNU/... Makefiles</h3>
 <p>You can use (MinGW) Makefiles by calling:</p>
 <div class="fragment"><div class="line">$ mkdir build</div>
 <div class="line">$ cd build</div>
-<div class="line">$ cmake .. -G &quot;MinGW Makefiles&quot; -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON</div>
+<div class="line">$ cmake .. -G &quot;MinGW Makefiles&quot; -DBUILD_SHARED_LIBS=ON</div>
 <div class="line">$ cmake --build . --config &quot;Debug&quot;</div>
 <div class="line">$ cmake --build . --config &quot;Debug&quot; --target install</div>
 </div><!-- fragment --><p>Note that we set several compiler options on the first run of cmake. The options are describe in detail below in <a class="el" href="page_buildinstructions.html#page_buildinstructions_CMAKE_CONFIG">Configuring a Build with CMake</a> .</p>
@@ -130,8 +130,7 @@ Building with Visual Studio</h3>
 Configuring a Build with CMake</h2>
 <p>The CMake build system offers several configuration variables that you may set/change to modify the outcome of the build:</p><ul>
 <li><code>CMAKE_PREFIX_PATH</code> : add the path to your Qt installatrion to this variable, so the <code>find_package(Qt5...)</code> commands find the libraries you want to use</li>
-<li><code>TinyTIFF_BUILD_SHARED_LIBS</code> : Build as shared library (default: <code>ON</code> )</li>
-<li><code>TinyTIFF_BUILD_STATIC_LIBS</code> : Build as static library (default: <code>OFF</code> )</li>
+<li><code>BUILD_SHARED_LIBS</code> : Build as shared library (default: <code>ON</code> )</li>
 <li><code>TinyTIFF_BUILD_DECORATE_LIBNAMES_WITH_BUILDTYPE</code> : If set, the build-type is appended to the library name (default: <code>ON</code> )</li>
 <li><code>TinyTIFF_BUILD_EXAMPLES</code> : Build examples (default: <code>ON</code> )</li>
 <li><code>CMAKE_INSTALL_PREFIX</code> : Install directory for the library</li>
@@ -142,7 +141,7 @@ Configuring a Build with CMake</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Apr 28 2024 21:04:22 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Tue Apr 30 2024 21:32:27 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>
