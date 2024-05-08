@@ -1,4 +1,4 @@
-name: BUILD-MSVC-CI
+name: BUILD-LINUX-CI
 
 on: [push, pull_request]
 
@@ -10,23 +10,23 @@ jobs:
     if: >-
       ! contains(toJSON(github.event.commits.*.message), '[skip ci]') &&
       ! contains(toJSON(github.event.commits.*.message), '[skip github]')
-    name: MSVC 2022
-    runs-on: windows-latest
+    name: LINUX-CI
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - {gen: Visual Studio 17 2022, arch: Win32, shared: ON, static: OFF}
-          - {gen: Visual Studio 17 2022, arch: Win32, shared: OFF, static: ON}
-          - {gen: Visual Studio 17 2022, arch: x64, shared: ON, static: OFF}
-          - {gen: Visual Studio 17 2022, arch: x64, shared: OFF, static: ON}
+          - {gen: Unix Makefiles, shared: ON, ccompiler: gcc, cxxcompiler: g++}
+          - {gen: Unix Makefiles, shared: OFF, ccompiler: gcc, cxxcompiler: g++}
+          - {gen: Unix Makefiles, shared: ON, ccompiler: clang, cxxcompiler: clang}
+          - {gen: Unix Makefiles, shared: OFF, ccompiler: clang, cxxcompiler: clang}
     steps:
     - name: checkout
       uses: actions/checkout@v4
     - name: Configure
       run: |
         mkdir install
-        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} -DTinyTIFF_BUILD_SHARED_LIBS=${{matrix.shared}} -DTinyTIFF_BUILD_STATIC_LIBS=${{matrix.static}} -DBUILD_SHARED_LIBS=${{matrix.shared}} "-DCMAKE_INSTALL_PREFIX=./install" -B build
+        cmake -G "${{matrix.gen}}" -DBUILD_SHARED_LIBS=${{matrix.shared}} "-DCMAKE_INSTALL_PREFIX=./install" -DCMAKE_CXX_COMPILER=${{matrix.cxxcompiler}} -DCMAKE_C_COMPILER=${{matrix.ccompiler}} -B build
     - name: Build Release
       run: |
            cmake --build build --config Release --verbose           
@@ -39,10 +39,8 @@ jobs:
       run: |
         cd tests
         cd extcmake_tinytiff_test
-        mkdir build
+        md build
         cd build
-        pwd
-        echo ${{github.workspace}}
         cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} "-DCMAKE_PREFIX_PATH=${{github.workspace}}/install/" -B . -S ..
         cmake --build . --config Release --verbose  
     - name: Test CMake-build against TinyTIFF, using FetchContent-API
@@ -50,7 +48,7 @@ jobs:
       run: |
         cd tests
         cd extcmake_fetchcontent_tinytiff_test
-        mkdir build 
+        md build 
         cd build
         cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} -B . -S ..
         cmake --build . --config Release --verbose  
