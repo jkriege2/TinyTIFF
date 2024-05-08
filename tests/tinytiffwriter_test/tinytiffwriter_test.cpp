@@ -3,6 +3,7 @@
 #include "test_results.h"
 #include "testimage_tools.h"
 #include <fstream>
+#include <string.h>
 #include <array>
 #ifdef TINYTIFF_TEST_LIBTIFF
 #include <tiffio.h>
