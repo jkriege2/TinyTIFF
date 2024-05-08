@@ -235,7 +235,7 @@ int TinyTIFFReader_fOK(const TinyTIFFReaderFile* tiff)  {
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
-int TinyTIFFReader_fseek_set(TinyTIFFReaderFile* tiff, unsigned long offset) {
+int TinyTIFFReader_fseek_set(TinyTIFFReaderFile* tiff, long long offset) {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
    DWORD res = SetFilePointer (tiff->hFile,
                                 offset,
@@ -245,11 +245,18 @@ int TinyTIFFReader_fseek_set(TinyTIFFReaderFile* tiff, unsigned long offset) {
 
    return res;
 #else
+#  ifdef HAVE_FSEEKO64
+    return fseeko64(tiff->file, offset, SEEK_SET);
+#  elif defined(HAVE_FSEEKI64)
+    return _fseeki64(tiff->file, offset, SEEK_SET);
+#  else
     return fseek(tiff->file, (long)offset, SEEK_SET);
+#  endif
+
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
-int TinyTIFFReader_fseek_cur(TinyTIFFReaderFile* tiff, unsigned long offset) {
+int TinyTIFFReader_fseek_cur(TinyTIFFReaderFile* tiff, long long offset) {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
    DWORD res = SetFilePointer (tiff->hFile,
                                 offset,
@@ -259,7 +266,13 @@ int TinyTIFFReader_fseek_cur(TinyTIFFReaderFile* tiff, unsigned long offset) {
 
    return res;
 #else
+#  ifdef HAVE_FSEEKO64
+    return fseeko64(tiff->file, offset, SEEK_CUR);
+#  elif defined(HAVE_FSEEKI64)
+    return _fseeki64(tiff->file, offset, SEEK_CUR);
+#  else
     return fseek(tiff->file, (long)offset, SEEK_CUR);
+#  endif
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
@@ -279,19 +292,6 @@ unsigned long TinyTIFFReader_fread(void * ptr, unsigned long ptrsize, unsigned l
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
-#ifdef ENABLE_UNUSED_TinyTIFFReader_ftell // Silence "unused" warning
-static long int TinyTIFFReader_ftell ( TinyTIFFReaderFile * tiff ) {
-#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
-DWORD dwPtr = SetFilePointer( tiff->hFile,
-                                0,
-                                NULL,
-                                FILE_CURRENT );
-    return dwPtr;
-#else
-    return ftell(tiff->file);
-#endif
-}
-#endif
 
 int TinyTIFFReader_fgetpos(TinyTIFFReaderFile* tiff, TinyTIFFReader_POSTYPE* pos) {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO

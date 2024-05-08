@@ -21,6 +21,14 @@
 #ifndef TINYTIFF_CTOOLS_INTERNAL_H
 #define TINYTIFF_CTOOLS_INTERNAL_H
 
+#if defined(HAVE_FTELLI64) || defined(HAVE_FTELLO64)
+#  define TINYTIFF_MAX_FILE_SIZE (0xFFFFFFFE)
+#else
+#  warning COMPILING TinyTIFFWriter without LARGE_FILE_SUPPORT ... File size is limited to 2GB!
+#  define TINYTIFF_MAX_FILE_SIZE (2*1024*1024*1024-1)
+#endif
+
+
 #if defined(__has_builtin)
 #  if __has_builtin(__builtin_object_size)
 #    define tinytiff_builtin_object_size(ptr) __builtin_object_size(ptr, 2)
