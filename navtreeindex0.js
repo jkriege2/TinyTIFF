@@ -135,10 +135,11 @@ var NAVTREEINDEX0 =
 "struct_tiny_t_i_f_f_writer_file.html#adcdb61b435ed9d2b8de5134ca2e28927":[4,0,1,1,0,11],
 "struct_tiny_t_i_f_f_writer_file.html#aee5529767a058e6b62d145b3625b3d0d":[4,0,1,1,0,1],
 "tiff__definitions__internal_8h_source.html":[6,0,0,0],
-"tinytiff__defs_8h_source.html":[6,0,0,1],
-"tinytiff__tools_8hxx_source.html":[6,0,0,2],
-"tinytiffreader_8h_source.html":[6,0,0,3],
-"tinytiffreader_8hxx_source.html":[6,0,0,4],
-"tinytiffwriter_8h_source.html":[6,0,0,5],
+"tinytiff__ctools__internal_8h_source.html":[6,0,0,1],
+"tinytiff__defs_8h_source.html":[6,0,0,2],
+"tinytiff__tools_8hxx_source.html":[6,0,0,3],
+"tinytiffreader_8h_source.html":[6,0,0,4],
+"tinytiffreader_8hxx_source.html":[6,0,0,5],
+"tinytiffwriter_8h_source.html":[6,0,0,6],
 "topics.html":[4]
 };
