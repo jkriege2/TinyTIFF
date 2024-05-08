@@ -16,6 +16,10 @@
 
 
 */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #ifndef TIFF_DEFINITIONS_INTERNAL_H
 #define TIFF_DEFINITIONS_INTERNAL_H
 
@@ -93,17 +97,5 @@
 #define TIFF_RESOLUTION_UNIT_CENTIMETER 3
 
 
-
-#ifdef HAVE_STRCPY_S
-#define TINYTIFF_SET_LAST_ERROR(tiff, message) strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, message);
-#else
-#define TINYTIFF_SET_LAST_ERROR(tiff, message) strcpy(tiff->lastError, message);
-#endif
-
-#ifdef HAVE_SPRINTF_S
-#define TINYTIFF_SPRINTF_LAST_ERROR(tiff, message, ...) sprintf_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, message, __VA_ARGS__);
-#else
-#define TINYTIFF_SPRINTF_LAST_ERROR(tiff, message, ...) sprintf(tiff->lastError, message, __VA_ARGS__);
-#endif
 
 #endif // TIFF_DEFINITIONS_INTERNAL_H

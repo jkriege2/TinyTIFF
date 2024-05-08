@@ -26,10 +26,7 @@
 
 #include "tinytiff_export.h"
 #include "tinytiff_defs.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <inttypes.h>
+#include <stdint.h>
 
 /*! \defgroup tinytiffwriter Tiny TIFF writer library
     \ingroup tinytiff_maingroup

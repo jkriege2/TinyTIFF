@@ -39,6 +39,7 @@ check_symbol_exists(fread_s "stdio.h" HAVE_FREAD_S)
 check_symbol_exists(sprintf_s "stdio.h" HAVE_SPRINTF_S)
 check_symbol_exists(strcat_s "string.h" HAVE_STRCAT_S)
 check_symbol_exists(memcpy_s "string.h" HAVE_MEMCPY_S)
+check_symbol_exists(memset_s "string.h" HAVE_MEMSET_S)
 check_symbol_exists(strnlen_s "string.h" HAVE_STRNLEN_S)
 
 
@@ -88,6 +89,9 @@ endif()
 if (HAVE_MEMCPY_S)
     target_compile_definitions(${lib_name} PRIVATE HAVE_MEMCPY_S)
 endif()
+if (HAVE_MEMSET_S)
+    target_compile_definitions(${lib_name} PRIVATE HAVE_MEMSET_S)
+endif()
 if (HAVE_STRNLEN_S)
     target_compile_definitions(${lib_name} PRIVATE HAVE_STRNLEN_S)
 endif()
@@ -108,6 +112,7 @@ set_property(SOURCE tinytiffreader.c tinytiffreader.h PROPERTY LANGUAGE "C")
 set_property(SOURCE tinytiffwriter.c tinytiffwriter.h PROPERTY LANGUAGE "C")
 set_property(SOURCE tiff_definitions_internal.h tinytiff_defs.h PROPERTY LANGUAGE "C")
 target_sources(${lib_name} PRIVATE
+    tinytiff_ctools_internal.c
     tinytiffreader.c
     tinytiffwriter.c
 )
@@ -116,6 +121,7 @@ target_sources(${lib_name} PRIVATE
 target_sources(${lib_name} PRIVATE FILE_SET privateHEADERS TYPE HEADERS
     FILES
     tiff_definitions_internal.h
+    tinytiff_ctools_internal.h
 )
 
 target_sources(${lib_name} PUBLIC FILE_SET HEADERS TYPE HEADERS

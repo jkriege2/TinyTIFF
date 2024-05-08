@@ -18,12 +18,16 @@
 */
 #include "tinytiffreader.h"
 #include "tiff_definitions_internal.h"
+#include "tinytiff_ctools_internal.h"
 #include "tinytiff_version.h"
 //#define DEBUG_IFDTIMING
 #ifdef DEBUG_IFDTIMING
 #include "highrestimer.h"
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -189,14 +193,6 @@ unsigned long TinyTIFFReader_doRangesOverlap(unsigned long xstart, unsigned long
     return TINYTIFF_FALSE;
 }
 
-int TinyTIFFReader_memcpy_s( void * dest, unsigned long destsz, const void * src, unsigned long count ) {
-#ifdef HAVE_MEMCPY_S
-    return memcpy_s(dest, destsz, src, count);
-#else
-    memcpy(dest,  src, count);
-    return 0;
-#endif
-}
 
 void TinyTIFFReader_fopen(TinyTIFFReaderFile* tiff, const char* filename) {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
@@ -618,7 +614,7 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                         tiff->currentFrame.stripcount=ifd.count;
                         tiff->currentFrame.stripoffsets=(uint32_t*)calloc(ifd.count, sizeof(uint32_t));
                         if (tiff->currentFrame.stripoffsets) {
-                            TinyTIFFReader_memcpy_s(tiff->currentFrame.stripoffsets, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
+                            TinyTIFF_memcpy_s(tiff->currentFrame.stripoffsets, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
                         } else {
                             tiff->wasError=TINYTIFF_TRUE;
                             TINYTIFF_SET_LAST_ERROR(tiff, "unable to allocate memory\0");
@@ -652,7 +648,7 @@ static void TinyTIFFReader_readNextFrame(TinyTIFFReaderFile* tiff) {
                     if (ifd.count>0 && ifd.pvalue) {
                         tiff->currentFrame.stripcount=ifd.count;
                         tiff->currentFrame.stripbytecounts=(uint32_t*)calloc(ifd.count, sizeof(uint32_t));
-                        TinyTIFFReader_memcpy_s(tiff->currentFrame.stripbytecounts, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
+                        TinyTIFF_memcpy_s(tiff->currentFrame.stripbytecounts, ifd.count*sizeof(uint32_t), ifd.pvalue, ifd.count*sizeof(uint32_t));
                     } else {
                         tiff->wasError=TINYTIFF_TRUE;
                         TINYTIFF_SET_LAST_ERROR(tiff, "STRIPBYTECOUNTS has an invalid value (==0) or error reading data!\0");
@@ -851,7 +847,7 @@ int TinyTIFFReader_getSampleData_s___internl(TinyTIFFReaderFile* tiff, void* buf
                     }
                     unsigned long stripi=0;
                     for (stripi=sample*tiff->currentFrame.bitspersample/8; stripi<stripsize_bytes; stripi+=tiff->currentFrame.bitspersample/8*tiff->currentFrame.samplesperpixel) {
-                        if (doSizeChecks) TinyTIFFReader_memcpy_s(&(((uint8_t*)buffer)[outputimageidx_bytes]), buffer_size-outputimageidx_bytes, &(stripdata[stripi]), tiff->currentFrame.bitspersample/8);
+                        if (doSizeChecks) TinyTIFF_memcpy_s(&(((uint8_t*)buffer)[outputimageidx_bytes]), buffer_size-outputimageidx_bytes, &(stripdata[stripi]), tiff->currentFrame.bitspersample/8);
                         else memcpy(&(((uint8_t*)buffer)[outputimageidx_bytes]), &(stripdata[stripi]), tiff->currentFrame.bitspersample/8);
 #ifdef TINYTIFF_ADDITIONAL_DEBUG_MESSAGES
                         if (stripi<sample*tiff->currentFrame.bitspersample/8+10*tiff->currentFrame.bitspersample/8*tiff->currentFrame.samplesperpixel) printf("      - memcpy(buffer[%8lu], stripdata[%8lu], %lu)\n", (unsigned long)outputimageidx_bytes, (unsigned long)stripi, (unsigned long)(tiff->currentFrame.bitspersample/8));

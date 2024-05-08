@@ -22,7 +22,11 @@
 
 #include <math.h>
 #include <float.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "tiff_definitions_internal.h"
+#include "tinytiff_ctools_internal.h"
 #include "tinytiff_version.h"
 
 #ifndef __WINDOWS__
@@ -427,7 +431,7 @@ static void TinyTIFFWriter_startIFD(TinyTIFFWriterFile* tiff, int hsize) {
         tiff->lastHeader=(uint8_t*)calloc(hsize+2, 1);
         tiff->lastHeaderSize=hsize;
     } else {
-        memset(tiff->lastHeader, 0, hsize+2);
+        TinyTIFF_memset_s(tiff->lastHeader, tiff->lastHeaderSize+2, 0, hsize+2);
     }
     tiff->pos=2;
 }
@@ -700,7 +704,7 @@ TinyTIFFWriterFile* TinyTIFFWriter_open(const char* filename, uint16_t bitsPerSa
     if (!tiff) return NULL;
     //tiff->file=fopen(filename, "wb");
     TinyTIFFWriter_fopen(tiff, filename);
-    memset(tiff->lastError, 0, TIFF_LAST_ERROR_SIZE);
+    TinyTIFF_memset_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, 0, TIFF_LAST_ERROR_SIZE);
     tiff->wasError=TINYTIFF_FALSE;
     tiff->width=width;
     tiff->height=height;
@@ -810,37 +814,21 @@ void TinyTIFFWriter_close_withdescription(TinyTIFFWriterFile* tiff, const char* 
         if (imageDescription) {
     #ifdef TINYTIFF_WRITE_COMMENTS
             if (tiff->descriptionOffset>0) {
-              const size_t inlen=strlen(imageDescription);
+              const size_t inlen=TinyTIFF_strlen_s(imageDescription, TINYTIFFWRITER_DESCRIPTION_SIZE);
               char description[TINYTIFFWRITER_DESCRIPTION_SIZE+1];
-              memset(description, 0, TINYTIFFWRITER_DESCRIPTION_SIZE+1);
+              TinyTIFF_memset_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, 0, TINYTIFFWRITER_DESCRIPTION_SIZE+1);
 
               if (inlen>0) {
                   if (inlen<=TINYTIFFWRITER_DESCRIPTION_SIZE) {
-    #ifdef HAVE_STRCPY_S
-                    strcpy_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, imageDescription);
-    #else
-                    strcpy(description, imageDescription);
-    #endif
+                    TINYTIFF_STRCPY_S(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, imageDescription);
                   } else {
-    #ifdef HAVE_MEMCPY_S
-                      memcpy_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, imageDescription, TINYTIFFWRITER_DESCRIPTION_SIZE);
-    #else
-                      memcpy(description, imageDescription, TINYTIFFWRITER_DESCRIPTION_SIZE);
-    #endif
+                      TinyTIFF_memcpy_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, imageDescription, TINYTIFFWRITER_DESCRIPTION_SIZE);
                   }
               } else {
-    #ifdef HAVE_SPRINTF_S
-                  sprintf_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, "TinyTIFFWriter_version=1.1\nimages=%ld", (unsigned long)(tiff->frames));
-    #else
-                  sprintf(description, "TinyTIFFWriter_version=1.1\nimages=%ld", (unsigned long)(tiff->frames));
-    #endif
+                  TINYTIFF_SPRINTF_S(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, "TinyTIFFWriter_version=1.1\nimages=%ld", (unsigned long)(tiff->frames));
               }
               description[TINYTIFFWRITER_DESCRIPTION_SIZE]='\0';
-#ifdef HAVE_STRNLEN_S
-              const size_t dlen=strnlen_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1);
-#else
-              const size_t dlen=strlen(description);
-#endif
+              const size_t dlen=TinyTIFF_strlen_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1);
 
               //printf("WRITING COMMENT\n***");
               //printf(description);
@@ -862,64 +850,25 @@ void TinyTIFFWriter_close_withdescription(TinyTIFFWriterFile* tiff, const char* 
 void TinyTIFFWriter_close_withmetadatadescription(TinyTIFFWriterFile* tiff, double pixel_width, double pixel_height, double frametime, double deltaz) {
     if (tiff) {
       char description[TINYTIFFWRITER_DESCRIPTION_SIZE+1];
-      memset(description, 0, TINYTIFFWRITER_DESCRIPTION_SIZE+1);
-#ifdef HAVE_SPRINTF_S
+      TinyTIFF_memset_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, 0, TINYTIFFWRITER_DESCRIPTION_SIZE+1);
       const int spwlen=256;
-#endif
       char spw[256];
-#ifdef HAVE_SPRINTF_S
-      sprintf_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, "TinyTIFFWriter_version=1.1\nimages=%lu", (unsigned long int)tiff->frames);
-#else
-      sprintf(description, "TinyTIFFWriter_version=1.1\nimages=%lu", (unsigned long int)tiff->frames);
-#endif
+      TINYTIFF_SPRINTF_S(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, "TinyTIFFWriter_version=1.1\nimages=%lu", (unsigned long int)tiff->frames);
       if (fabs(pixel_width)>10.0*DBL_MIN) {
-#ifdef HAVE_SPRINTF_S
-          sprintf_s(spw, spwlen, "\npixel_width=%lf ", pixel_width);
-#else
-          sprintf(spw, "\npixel_width=%lf ", pixel_width);
-#endif
-#ifdef HAVE_STRCAT_S
-          strcat_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, spw);
-#else
-          strcat(description,spw);
-#endif
+          TINYTIFF_SPRINTF_S(spw, spwlen, "\npixel_width=%lf ", pixel_width);
+          TINYTIFF_STRCAT_S(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, spw);
       }
       if (fabs(pixel_height)>10.0*DBL_MIN) {
-#ifdef HAVE_SPRINTF_S
-          sprintf_s(spw, spwlen, "\npixel_height=%lf ", pixel_height);
-#else
-          sprintf(spw, "\npixel_height=%lf ", pixel_height);
-#endif
-#ifdef HAVE_STRCAT_S
-          strcat_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, spw);
-#else
-          strcat(description,spw);
-#endif
+          TINYTIFF_SPRINTF_S(spw, spwlen, "\npixel_height=%lf ", pixel_height);
+          TINYTIFF_STRCAT_S(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, spw);
       }
       if (fabs(deltaz)>10.0*DBL_MIN) {
-#ifdef HAVE_SPRINTF_S
-          sprintf_s(spw, spwlen, "\ndeltaz=%lf ", deltaz);
-#else
-          sprintf(spw, "\ndeltaz=%lf ", deltaz);
-#endif
-#ifdef HAVE_STRCAT_S
-          strcat_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, spw);
-#else
-          strcat(description,spw);
-#endif
+          TINYTIFF_SPRINTF_S(spw, spwlen, "\ndeltaz=%lf ", deltaz);
+          TINYTIFF_STRCAT_S(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, spw);
       }
       if (fabs(frametime)>10.0*DBL_MIN) {
-#ifdef HAVE_SPRINTF_S
-          sprintf_s(spw, spwlen, "\nframetime=%lg ", frametime);
-#else
-          sprintf(spw, "\nframetime=%lg ", frametime);
-#endif
-#ifdef HAVE_STRCAT_S
-          strcat_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, spw);
-#else
-          strcat(description,spw);
-#endif
-
+          TINYTIFF_SPRINTF_S(spw, spwlen, "\nframetime=%lg ", frametime);
+          TINYTIFF_STRCAT_S(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, spw);
       }
       description[TINYTIFFWRITER_DESCRIPTION_SIZE]='\0';
       TinyTIFFWriter_close_withdescription(tiff, description);
@@ -927,33 +876,19 @@ void TinyTIFFWriter_close_withmetadatadescription(TinyTIFFWriterFile* tiff, doub
 }
 
 
-#ifdef HAVE_SPRINTF_S
 #define TINTIFFWRITER_WRITEImageDescriptionTemplate(tiff) \
     if (tiff->frames<=0) {\
         int datapos=0;\
         int sizepos=0;\
         char description[TINYTIFFWRITER_DESCRIPTION_SIZE+1];\
-        memset(description, 0, TINYTIFFWRITER_DESCRIPTION_SIZE+1);\
-        sprintf_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, "TinyTIFFWriter_version=1.1\n");\
+        TinyTIFF_memset_s(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, 0, TINYTIFFWRITER_DESCRIPTION_SIZE+1);\
+        TINYTIFF_STRCPY_S(description, TINYTIFFWRITER_DESCRIPTION_SIZE+1, "TinyTIFFWriter_version=1.1\n");\
         description[TINYTIFFWRITER_DESCRIPTION_SIZE]='\0';\
         TinyTIFFWriter_writeIFDEntryASCIIARRAY(tiff, TIFF_FIELD_IMAGEDESCRIPTION, description, TINYTIFFWRITER_DESCRIPTION_SIZE, &datapos, &sizepos);\
         tiff->descriptionOffset=tiff->lastStartPos+datapos;\
         tiff->descriptionSizeOffset=tiff->lastStartPos+sizepos;\
      }
-#else
-#define TINTIFFWRITER_WRITEImageDescriptionTemplate(tiff) \
-    if (tiff->frames<=0) {\
-        int datapos=0;\
-        int sizepos=0;\
-        char description[TINYTIFFWRITER_DESCRIPTION_SIZE+1];\
-        memset(description, 0, TINYTIFFWRITER_DESCRIPTION_SIZE+1);\
-        sprintf(description, "TinyTIFFWriter_version=1.1\n");\
-        description[TINYTIFFWRITER_DESCRIPTION_SIZE]='\0';\
-        TinyTIFFWriter_writeIFDEntryASCIIARRAY(tiff, TIFF_FIELD_IMAGEDESCRIPTION, description, TINYTIFFWRITER_DESCRIPTION_SIZE, &datapos, &sizepos);\
-        tiff->descriptionOffset=tiff->lastStartPos+datapos;\
-        tiff->descriptionSizeOffset=tiff->lastStartPos+sizepos;\
-     }
-#endif
+
 
 int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *data, enum TinyTIFFSampleLayout inputOrganisation, enum TinyTIFFSampleLayout outputOrganization)
 {
@@ -1050,7 +985,7 @@ int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *d
                 for (sample=0; sample<tiff->samples; sample++) {
                     const size_t bytecount=tiff->bitspersample/8;
                     const size_t tmpidx=(sample*tiff->width*tiff->height+pix)*bytecount;
-                    memcpy(&(tmp[tmpidx]), &(((uint8_t*)data)[sampidx]), bytecount);
+                    TinyTIFF_memcpy_s(&(tmp[tmpidx]), bytecount, &(((uint8_t*)data)[sampidx]), bytecount);
                     sampidx++;
                 }
             }
@@ -1067,7 +1002,7 @@ int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *d
                     const size_t bytecount=tiff->bitspersample/8;
                     const size_t tmpidx=(pix*tiff->samples+sample)*bytecount;
                     const size_t sampidx=(sample*tiff->width*tiff->height+pix)*bytecount;
-                    memcpy(&(tmp[tmpidx]), &(((uint8_t*)data)[sampidx]), bytecount);
+                    TinyTIFF_memcpy_s(&(tmp[tmpidx]), bytecount, &(((uint8_t*)data)[sampidx]), bytecount);
                 }
             }
             TinyTIFFWriter_fwrite(tmp, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);

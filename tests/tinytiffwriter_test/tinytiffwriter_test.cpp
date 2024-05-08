@@ -18,7 +18,7 @@ using namespace std;
 
 
 template <class T>
-bool libtiffTestRead(const char* filename, const T* writteneven, const T* writtenodd, uint32_t width, uint32_t height, uint16_t samples=1, uint32_t frames_expected=0, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky)  {
+bool libtiffTestRead(const char* filename, const T* writteneven, const T* writtenodd, uint32_t width, uint32_t height, uint16_t samples=1, uint32_t frames_expected=0, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky, std::string* description_out=nullptr)  {
     bool ok=true;
 #ifdef TINYTIFF_TEST_LIBTIFF
     TIFF* tif = TIFFOpen(filename, "r");
@@ -34,7 +34,12 @@ bool libtiffTestRead(const char* filename, const T* writteneven, const T* writte
             TIFFGetField(tif,TIFFTAG_BITSPERSAMPLE,&bs);
             char* val=NULL;
             TIFFGetField(tif,TIFFTAG_IMAGEDESCRIPTION,&val);
-            if (val) std::cout<<"    ImageDescription("<<strlen(val)<<"):\n"<<val<<"\n";
+            if (val) {
+                std::cout<<"    ImageDescription("<<strlen(val)<<"):\n"<<val<<"\n";
+                if (description_out) *description_out=val;
+            } else {
+                if (description_out) description_out->clear();
+            }
             TIFFPrintDirectory(tif, stdout);
             if (nx==width && ny==height && ns==samples && bs==sizeof(T)*8) {
                 size_t errcnt=0;
@@ -98,9 +103,14 @@ bool libtiffTestRead(const char* filename, const T* writteneven, const T* writte
     return ok;
 }
 
+enum class DescriptionMode {
+    None,
+    Text,
+    Metadata
+};
 
 template <class T>
-void performWriteTest(const std::string& name, const char* filename, const T* imagedata, size_t WIDTH, size_t HEIGHT, size_t SAMPLES, TinyTIFFWriterSampleInterpretation interpret, std::vector<TestResult>& test_results, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky, TinyTIFFSampleLayout outputOrg=TinyTIFF_Chunky) {
+void performWriteTest(const std::string& name, const char* filename, const T* imagedata, size_t WIDTH, size_t HEIGHT, size_t SAMPLES, TinyTIFFWriterSampleInterpretation interpret, std::vector<TestResult>& test_results, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky, TinyTIFFSampleLayout outputOrg=TinyTIFF_Chunky, DescriptionMode descMode=DescriptionMode::None) {
     const size_t bits=sizeof(T)*8;
     std::string desc=std::to_string(WIDTH)+"x"+std::to_string(HEIGHT)+"pix/"+std::to_string(bits)+"bit/"+std::to_string(SAMPLES)+"ch/1frame";
     if (inputOrg==TinyTIFF_Chunky && outputOrg==TinyTIFF_Chunky) desc+="/CHUNKY_FROM_CHUNKY";
@@ -122,15 +132,28 @@ void performWriteTest(const std::string& name, const char* filename, const T* im
             test_results.back().success=false;
             TESTFAIL("error writing image data into '"<<filename<<"'! MESSAGE: "<<TinyTIFFWriter_getLastError(tiff)<<"", test_results.back())
         }
-        TinyTIFFWriter_close(tiff);
+        if (descMode==DescriptionMode::None) TinyTIFFWriter_close(tiff);
+        else if (descMode==DescriptionMode::Text) TinyTIFFWriter_close_withdescription(tiff, "Test Description for TIFF");
+        else if (descMode==DescriptionMode::Metadata) TinyTIFFWriter_close_withmetadatadescription(tiff, 1.234, 2.345, 10, 0.1);
         test_results.back().duration_ms=timer.get_time()/1e3;
         test_results.back().numImages=1;
+        std::string description_out;
         if ((get_filesize(filename)<=0)) {
             test_results.back().success=false;
             TESTFAIL("file '"<<filename<<"' has no contents!", test_results.back())
-        } else if (!libtiffTestRead<T>(filename, imagedata, nullptr, WIDTH, HEIGHT, SAMPLES, 1, inputOrg)) {
-            test_results.back().success=false;
-            TESTFAIL("reading '"<<filename<<"' with libTIFF failed!", test_results.back())
+        } else {
+            if (!libtiffTestRead<T>(filename, imagedata, nullptr, WIDTH, HEIGHT, SAMPLES, 1, inputOrg, &description_out)) {
+                test_results.back().success=false;
+                TESTFAIL("reading '"<<filename<<"' with libTIFF failed!", test_results.back())
+            } else {
+                if (descMode==DescriptionMode::Text && description_out.find("Test Description for TIFF")==std::string::npos) {
+                    test_results.back().success=false;
+                    TESTFAIL("reading '"<<filename<<"' with libTIFF failed to read correct description!", test_results.back())
+                } else  if (descMode==DescriptionMode::Metadata && description_out.find("pixel_width")==std::string::npos) {
+                    test_results.back().success=false;
+                    TESTFAIL("reading '"<<filename<<"' with libTIFF failed to read correct metadata description!", test_results.back())
+                }
+            }
         }
     } else {
         TESTFAIL("could not open '"<<filename<<"' for writing!", test_results.back())
@@ -286,6 +309,9 @@ int main(int argc, char *argv[]) {
     invertTestImage(greyalphai.data(), WIDTH, HEIGHT, 2);
 
 
+    performWriteTest("WRITING 8-Bit UINT GREY TIFF", "test8.tif", image8.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
+    performWriteTest("WRITING 8-Bit UINT GREY TIFF with description", "test8_msg.tif", image8.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results, TinyTIFF_Chunky, TinyTIFF_Chunky, DescriptionMode::Text);
+    performWriteTest("WRITING 8-Bit UINT GREY TIFF with metadata description", "test8_metadata.tif", image8.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results, TinyTIFF_Chunky, TinyTIFF_Chunky, DescriptionMode::Metadata);
     performWriteTest("WRITING 8-Bit UINT GREY TIFF", "test8.tif", image8.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
     if (quicktest==TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 8-Bit UINT GREY TIFF", "test8m.tif", image8.data(), image8i.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
 

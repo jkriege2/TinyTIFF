@@ -23,10 +23,7 @@
 
 #include "tinytiff_export.h"
 #include "tinytiff_defs.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <inttypes.h>
+#include <stdint.h>
 
 
 /*! \defgroup tinytiffreader Tiny TIFF reader library
