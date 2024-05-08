@@ -25,7 +25,8 @@ This software is licensed under the term of the [GNU Lesser General Public Licen
 [![Open PRs](https://img.shields.io/github/issues-pr/jkriege2/TinyTIFF)](https://github.com/jkriege2/TinyTIFF/pulls)
 [![Closed PRs](https://img.shields.io/github/issues-pr-closed/jkriege2/TinyTIFF)](https://github.com/jkriege2/TinyTIFF/pulls?q=is%3Apr+is%3Aclosed)
 
-[![MSVC-Build Status](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_msvc.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_msvc.yml)
+[![BUILD-MSVC-CI](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_windows.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_windows.yml)
+[![BUILD-LINUX-CI](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_linux.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_linux.yml)
 [![MSVC-CodeAnalysis](https://github.com/jkriege2/TinyTIFF/actions/workflows/msvc-codeanalysis.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/msvc-codeanalysis.yml)
 [![Docu-Build](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_docs.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_docs.yml)
 
