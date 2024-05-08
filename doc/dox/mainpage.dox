@@ -21,6 +21,7 @@ This is a lightweight C++ library that allows to read and write TIFF files. It o
     - no suppoer for palleted images
     - stripped TIFFs only, tiling is not supported
 .
+The library is built with CMake and supports both \c find_package(TinyTIFF) and CMake's FetchContent to include it into other projects. See https://jkriege2.github.io/TinyTIFF/page_useinstructions.html for details
 
 This software is licensed under the term of the GNU Lesser General Public License 3.0 
 (LGPL 3.0) or above. See \ref licensesec for details.

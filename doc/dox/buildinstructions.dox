@@ -32,7 +32,7 @@ For Visual Studio it could look like this:
 \code{.sh}
     $ mkdir build
     $ cd build
-    $ cmake .. -G "Visual Studio 15 2017 Win64" -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON 
+    $ cmake .. -G "Visual Studio 15 2017 Win64" DBUILD_SHARED_LIBS=ON 
 \endcode
 This call results in a Visual Studio solution \c build/TinyTIFF.sln that you can load and compile from the Visual Studio IDE. Alternatively you can also build the solution directly calling:
 \code{.sh}

@@ -30,6 +30,13 @@ This software is licensed under the term of the [GNU Lesser General Public Licen
 [![MSVC-CodeAnalysis](https://github.com/jkriege2/TinyTIFF/actions/workflows/msvc-codeanalysis.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/msvc-codeanalysis.yml)
 [![Docu-Build](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_docs.yml/badge.svg)](https://github.com/jkriege2/TinyTIFF/actions/workflows/build_docs.yml)
 
+# Documentation
+
+* library docukentation: https://travis-ci.org/jkriege2/TinyTIFF
+* API documentation: http://jkriege2.github.io/TinyTIFF/modules.html
+* build instructions: http://jkriege2.github.io/TinyTIFF/page_buildinstructions.html
+* usage instructions: http://jkriege2.github.io/TinyTIFF/page_useinstructions.html
+
 
 # TinyTIFFReader
 
@@ -192,7 +199,7 @@ Internally this library works like this: TinyTIFFWriter_open() will basically on
 ```
 The free space, indicated as SOME_FREE_SPACE is used to store contents of extended fields, like RATIONAL or ARRAY fields. Every image in the file will have this size and unused bytes are set to 0x00. TinyTIFFWriter_writeImage() then works like this: The image description data is first assembled in memory, then the complete image description data and the complete image data is written to the file all together. This reduces the number of file access operations and writes the data in two reltively large chunks which allows the operating system to properly optimize file access. Finally this method will save the position of the  NEXT_IFD_OFFSET field in the image header. The  NEXT_IFD_OFFSET field is filled with the adress of the next potential image. Finally the method TinyTIFFWriter_close() will write  0x00000000 into the NEXT_IFD_OFFSET of the last image (as saved above) which ends the list of images in the file. This ansatz for writing TIFF files is only about a factor of 2 slower than directly writing binary data into a file. In addition the time needed to write an image stays equal also when writing many images, which is NOT the case for libtiff. 
 
-## PErformance Measurement
+## Performance Measurement
 
 The library was developed due to a problem with libTIFF, when a lot (>1000) frames are written into a TIFF-file. LibTIFF does not need constant time per frame (i.e. the time to write a multi-frame TIFF grows linearly with the number of frames), but the time to write a frame increases with the number of frames.
 The following performance measurement shows this. It was acquired using `tinytiffwriter_speedtest` from this repository and shows the average time required to write one frame (64x64x pixels, 16-bit integer) out of a number (10, 100, 1000, ...) of frames. It compares the performance of libTIFF, TinyTIFFWriter and simply writing the dtaa using `fwrite()` ("RAW"). It was acquired on an Ryzen 5 3600+, Win10, 32-bit Release-build, writing onto a Harddisk (not a SSD)
@@ -212,10 +219,3 @@ The following image shows another performance measurement, this time for differe
 ![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_imagesizes.png)  |  ![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_imagesizes_ssd.png)
 
 This suggests that for harddisks the performance of TinyTIFFWriter and `fwrite()` are comparable for all image sizes. For larger images, also the performance of libTIFF is in the same range, whereas for small images, libTIFF falls off somewhat.   For SSDs, the libraries are closer together, but still TinyTIFFWriter is faster than libTIFF by a factor of 1.5-5x (again note the logarithmic scale on the y-axis!).
-
-# Documentation
-
-* library docukentation: https://travis-ci.org/jkriege2/TinyTIFF
-* API documentation: http://jkriege2.github.io/TinyTIFF/modules.html
-* build instructions: http://jkriege2.github.io/TinyTIFF/page_buildinstructions.html
-* usage instructions: http://jkriege2.github.io/TinyTIFF/page_useinstructions.html

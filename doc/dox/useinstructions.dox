@@ -3,39 +3,66 @@
 \page page_useinstructions Usage/Linking Instructions
 
 This page explains how to link against TinyTIFF.
-
-
-After building and installing TinyTIFF you have all files that you need inside the instal directory:
-  - \c <INSTALLDIR>/include contains all required header files
-  - \c <INSTALLDIR>/bin contains the shared libraries
-  - \c <INSTALLDIR>/lib contains the link libraries
-  - \c <INSTALLDIR>/lib/cmake contains files necessary for CMake's \c find_package() to work
 .
 
 \tableofcontents
 
 
-\section page_buildinstructions_CMAKE Use TinyTIFF with CMake
-When using CMake to build you application, you can simply use \c target_link_libraries() to link against TinyTIFF and use CMake's \c find_package() to enable that (see https://github.com/jkriege2/TinyTIFF/tree/master/tests/extcmake_tinytiff_test for an example):
+\section page_useinstructions_CMAKE Use TinyTIFF with CMake
+When using CMake to build your application, you can simply use \c target_link_libraries() to link against TinyTIFF and use CMake's \c find_package() to enable that (see https://github.com/jkriege2/TinyTIFF/tree/master/tests/extcmake_tinytiff_test for an example):
 
 \code{.cmake}
-project(extcmake_tinytiff_test CXX)
-cmake_minimum_required(VERSION 3.0)
+  cmake_minimum_required(VERSION 3.10)
 
-# search TinyTIFF Package
-find_package(TinyTIFF REQUIRED)
+  project(extcmake_tinytiff_test CXX)
 
-# add an executable
-add_executable(extcmake_tinytiff_test extcmake_tinytiff_test.cpp)
+  # find TinyTIFF library
+  find_package(TinyTIFF)
 
-# link against TinyTIFF
-target_link_libraries(extcmake_tinytiff_test TinyTIFF)
+  # add an executable
+  add_executable(${PROJECT_NAME}
+    extcmake_tinytiff_test.cpp
+  )
 
+  # link against TinyTIFF
+  target_link_libraries(${PROJECT_NAME} TinyTIFF::TinyTIFF)
 \endcode
 
-Note that you may have to provide the CMake variables \c TinyTIFF_DIR (or \c TinyTIFFShared_DIR\c ) to \c <INSTALLDIR>/lib/cmake/TinyTIFF so CMake finds the \c TinyTIFFConfig.cmake file there.
+\note Note that you may have to provide CMake with search pathes to find the library, e.g. set \c TinyTIFF_DIR to \c <INSTALLDIR>/lib/cmake/TinyTIFF so CMake finds the \c TinyTIFFConfig.cmake file there.
 
-\section page_buildinstructions_NOCMAKE Use TinyTIFF without CMake
+
+
+\section page_useinstructions_CMAKE_FETCHCONTENT Use TinyTIFF with CMake & FetchCotent-API
+When using CMake to build your application, you can also use CMake's FetchContent-API to download and include TinyTIFF (see https://github.com/jkriege2/TinyTIFF/tree/master/tests/extcmake_fetchcontent_tinytiff_test for an example and https://cmake.org/cmake/help/latest/module/FetchContent.html for documentation on FetchContent):
+
+\code{.cmake}
+  # set minimum required CMake-Version
+  cmake_minimum_required(VERSION 3.23)
+
+  # set Project name
+  project(extcmake_fetchcontent_tinytiff_test LANGUAGES CXX)
+
+  # include TinyTIFF via FetchContent-API:
+  # ... first load the FetchContent-API:
+  include(FetchContent) # once in the project to include the module
+  # ... now declare TinyTIFF
+  FetchContent_Declare(TinyTIFF
+                       GIT_REPOSITORY https://github.com/jkriege2/TinyTIFF.git
+                       # GIT_TAG        3.1.0.0
+                       )
+                       
+  # ... finally make TinyTIFF available
+  FetchContent_MakeAvailable(TinyTIFF)
+
+  add_executable(${PROJECT_NAME}
+    extcmake_fetchcontent_tinytiff_test.cpp
+  )
+
+  target_link_libraries(${PROJECT_NAME} TinyTIFF::TinyTIFF)
+\endcode
+
+
+\section page_useinstructions_NOCMAKE Use TinyTIFF without CMake
 You can also link against TinyTIFF without using CMake. For this you simply have to supply the library as a parameter to your compile/link run, e.g. for GCC:
 
 \code{.sh}
