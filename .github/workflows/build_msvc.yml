@@ -42,8 +42,8 @@ jobs:
         mkdir build
         cd build
         pwd
-        echo ${{GITHUB_WORKSPACE}}
-        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} "-DCMAKE_PREFIX_PATH=${{GITHUB_WORKSPACE}}/install/" -B . -S ..
+        echo ${{github.workspace}}
+        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} "-DCMAKE_PREFIX_PATH=${{github.workspace}}/install/" -B . -S ..
         cmake --build . --config Release --verbose  
     - name: Test CMake-build against TinyTIFF, using FetchContent-API
       if: success() || failure() # always run even if the previous step fails
