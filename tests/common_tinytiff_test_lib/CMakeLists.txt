@@ -33,6 +33,7 @@ if (NOT TARGET TIFF::TIFF)
     )
 endif()
 
+
 add_library(common_tinytiff_test_lib STATIC )
 target_compile_features(common_tinytiff_test_lib PUBLIC cxx_std_11)
 target_include_directories(common_tinytiff_test_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -58,6 +59,11 @@ if (TIFF_FOUND)
         target_link_libraries(common_tinytiff_test_lib PUBLIC TIFF::TIFF)
     target_include_directories(common_tinytiff_test_lib PUBLIC ${TIFF_INCLUDE_DIRS})
 
+endif()
+
+find_library(MATH_LIBRARY m)
+if(MATH_LIBRARY)
+    target_link_libraries(common_tinytiff_test_lib PUBLIC ${MATH_LIBRARY})
 endif()
 
 
