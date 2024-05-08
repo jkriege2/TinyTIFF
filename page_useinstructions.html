@@ -95,32 +95,57 @@ $(document).ready(function(){initNavTree('page_useinstructions.html',''); initRe
 </div><!--header-->
 <div class="contents">
 <div class="toc"><h3>Table of Contents</h3>
-<ul><li class="level1"><a href="#page_buildinstructions_NOCMAKE">Use TinyTIFF without CMake</a></li>
+<ul><li class="level1"><a href="#page_useinstructions_CMAKE">Use TinyTIFF with CMake</a></li>
+<li class="level1"><a href="#page_useinstructions_CMAKE_FETCHCONTENT">Use TinyTIFF with CMake &amp; FetchCotent-API</a></li>
+<li class="level1"><a href="#page_useinstructions_NOCMAKE">Use TinyTIFF without CMake</a></li>
 </ul>
 </div>
 <div class="textblock"><p>This page explains how to link against TinyTIFF.</p>
-<p>After building and installing TinyTIFF you have all files that you need inside the instal directory:</p><ul>
-<li><code></code> &lt;INSTALLDIR&gt;/include contains all required header files</li>
-<li><code></code> &lt;INSTALLDIR&gt;/bin contains the shared libraries</li>
-<li><code></code> &lt;INSTALLDIR&gt;/lib contains the link libraries</li>
-<li><code></code> &lt;INSTALLDIR&gt;/lib/cmake contains files necessary for CMake's <code>find_package()</code> to work</li>
-</ul>
-<h1><a class="anchor" id="page_buildinstructions_CMAKE"></a>
-Build using CMake</h1>
-<p>When using CMake to build you application, you can simply use <code>target_link_libraries()</code> to link against TinyTIFF and use CMake's <code>find_package()</code> to enable that (see <a href="https://github.com/jkriege2/TinyTIFF/tree/master/tests/extcmake_tinytiff_test">https://github.com/jkriege2/TinyTIFF/tree/master/tests/extcmake_tinytiff_test</a> for an example):</p>
-<div class="fragment"><div class="line">project(extcmake_tinytiff_test CXX)</div>
-<div class="line">cmake_minimum_required(VERSION 3.0)</div>
+<h1><a class="anchor" id="page_useinstructions_CMAKE"></a>
+Use TinyTIFF with CMake</h1>
+<p>When using CMake to build your application, you can simply use <code>target_link_libraries()</code> to link against TinyTIFF and use CMake's <code>find_package()</code> to enable that (see <a href="https://github.com/jkriege2/TinyTIFF/tree/master/tests/extcmake_tinytiff_test">https://github.com/jkriege2/TinyTIFF/tree/master/tests/extcmake_tinytiff_test</a> for an example):</p>
+<div class="fragment"><div class="line">cmake_minimum_required(VERSION 3.10)</div>
 <div class="line"> </div>
-<div class="line"># search TinyTIFF Package</div>
-<div class="line">find_package(TinyTIFF REQUIRED)</div>
+<div class="line">project(extcmake_tinytiff_test CXX)</div>
+<div class="line"> </div>
+<div class="line"># find TinyTIFF library</div>
+<div class="line">find_package(TinyTIFF)</div>
 <div class="line"> </div>
 <div class="line"># add an executable</div>
-<div class="line">add_executable(extcmake_tinytiff_test extcmake_tinytiff_test.cpp)</div>
+<div class="line">add_executable(${PROJECT_NAME}</div>
+<div class="line">  extcmake_tinytiff_test.cpp</div>
+<div class="line">)</div>
 <div class="line"> </div>
 <div class="line"># link against TinyTIFF</div>
-<div class="line">target_link_libraries(extcmake_tinytiff_test TinyTIFF)</div>
-</div><!-- fragment --><p>Note that you may have to provide the CMake variables <code>TinyTIFF_DIR</code> (or <code>TinyTIFFShared_DIR<code></code>)</code> to <code></code> &lt;INSTALLDIR&gt;/lib/cmake/TinyTIFF so CMake finds the <code>TinyTIFFConfig.cmake</code> file there.</p>
-<h1><a class="anchor" id="page_buildinstructions_NOCMAKE"></a>
+<div class="line">target_link_libraries(${PROJECT_NAME} TinyTIFF::TinyTIFF)</div>
+</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>Note that you may have to provide CMake with search pathes to find the library, e.g. set <code>TinyTIFF_DIR</code> to <code></code> &lt;INSTALLDIR&gt;/lib/cmake/TinyTIFF so CMake finds the <code>TinyTIFFConfig.cmake</code> file there.</dd></dl>
+<h1><a class="anchor" id="page_useinstructions_CMAKE_FETCHCONTENT"></a>
+Use TinyTIFF with CMake &amp; FetchCotent-API</h1>
+<p>When using CMake to build your application, you can also use CMake's FetchContent-API to download and include TinyTIFF (see <a href="https://github.com/jkriege2/TinyTIFF/tree/master/tests/extcmake_fetchcontent_tinytiff_test">https://github.com/jkriege2/TinyTIFF/tree/master/tests/extcmake_fetchcontent_tinytiff_test</a> for an example and <a href="https://cmake.org/cmake/help/latest/module/FetchContent.html">https://cmake.org/cmake/help/latest/module/FetchContent.html</a> for documentation on FetchContent):</p>
+<div class="fragment"><div class="line"># set minimum required CMake-Version</div>
+<div class="line">cmake_minimum_required(VERSION 3.23)</div>
+<div class="line"> </div>
+<div class="line"># set Project name</div>
+<div class="line">project(extcmake_fetchcontent_tinytiff_test LANGUAGES CXX)</div>
+<div class="line"> </div>
+<div class="line"># include TinyTIFF via FetchContent-API:</div>
+<div class="line"># ... first load the FetchContent-API:</div>
+<div class="line">include(FetchContent) # once in the project to include the module</div>
+<div class="line"># ... now declare TinyTIFF</div>
+<div class="line">FetchContent_Declare(TinyTIFF</div>
+<div class="line">                     GIT_REPOSITORY https://github.com/jkriege2/TinyTIFF.git</div>
+<div class="line">                     # GIT_TAG        3.1.0.0</div>
+<div class="line">                     )</div>
+<div class="line">                     </div>
+<div class="line"># ... finally make TinyTIFF available</div>
+<div class="line">FetchContent_MakeAvailable(TinyTIFF)</div>
+<div class="line"> </div>
+<div class="line">add_executable(${PROJECT_NAME}</div>
+<div class="line">  extcmake_fetchcontent_tinytiff_test.cpp</div>
+<div class="line">)</div>
+<div class="line"> </div>
+<div class="line">target_link_libraries(${PROJECT_NAME} TinyTIFF::TinyTIFF)</div>
+</div><!-- fragment --><h1><a class="anchor" id="page_useinstructions_NOCMAKE"></a>
 Use TinyTIFF without CMake</h1>
 <p>You can also link against TinyTIFF without using CMake. For this you simply have to supply the library as a parameter to your compile/link run, e.g. for GCC:</p>
 <div class="fragment"><div class="line">$ g++ main.cpp -o out -I&lt;INSTALLDIR&gt;/include -L&lt;INSTALLDIR&gt;/lib -lTinyTIFF_Release</div>
@@ -132,7 +157,7 @@ Use TinyTIFF without CMake</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed May 8 2024 11:01:37 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed May 8 2024 11:14:55 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

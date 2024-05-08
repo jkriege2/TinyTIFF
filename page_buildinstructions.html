@@ -123,7 +123,7 @@ Building with MinGW/GNU/... Makefiles</h3>
 Building with Visual Studio</h3>
 <p>For Visual Studio it could look like this: </p><div class="fragment"><div class="line">$ mkdir build</div>
 <div class="line">$ cd build</div>
-<div class="line">$ cmake .. -G &quot;Visual Studio 15 2017 Win64&quot; -DTinyTIFF_BUILD_SHARED_LIBS=ON -DTinyTIFF_BUILD_STATIC_LIBS=ON </div>
+<div class="line">$ cmake .. -G &quot;Visual Studio 15 2017 Win64&quot; DBUILD_SHARED_LIBS=ON </div>
 </div><!-- fragment --><p> This call results in a Visual Studio solution <code>build/TinyTIFF.sln</code> that you can load and compile from the Visual Studio IDE. Alternatively you can also build the solution directly calling: </p><div class="fragment"><div class="line">$ cmake --build . --config &quot;Debug&quot;</div>
 </div><!-- fragment --><p> Afterwards you can install the library by </p><div class="fragment"><div class="line">$ cmake --build . --config &quot;Debug&quot; --target install</div>
 </div><!-- fragment --><h2><a class="anchor" id="page_buildinstructions_CMAKE_CONFIG"></a>
@@ -141,7 +141,7 @@ Configuring a Build with CMake</h2>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed May 8 2024 11:01:37 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+    <li class="footer">Generated on Wed May 8 2024 11:14:55 for TinyTIFF by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
   </ul>
 </div>
 </body>

@@ -39,7 +39,9 @@ var NAVTREE =
       [ "TinyTIFF: LGPL >= 3.0", "licensepage.html#licensesec", null ]
     ] ],
     [ "Usage/Linking Instructions", "page_useinstructions.html", [
-      [ "Use TinyTIFF without CMake", "page_useinstructions.html#page_buildinstructions_NOCMAKE", null ]
+      [ "Use TinyTIFF with CMake", "page_useinstructions.html#page_useinstructions_CMAKE", null ],
+      [ "Use TinyTIFF with CMake & FetchCotent-API", "page_useinstructions.html#page_useinstructions_CMAKE_FETCHCONTENT", null ],
+      [ "Use TinyTIFF without CMake", "page_useinstructions.html#page_useinstructions_NOCMAKE", null ]
     ] ],
     [ "Topics", "topics.html", "topics" ],
     [ "Data Structures", "annotated.html", [
