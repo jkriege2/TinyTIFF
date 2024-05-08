@@ -51,6 +51,9 @@
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
 #  include <windows.h>
 #  warning COMPILING TinyTIFFWriter with WinAPI
+#  define TinyTIFFWriter_POSTYPE DWORD
+#else
+#  define TinyTIFFWriter_POSTYPE fpos_t
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 
 
@@ -60,6 +63,7 @@
 int TinyTIFFWriter_getMaxDescriptionTextSize() {
     return TINYTIFFWRITER_DESCRIPTION_SIZE;
 }
+
 
 /** \defgroup tinytiffwriter_internal TinyTIFFWriter: Internal functions
  *  \ingroup tinytiffwriter */
@@ -212,7 +216,7 @@ static size_t TinyTIFFWriter_fwrite(const void * ptr, size_t size, size_t count,
     \ingroup tinytiffwriter_internal
     \internal
  */
-static long int TinyTIFFWriter_ftell ( TinyTIFFWriterFile * tiff ) {
+static long long TinyTIFFWriter_ftell ( TinyTIFFWriterFile * tiff ) {
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
 DWORD dwPtr = SetFilePointer( tiff->hFile,
                                 0,
@@ -222,6 +226,18 @@ DWORD dwPtr = SetFilePointer( tiff->hFile,
 #else
     return ftell(tiff->file);
 #endif
+}
+
+int TinyTIFFWriter_fgetpos(TinyTIFFWriterFile* tiff, TinyTIFFWriter_POSTYPE* pos) {
+#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
+    *pos= SetFilePointer( tiff->hFile,
+                          0,
+                          NULL,
+                          FILE_CURRENT );
+    return 0;
+#else
+    return fgetpos(tiff->file, pos);
+#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
 
@@ -243,25 +259,6 @@ static int TinyTIFFWriter_fseek_set(TinyTIFFWriterFile* tiff, size_t offset) {
 #endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
 }
 
-#ifdef TinyTIFFWriter_fseek_cur // Silence "unused" warning
-/*! \brief wrapper around fseek(..., FILE_CURRENT)
-    \ingroup tinytiffwriter_internal
-    \internal
- */
-static int TinyTIFFWriter_fseek_cur(TinyTIFFWriterFile* tiff, size_t offset) {
-#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
-   DWORD res = SetFilePointer (tiff->hFile,
-                                offset,
-                                NULL,
-                                FILE_CURRENT);
-
-
-   return res;
-#else
-    return fseek(tiff->file, (long)offset, SEEK_CUR);
-#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
-}
-#endif
 
 /*! \brief calculates the number of channels, covered by the photometric interpretation. If samples is larger than this, the difference are extraSamples!
     \ingroup tinytiffwriter_internal
@@ -901,6 +898,7 @@ int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *d
         return TINYTIFF_FALSE;
     }
     const long pos=TinyTIFFWriter_ftell(tiff);
+
     int hsize=TIFF_HEADER_SIZE;
 #ifdef TINYTIFF_WRITE_COMMENTS
     if (tiff->frames<=0) {
@@ -973,6 +971,17 @@ int TinyTIFFWriter_writeImageMultiSample(TinyTIFFWriterFile *tiff, const void *d
     }
     TinyTIFFWriter_writeIFDEntrySHORT(tiff, TIFF_FIELD_SAMPLEFORMAT, tiff->sampleformat);
     TinyTIFFWriter_endIFD(tiff, hsize);
+
+    TinyTIFFWriter_POSTYPE datapos=0; TinyTIFFWriter_fgetpos(tiff, &datapos);
+    const TinyTIFFWriter_POSTYPE data_size_expected=tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8);
+    const TinyTIFFWriter_POSTYPE expected_endpos=datapos+data_size_expected;
+    const TinyTIFFWriter_POSTYPE max_endpos=(((TinyTIFFWriter_POSTYPE)0xFFFFFFFF)-(TinyTIFFWriter_POSTYPE)1024);
+    if (expected_endpos>=max_endpos) {
+        tiff->wasError=TINYTIFF_TRUE;
+        TINYTIFF_SET_LAST_ERROR(tiff, "trying to write behind end of file in TinyTIFFWriter_writeImage() (i.e. too many of a too big frame)\0");
+        return TINYTIFF_FALSE;
+    }
+
     if (inputOrganisation==outputOrganization) {
         TinyTIFFWriter_fwrite(data, tiff->width*tiff->height*tiff->samples*(tiff->bitspersample/8), 1, tiff);
     } else if (inputOrganisation==TinyTIFF_Interleaved && outputOrganization==TinyTIFF_Separate) {

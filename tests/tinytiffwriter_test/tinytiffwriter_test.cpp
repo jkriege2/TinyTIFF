@@ -168,6 +168,94 @@ void performWriteTest(const std::string& name, const char* filename, const T* im
 }
 
 template <class T>
+void performWriteTest_ExpectedToFail(const std::string& name, const char* filename, const T* imagedata, size_t WIDTH, size_t HEIGHT, size_t SAMPLES, TinyTIFFWriterSampleInterpretation interpret, std::vector<TestResult>& test_results, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky, TinyTIFFSampleLayout outputOrg=TinyTIFF_Chunky) {
+    const size_t bits=sizeof(T)*8;
+    std::string desc=std::to_string(WIDTH)+"x"+std::to_string(HEIGHT)+"pix/"+std::to_string(bits)+"bit/"+std::to_string(SAMPLES)+"ch/1frame";
+    if (inputOrg==TinyTIFF_Chunky && outputOrg==TinyTIFF_Chunky) desc+="/CHUNKY_FROM_CHUNKY";
+    if (inputOrg==TinyTIFF_Chunky && outputOrg==TinyTIFF_Planar) desc+="/PLANAR_FROM_CHUNKY";
+    if (inputOrg==TinyTIFF_Planar && outputOrg==TinyTIFF_Chunky) desc+="/CHUNKY_FROM_PLANAR";
+    if (inputOrg==TinyTIFF_Planar && outputOrg==TinyTIFF_Planar) desc+="/PLANAR_FROM_PLANAR";
+    test_results.emplace_back();
+    test_results.back().name=name+" ["+desc+", "+std::string(filename)+"]";
+    test_results.back().success=true;
+    std::cout<<"\n\n*****************************************************************************\n";
+    std::cout<<"* "<<test_results.back().name<<"\n";
+    HighResTimer timer;
+    timer.start();
+    TinyTIFFWriterFile* tiff = TinyTIFFWriter_open(filename, bits, TinyTIFF_SampleFormatFromType<T>().format, SAMPLES, WIDTH,HEIGHT, interpret);
+    if (tiff) {
+        int res;
+        res=TinyTIFFWriter_writeImageMultiSample(tiff, imagedata, inputOrg, outputOrg);
+        if (res!=TINYTIFF_FALSE) {
+            test_results.back().success=false;
+            TESTFAIL("could not prevent writing image data into '"<<filename<<"'!", test_results.back())
+        } else {
+            std::cout<<"  --> WRITING GENERATED ERROR MESSAGE:"<<TinyTIFFWriter_getLastError(tiff)<<"\n";
+        }
+        TinyTIFFWriter_close(tiff);
+        test_results.back().duration_ms=timer.get_time()/1e3;
+        test_results.back().numImages=1;
+        std::string description_out;
+    } else {
+        TESTFAIL("could not open '"<<filename<<"' for writing!", test_results.back())
+        test_results.back().success=false;
+    }
+    if (test_results.back().success) {
+        std::cout<<"* ==> SUCCESSFUL,   duration="<<test_results.back().duration_ms<<"ms\n";
+    } else {
+        std::cout<<"* ==> FAILED\n";
+    }
+}
+
+
+template <class T>
+void performMultiFrameWriteTest_ExpectedToFail(const std::string& name, const char* filename, const T* imagedata, const T* imagedatai, size_t WIDTH, size_t HEIGHT, size_t SAMPLES, size_t FRAMES, TinyTIFFWriterSampleInterpretation interpret, std::vector<TestResult>& test_results, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky, TinyTIFFSampleLayout outputOrg=TinyTIFF_Chunky) {
+    const size_t bits=sizeof(T)*8;
+    std::string desc=std::to_string(WIDTH)+"x"+std::to_string(HEIGHT)+"pix/"+std::to_string(bits)+"bit/"+std::to_string(SAMPLES)+"ch/1frame";
+    if (inputOrg==TinyTIFF_Chunky && outputOrg==TinyTIFF_Chunky) desc+="/CHUNKY_FROM_CHUNKY";
+    if (inputOrg==TinyTIFF_Chunky && outputOrg==TinyTIFF_Planar) desc+="/PLANAR_FROM_CHUNKY";
+    if (inputOrg==TinyTIFF_Planar && outputOrg==TinyTIFF_Chunky) desc+="/CHUNKY_FROM_PLANAR";
+    if (inputOrg==TinyTIFF_Planar && outputOrg==TinyTIFF_Planar) desc+="/PLANAR_FROM_PLANAR";
+    test_results.emplace_back();
+    test_results.back().name=name+" ["+desc+", "+std::string(filename)+"]";
+    test_results.back().success=true;
+    std::cout<<"\n\n*****************************************************************************\n";
+    std::cout<<"* "<<test_results.back().name<<"\n";
+    HighResTimer timer;
+    timer.start();
+    TinyTIFFWriterFile* tiff = TinyTIFFWriter_open(filename, bits, TinyTIFF_SampleFormatFromType<T>().format, SAMPLES, WIDTH,HEIGHT, interpret);
+    if (tiff) {
+        int res;
+        size_t f=0;
+        for (; f<FRAMES; f++) {
+            if (f%2==0) res=TinyTIFFWriter_writeImageMultiSample(tiff, imagedata, inputOrg, outputOrg);
+            else res=TinyTIFFWriter_writeImageMultiSample(tiff, imagedatai, inputOrg, outputOrg);
+            if (res!=TINYTIFF_TRUE) {
+                break;
+            }
+        }
+        if (res!=TINYTIFF_FALSE) {
+            test_results.back().success=false;
+            TESTFAIL("could not prevent writing image data into '"<<filename<<"'!", test_results.back())
+        } else {
+            std::cout<<"  --> WRITING GENERATED ERROR MESSAGE for frame "<<(f+1)<<"/"<<FRAMES<<":"<<TinyTIFFWriter_getLastError(tiff)<<"\n";
+        }
+        TinyTIFFWriter_close(tiff);
+        test_results.back().duration_ms=timer.get_time()/1e3;
+        test_results.back().numImages=1;
+        std::string description_out;
+    } else {
+        TESTFAIL("could not open '"<<filename<<"' for writing!", test_results.back())
+        test_results.back().success=false;
+    }
+    if (test_results.back().success) {
+        std::cout<<"* ==> SUCCESSFUL,   duration="<<test_results.back().duration_ms<<"ms\n";
+    } else {
+        std::cout<<"* ==> FAILED\n";
+    }
+}
+
+template <class T>
 void performMultiFrameWriteTest(const std::string& name, const char* filename, const T* imagedata, const T* imagedatai, size_t WIDTH, size_t HEIGHT, size_t SAMPLES, size_t FRAMES, TinyTIFFWriterSampleInterpretation interpret, std::vector<TestResult>& test_results, TinyTIFFSampleLayout inputOrg=TinyTIFF_Chunky, TinyTIFFSampleLayout outputOrg=TinyTIFF_Chunky) {
     const size_t bits=sizeof(T)*8;
     std::string desc=std::to_string(WIDTH)+"x"+std::to_string(HEIGHT)+"pix/"+std::to_string(bits)+"bit/"+std::to_string(SAMPLES)+"ch/"+std::to_string(FRAMES)+"frames";
@@ -324,6 +412,13 @@ int main(int argc, char *argv[]) {
 
     performWriteTest("WRITING 64-Bit UINT GREY TIFF", "test64.tif", image64.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
     if (quicktest==TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 64-Bit UINT GREY TIFF", "test64m.tif", image64.data(), image64i.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);
+    if (quicktest==TINYTIFF_FALSE) {
+        const size_t WIDTH_too_many=8000;
+        const size_t HEIGHT_too_many=4000;
+        const std::vector<uint64_t> image64_too_many(WIDTH_too_many*HEIGHT_too_many, 0);
+        const size_t too_many_frames=((size_t)0xFFFFFFFF)/((size_t)(WIDTH_too_many*HEIGHT_too_many*sizeof(uint64_t)))*8;
+        performMultiFrameWriteTest_ExpectedToFail("WRITING TOO MANY 64-Bit UINT GREY TIFF", "test64m_toomany.tif", image64_too_many.data(), image64_too_many.data(), WIDTH_too_many, HEIGHT_too_many, 1, too_many_frames, TinyTIFFWriter_Greyscale, test_results);
+    }
 
     performWriteTest("WRITING 32-Bit FLOAT GREY TIFF", "testf.tif", imagef.data(), WIDTH, HEIGHT, 1, TinyTIFFWriter_Greyscale, test_results);
     if (quicktest==TINYTIFF_FALSE) performMultiFrameWriteTest("WRITING 32-Bit FLOAT GREY TIFF", "testfm.tif", imagef.data(), imagefi.data(), WIDTH, HEIGHT, 1, NUMFRAMES, TinyTIFFWriter_Greyscale, test_results);

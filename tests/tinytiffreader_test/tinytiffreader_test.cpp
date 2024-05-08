@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <sstream>
