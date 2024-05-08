@@ -35,6 +35,9 @@ jobs:
         cmake --install build --config Release
         cd install
         ls -R
+    - name: Build Debug
+      run: |
+           cmake --build build --config Release --verbose           
     - name: Test CMake-build against TinyTIFF
       run: |
         cd tests
