@@ -37,7 +37,7 @@ jobs:
         ls -R
     - name: Build Debug
       run: |
-           cmake -G "${{matrix.gen}}" -DBUILD_SHARED_LIBS=${{matrix.shared}} "-DTinyTIFF_BUILD_TESTS=OFF" -DCMAKE_CXX_COMPILER=${{matrix.cxxcompiler}} -DCMAKE_C_COMPILER=${{matrix.ccompiler}} -DCMAKE_CXX_FLAGS_ALL_WARNINGS:STRING="-Wall" -DCMAKE_C_FLAGS_ALL_WARNINGS:STRING="-Wall" -B build_debug
+           cmake -G "${{matrix.gen}}" -DBUILD_SHARED_LIBS=${{matrix.shared}} "-DTinyTIFF_BUILD_TESTS=OFF" -DCMAKE_CXX_COMPILER=${{matrix.cxxcompiler}} -DCMAKE_C_COMPILER=${{matrix.ccompiler}} -DCMAKE_CXX_FLAGS_DEBUG:STRING="-Wall" -DCMAKE_C_FLAGS_DEBUG:STRING="-Wall" -B build_debug
            cmake --build build_debug --config Debug --verbose           
     - name: Test CMake-build against TinyTIFF
       run: |
