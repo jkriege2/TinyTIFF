@@ -18,8 +18,8 @@ jobs:
         include:
           - {gen: Unix Makefiles, shared: ON, ccompiler: gcc, cxxcompiler: g++}
           - {gen: Unix Makefiles, shared: OFF, ccompiler: gcc, cxxcompiler: g++}
-          - {gen: Unix Makefiles, shared: ON, ccompiler: clang, cxxcompiler: clang}
-          - {gen: Unix Makefiles, shared: OFF, ccompiler: clang, cxxcompiler: clang}
+          - {gen: Unix Makefiles, shared: ON, ccompiler: clang, cxxcompiler: clang++}
+          - {gen: Unix Makefiles, shared: OFF, ccompiler: clang, cxxcompiler: clang++}
     steps:
     - name: checkout
       uses: actions/checkout@v4
@@ -39,18 +39,18 @@ jobs:
       run: |
         cd tests
         cd extcmake_tinytiff_test
-        md build
+        mkdir build
         cd build
-        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} "-DCMAKE_PREFIX_PATH=${{github.workspace}}/install/" -B . -S ..
+        cmake -G "${{matrix.gen}}" "-DCMAKE_PREFIX_PATH=${{github.workspace}}/install/" -DCMAKE_CXX_COMPILER=${{matrix.cxxcompiler}} -DCMAKE_C_COMPILER=${{matrix.ccompiler}} -B . -S ..
         cmake --build . --config Release --verbose  
     - name: Test CMake-build against TinyTIFF, using FetchContent-API
       if: success() || failure() # always run even if the previous step fails
       run: |
         cd tests
         cd extcmake_fetchcontent_tinytiff_test
-        md build 
+        mkdir build 
         cd build
-        cmake -G "${{matrix.gen}}" -A ${{matrix.arch}} -B . -S ..
+        cmake -G "${{matrix.gen}}" -DCMAKE_CXX_COMPILER=${{matrix.cxxcompiler}} -DCMAKE_C_COMPILER=${{matrix.ccompiler}} -B . -S ..
         cmake --build . --config Release --verbose  
 
     - name: Run Release tests
@@ -59,8 +59,9 @@ jobs:
         cd bin
         pwd
         ls 
-        .\tinytiffwriter_test --simple
-        .\tinytiffreader_test --simple
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${{github.workspace}}/install/lib/
+        ./tinytiffwriter_test --simple
+        ./tinytiffreader_test --simple
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@v4
       if: success() || failure() # always run even if the previous step fails
