@@ -1,6 +1,6 @@
 # TinyTIFF
 
-(c) 2014-2020 by Jan W. Krieger
+(c) 2014-2024 by Jan W. Krieger <jan@jkrieger.de>
 
 This is a lightweight C/C++ library, which is able to read and write basic TIFF
 files. It is significantly faster than libTIFF, especially in writing large
@@ -219,3 +219,11 @@ The following image shows another performance measurement, this time for differe
 ![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_imagesizes.png)  |  ![](https://raw.githubusercontent.com/jkriege2/TinyTIFF/master/doc/images/tinytiffwriter_libtiff_raw_comparison_imagesizes_ssd.png)
 
 This suggests that for harddisks the performance of TinyTIFFWriter and `fwrite()` are comparable for all image sizes. For larger images, also the performance of libTIFF is in the same range, whereas for small images, libTIFF falls off somewhat.   For SSDs, the libraries are closer together, but still TinyTIFFWriter is faster than libTIFF by a factor of 1.5-5x (again note the logarithmic scale on the y-axis!).
+
+
+
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/jkriege2/TinyTIFF.svg)](https://starchart.cc/jkriege2/TinyTIFF)
+
