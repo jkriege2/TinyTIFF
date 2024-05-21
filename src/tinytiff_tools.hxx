@@ -30,7 +30,7 @@ extern "C" {
 /*! \defgroup tinytiffwriter_CXX TinyTIFFWriter: Optional C++-Interface (include-only!)
     \ingroup tinytiffwriter
 
-    All functions and tenplates in this group are extensions to the basic TinyTIFFWriter libarary. They
+    All functions and templates in this group are extensions to the basic TinyTIFFWriter library. They
     are all header-only (or templates), so no link library other than libTinyTIFF is required.
 
 */
@@ -38,7 +38,7 @@ extern "C" {
 /*! \defgroup tinytiffreader_CXX TinyTIFFReader: Optional C++-Interface (include-only!)
     \ingroup tinytiffreader
 
-    All functions in this group are extensions to the basic TinyTIFFReader libarary. They
+    All functions in this group are extensions to the basic TinyTIFFReader library. They
     are all header-only (or templates), so no link library other than libTinyTIFF is required.
 
 */
