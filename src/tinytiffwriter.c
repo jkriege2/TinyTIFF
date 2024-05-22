@@ -50,7 +50,11 @@
 
 #ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
 #  include <windows.h>
-#  warning COMPILING TinyTIFFWriter with WinAPI
+#  ifdef _MSC_VER
+#    pragma message(__FILE__ "(): COMPILING TinyTIFFWriter with WinAPI")
+#  else
+#    warning COMPILING TinyTIFFWriter with WinAPI
+#  endif // _MSC_VER
 #  define TinyTIFFWriter_POSTYPE DWORD
 #else
 #  define TinyTIFFWriter_POSTYPE fpos_t
