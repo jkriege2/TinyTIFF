@@ -32,7 +32,7 @@ This software is licensed under the term of the [GNU Lesser General Public Licen
 
 # Documentation
 
-* library docukentation: https://travis-ci.org/jkriege2/TinyTIFF
+* library documentation: https://travis-ci.org/jkriege2/TinyTIFF
 * API documentation: http://jkriege2.github.io/TinyTIFF/modules.html
 * build instructions: http://jkriege2.github.io/TinyTIFF/page_buildinstructions.html
 * usage instructions: http://jkriege2.github.io/TinyTIFF/page_useinstructions.html
